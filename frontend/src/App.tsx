@@ -8,6 +8,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import BlogIndex from "@/pages/BlogIndex";
 import BlogPost from "@/pages/BlogPost";
+import NotFound from "@/pages/NotFound";
 import Login from "@/pages/admin/Login";
 import Dashboard from "@/pages/admin/Dashboard";
 import PostList from "@/pages/admin/PostList";
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       <Route path="/admin/login" element={<Login />} />

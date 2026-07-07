@@ -31,8 +31,8 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "var(--bg)" }}>
-      <div className="card" style={{ width: 400, padding: 36 }}>
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "var(--bg)", padding: 20 }}>
+      <div className="card" style={{ width: "100%", maxWidth: 400, padding: 36 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 8 }}>
           <Brandmark size={28} />
           <span style={{ fontWeight: 700, fontSize: 18 }}>Ashford & Briggs</span>

@@ -69,7 +69,7 @@ export default function Users() {
   return (
     <div>
       <h1 style={{ fontSize: 30, fontWeight: 800, marginBottom: 28 }}>Users</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 24, alignItems: "start" }}>
+      <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 24, alignItems: "start" }}>
         <form onSubmit={submit} className="card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700 }}>Add a user</h3>
           <div>

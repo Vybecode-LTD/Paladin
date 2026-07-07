@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
@@ -10,6 +11,37 @@ const fadeUp = {
 export default function About() {
   return (
     <>
+      <Seo
+        title="About | Ashford & Briggs"
+        description="Ashford & Briggs builds Paladin, real-time AI intelligence for recruiter phone calls. Founded 2026 in Jacksonville, FL, by John Evans and Matt Barker."
+        path="/about"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "About Ashford & Briggs",
+          url: "https://ashfordbriggs.com/about",
+          mainEntity: {
+            "@type": "Organization",
+            name: "Ashford & Briggs",
+            foundingDate: "2026",
+            foundingLocation: {
+              "@type": "Place",
+              name: "Jacksonville, FL",
+            },
+            founders: [
+              { "@type": "Person", name: "John Evans" },
+              { "@type": "Person", name: "Matt Barker" },
+            ],
+            makesOffer: {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "SoftwareApplication",
+                name: "Paladin",
+              },
+            },
+          },
+        }}
+      />
       <section style={{ padding: "100px 0 60px" }} className="container">
         <motion.div {...fadeUp} style={{ maxWidth: 760 }}>
           <span className="eyebrow">About</span>

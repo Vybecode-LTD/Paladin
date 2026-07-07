@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { api } from "@/lib/api";
+import { api, setOnAuthExpired } from "@/lib/api";
 
 type Role = "author" | "editor" | "admin";
 interface User { id: string; email: string; full_name: string; role: Role; is_active: boolean; }
@@ -15,6 +15,11 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setOnAuthExpired(() => setUser(null));
+    return () => setOnAuthExpired(null);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("ab_access_token");
@@ -45,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Provider + its hook are one cohesive unit, kept together deliberately
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");

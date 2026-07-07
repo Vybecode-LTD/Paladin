@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Brain, Radio, BookOpen, FileCheck, Layers } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
@@ -24,6 +25,24 @@ const pane = [
 export default function Product() {
   return (
     <>
+      <Seo
+        title="Paladin — Real-Time AI Intelligence for Recruiting Calls | Ashford & Briggs"
+        description="Paladin gives recruiters live intelligence during candidate calls: skills-gap analysis, real-time prompts, jargon context, and post-call summaries."
+        path="/product"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Paladin",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Any (works through your existing phone, no app install required)",
+          description:
+            "Real-time AI intelligence for recruiting phone calls. Paladin listens to both sides of a live call and surfaces pre-call skills-gap analysis, live contextual prompts, on-call jargon definitions, and a post-call summary with a skills-match confidence score.",
+          brand: {
+            "@type": "Organization",
+            name: "Ashford & Briggs",
+          },
+        }}
+      />
       <section style={{ padding: "100px 0 60px" }} className="container">
         <motion.div {...fadeUp} style={{ maxWidth: 760 }}>
           <span className="eyebrow">The Product</span>

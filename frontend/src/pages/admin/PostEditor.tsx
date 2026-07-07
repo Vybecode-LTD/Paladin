@@ -113,9 +113,9 @@ export default function PostEditor() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800 }}>{isNew ? "New Post" : "Edit Post"}</h1>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button onClick={() => save(false)} disabled={saving} className="btn btn-ghost">
             {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />} Save draft
           </button>
@@ -125,7 +125,7 @@ export default function PostEditor() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
+      <div className="admin-editor-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
         {/* Main editor column */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div>
@@ -157,7 +157,7 @@ export default function PostEditor() {
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={labelStyle}>Tags (comma-separated)</label>
               <input style={inputStyle} value={post.tags} onChange={(e) => upd("tags")(e.target.value)} placeholder="hiring, ai, recruiting" />
@@ -194,7 +194,7 @@ export default function PostEditor() {
         </div>
 
         {/* AI assist panel */}
-        <div className="card" style={{ position: "sticky", top: 24, background: "linear-gradient(160deg, var(--bg-card), rgba(0,118,209,0.1))" }}>
+        <div className="card admin-ai-panel" style={{ position: "sticky", top: 24, background: "linear-gradient(160deg, var(--bg-card), rgba(0,118,209,0.1))" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
             <Sparkles size={18} color="var(--accent-bright)" />
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>AI Assistant</h3>
@@ -208,7 +208,7 @@ export default function PostEditor() {
           <textarea style={{ ...inputStyle, minHeight: 76, resize: "vertical", marginBottom: 12 }} value={aiTopic}
             onChange={(e) => setAiTopic(e.target.value)} placeholder="e.g. Why résumé screening is broken in the age of generative AI" />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             <div>
               <label style={labelStyle}>Tone</label>
               <select style={inputStyle} value={aiTone} onChange={(e) => setAiTone(e.target.value)}>

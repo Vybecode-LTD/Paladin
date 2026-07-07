@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight, Radio, Brain, BookOpen, FileCheck, Phone, XCircle, CheckCircle2,
 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -35,6 +36,26 @@ const compare = [
 export default function Home() {
   return (
     <>
+      <Seo
+        title="Paladin — Real-Time AI Intelligence for Recruiting Calls | Ashford & Briggs"
+        description="Paladin gives recruiters live intelligence during candidate calls — skills gaps, decoded jargon, the right question at the right moment. No app required."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Paladin",
+          url: "https://ashfordbriggs.com",
+          description:
+            "Real-time AI intelligence for recruiter phone calls. Paladin surfaces skills gaps, decodes jargon, and delivers live prompts during the call, then produces a post-call summary — all through the recruiter's existing phone, no app required.",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Any",
+          publisher: {
+            "@type": "Organization",
+            name: "Ashford & Briggs",
+            url: "https://ashfordbriggs.com",
+          },
+        }}
+      />
       {/* HERO */}
       <section style={{ position: "relative", padding: "120px 0 90px", overflow: "hidden" }}>
         <div style={{

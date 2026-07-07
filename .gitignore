@@ -23,6 +23,9 @@ backend/static/
 .DS_Store
 *.log
 
+# Claude Code session runtime state — not project config
+.claude/scheduled_tasks.lock
+
 # Leftover scaffold export artifacts — not part of this project
 /ashford-briggs/
 *.zip

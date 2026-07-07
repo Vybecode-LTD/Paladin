@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon } from "lucide-react";
+import { LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon, Menu, X } from "lucide-react";
 import Brandmark from "@/components/Brandmark";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const items = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, min: "author" },
@@ -17,17 +19,24 @@ export default function AdminLayout() {
   const visible = items.filter((i) => rank[user!.role] >= rank[i.min]);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
-      <aside style={{
-        width: 240, borderRight: "1px solid var(--border)", padding: "24px 16px",
-        display: "flex", flexDirection: "column", background: "var(--bg-elevated)",
-      }}>
+    <div className="admin-shell">
+      <button
+        className="admin-menu-btn"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        onClick={() => setMenuOpen((o) => !o)}
+      >
+        {menuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {menuOpen && <div className="admin-scrim" onClick={() => setMenuOpen(false)} />}
+
+      <aside className={`admin-sidebar${menuOpen ? " admin-sidebar-open" : ""}`}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 700, padding: "0 8px 24px" }}>
           <Brandmark size={22} /> Admin
         </div>
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           {visible.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end style={({ isActive }) => ({
+            <NavLink key={to} to={to} end onClick={() => setMenuOpen(false)} style={({ isActive }) => ({
               display: "flex", alignItems: "center", gap: 12, padding: "10px 12px",
               borderRadius: 10, fontSize: 14, fontWeight: 500,
               background: isActive ? "var(--bg-card)" : "transparent",
@@ -45,7 +54,7 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
-      <div style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
+      <div className="admin-content">
         <Outlet />
       </div>
     </div>
