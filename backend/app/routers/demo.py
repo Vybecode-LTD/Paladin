@@ -1,8 +1,10 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.config import settings
 from app.core.database import get_db
+from app.core.ratelimit import limiter
 from app.middleware.auth import require_role
 from app.models.user import User, UserRole
 from app.models.demo_request import DemoRequest
@@ -12,7 +14,8 @@ router = APIRouter()
 
 
 @router.post("/demo-requests", response_model=DemoRequestOut, status_code=201)
-async def submit_demo(payload: DemoRequestCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit(settings.demo_rate_limit)
+async def submit_demo(request: Request, payload: DemoRequestCreate, db: AsyncSession = Depends(get_db)):
     """Public: capture a demo request from the marketing site."""
     dr = DemoRequest(**payload.model_dump())
     db.add(dr)

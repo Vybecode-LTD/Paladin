@@ -52,9 +52,18 @@ async def admin_create(payload: PostCreate,
     return PostOut.model_validate(post)
 
 
+def _parse_post_id(post_id: str) -> uuid.UUID:
+    """uuid.UUID() raises a bare ValueError on malformed input — a mistyped
+    or forged post_id in the URL should 404, not 500."""
+    try:
+        return uuid.UUID(post_id)
+    except (ValueError, AttributeError, TypeError):
+        raise HTTPException(status_code=404, detail="Post not found")
+
+
 async def _load_owned(post_id: str, user: User, db: AsyncSession) -> BlogPost:
     post = (await db.execute(
-        select(BlogPost).where(BlogPost.id == uuid.UUID(post_id))
+        select(BlogPost).where(BlogPost.id == _parse_post_id(post_id))
     )).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -92,7 +101,7 @@ async def admin_delete(post_id: str,
                        user: User = Depends(require_role(UserRole.editor)),
                        db: AsyncSession = Depends(get_db)):
     post = (await db.execute(
-        select(BlogPost).where(BlogPost.id == uuid.UUID(post_id))
+        select(BlogPost).where(BlogPost.id == _parse_post_id(post_id))
     )).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")

@@ -1,23 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DraftRequest(BaseModel):
-    topic: str
-    tone: str = "professional"
-    length: str = "medium"  # short | medium | long
+    topic: str = Field(min_length=1, max_length=300)
+    tone: str = Field(default="professional", max_length=50)
+    length: str = Field(default="medium", max_length=20)  # short | medium | long
 
 
 class TitlesRequest(BaseModel):
-    topic: str
+    topic: str = Field(min_length=1, max_length=300)
 
 
 class ExcerptRequest(BaseModel):
-    body_markdown: str
+    body_markdown: str = Field(min_length=1, max_length=20000)
 
 
 class SeoRequest(BaseModel):
-    title: str
-    body_markdown: str
+    title: str = Field(min_length=1, max_length=300)
+    body_markdown: str = Field(min_length=1, max_length=20000)
 
 
 class AIResponse(BaseModel):

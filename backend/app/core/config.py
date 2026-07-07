@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
+    # Rate limiting — in-memory (fine for the current single-worker deploy;
+    # move to a shared store if this ever scales to multiple workers/instances)
+    rate_limit_enabled: bool = True
+    auth_rate_limit: str = "10/minute"
+    demo_rate_limit: str = "5/hour"
+    ai_rate_limit: str = "20/hour"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

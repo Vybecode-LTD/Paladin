@@ -6,6 +6,11 @@ from app.core.config import settings
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 
 
+class AIServiceError(Exception):
+    """Upstream Anthropic call failed — caught by routers/ai.py and turned
+    into a clean 502/504 instead of an unhandled 500."""
+
+
 class AnthropicService:
     def __init__(self) -> None:
         self.api_key = settings.anthropic_api_key
@@ -23,10 +28,19 @@ class AnthropicService:
             "system": system,
             "messages": [{"role": "user", "content": user}],
         }
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(ANTHROPIC_URL, headers=headers, json=body)
-            resp.raise_for_status()
-            data = resp.json()
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(ANTHROPIC_URL, headers=headers, json=body)
+                resp.raise_for_status()
+                data = resp.json()
+        except httpx.TimeoutException:
+            raise AIServiceError("The AI service timed out. Please try again.")
+        except httpx.HTTPStatusError as exc:
+            raise AIServiceError(
+                f"AI service returned an error ({exc.response.status_code}). Please try again."
+            )
+        except httpx.HTTPError:
+            raise AIServiceError("Could not reach the AI service. Please try again.")
         return "".join(
             block.get("text", "")
             for block in data.get("content", [])
