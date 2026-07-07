@@ -3,6 +3,46 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
+## 2026-07-07 (latest) — Blog editor completeness pass + deploy handoff docs
+
+Verified the admin blog editor against a checklist (AI assistant, editing
+published posts, image handling, formatting, unpublish/delete) rather than
+assuming it was all there. Found and fixed two real gaps.
+
+**Added**
+- **Unpublish button** in `PostEditor.tsx` (`frontend/src/pages/admin/PostEditor.tsx`) —
+  shown only for already-published posts, confirms before acting, PATCHes
+  `status` back to `draft`. The backend already supported this transition;
+  there was simply no UI control for it before now.
+- **Insert image button** with caption support — a new "Insert image" button
+  in the editor prompts for a URL and an optional caption, inserting
+  `![alt](url "caption")` at the cursor. A new shared `MarkdownImage`
+  component (`frontend/src/components/MarkdownImage.tsx`) renders that
+  Markdown "title" as a real `<figure>/<figcaption>` instead of a native
+  tooltip — wired into both the editor's Preview tab and the public
+  `BlogPost.tsx` page, so captions render identically in both places.
+- Relabeled the existing draft-save button to "Save changes" when editing an
+  already-published post (it was ambiguously always labeled "Save draft"
+  even when it wouldn't actually change status).
+- A prominent handoff section at the top of `CLAUDE.md` instructing the next
+  Claude session to stop and ask the new maintainer about their actual
+  deployment environment (host, domain, DB, Docker availability, secrets)
+  before doing any deploy work — this repo is being handed off for
+  self-hosting on someone else's server.
+
+**Verified**
+- Confirmed the AI assistant (draft/titles/excerpt/SEO), editing an
+  already-published post, and delete all already worked correctly.
+- Live-tested the new Unpublish button against the real published post:
+  backend status flips to `draft`, `published_at` is preserved, the button
+  set correctly changes from Save/Unpublish/Update back to Save/Publish.
+  Live-tested Insert image: prompts fire, Markdown is inserted at the cursor,
+  Preview renders a real `<figure>/<figcaption>`. Restored the test post to
+  its original published state and content afterward.
+- `npx tsc --noEmit`, `npm run build`, and `npm run lint` all clean.
+
+---
+
 ## 2026-07-07 (later) — UX/SEO sweep confirmed + follow-up fixes
 
 The UX/SEO/accessibility pass referenced as "in progress" in the entry below

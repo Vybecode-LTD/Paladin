@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
+import MarkdownImage from "@/components/MarkdownImage";
 
 interface Post {
   title: string; body_markdown: string; cover_image_url: string;
@@ -73,7 +74,9 @@ export default function BlogPost() {
             <img src={post.cover_image_url} alt={post.title} style={{ width: "100%", borderRadius: "var(--radius)", marginBottom: 36 }} />
           )}
           <div className="prose">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.body_markdown}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: MarkdownImage }}>
+              {post.body_markdown}
+            </ReactMarkdown>
           </div>
         </motion.div>
       </article>

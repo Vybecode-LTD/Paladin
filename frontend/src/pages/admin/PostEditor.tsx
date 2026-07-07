@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Sparkles, Save, Send, Wand2, Loader2, Eye, Code } from "lucide-react";
+import { Sparkles, Save, Send, Wand2, Loader2, Eye, Code, ImagePlus, EyeOff } from "lucide-react";
 import { api, aiApi } from "@/lib/api";
+import MarkdownImage from "@/components/MarkdownImage";
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "11px 13px", background: "var(--bg)",
@@ -34,6 +35,7 @@ export default function PostEditor() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState<"write" | "preview">("write");
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   // AI panel state
   const [aiTopic, setAiTopic] = useState("");
@@ -92,11 +94,41 @@ export default function PostEditor() {
     finally { setAiBusy(null); }
   }
 
-  // ---- Save / publish ----
-  async function save(publish?: boolean) {
+  // ---- Insert image (with an optional caption, rendered as a figure) ----
+  function insertImage() {
+    const url = window.prompt("Image URL:");
+    if (!url || !url.trim()) return;
+    const caption = window.prompt("Caption (optional, shown under the image):") || "";
+    const alt = caption || "Image";
+    // Markdown's optional quoted "title" after the URL becomes the figure
+    // caption — see MarkdownImage.tsx's custom img renderer.
+    const snippet = caption
+      ? `![${alt}](${url.trim()} "${caption.replace(/"/g, "'")}")`
+      : `![${alt}](${url.trim()})`;
+
+    const textarea = bodyRef.current;
+    if (!textarea) {
+      upd("body_markdown")(`${post.body_markdown}\n\n${snippet}\n\n`);
+      return;
+    }
+    const { selectionStart, selectionEnd } = textarea;
+    const before = post.body_markdown.slice(0, selectionStart);
+    const after = post.body_markdown.slice(selectionEnd);
+    const insertion = `\n\n${snippet}\n\n`;
+    upd("body_markdown")(before + insertion + after);
+    setView("write");
+    setTimeout(() => {
+      textarea.focus();
+      const pos = before.length + insertion.length;
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  }
+
+  // ---- Save / publish / unpublish ----
+  async function save(statusOverride?: "draft" | "published") {
     if (!post.title.trim()) return alert("A title is required.");
     setSaving(true);
-    const payload = { ...post, status: publish ? "published" : post.status };
+    const payload = { ...post, status: statusOverride ?? post.status };
     try {
       if (isNew) {
         const created = await api.post("/admin/posts", payload);
@@ -109,6 +141,11 @@ export default function PostEditor() {
     finally { setSaving(false); }
   }
 
+  function unpublish() {
+    if (!window.confirm("Unpublish this post? It will no longer be visible on the public blog.")) return;
+    save("draft");
+  }
+
   if (loading) return <p style={{ color: "var(--text-dim)" }}>Loading…</p>;
 
   return (
@@ -116,10 +153,16 @@ export default function PostEditor() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800 }}>{isNew ? "New Post" : "Edit Post"}</h1>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button onClick={() => save(false)} disabled={saving} className="btn btn-ghost">
-            {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />} Save draft
+          <button onClick={() => save()} disabled={saving} className="btn btn-ghost">
+            {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+            {post.status === "published" ? "Save changes" : "Save draft"}
           </button>
-          <button onClick={() => save(true)} disabled={saving} className="btn btn-primary">
+          {!isNew && post.status === "published" && (
+            <button onClick={unpublish} disabled={saving} className="btn btn-ghost">
+              <EyeOff size={16} /> Unpublish
+            </button>
+          )}
+          <button onClick={() => save("published")} disabled={saving} className="btn btn-primary">
             <Send size={16} /> {post.status === "published" ? "Update" : "Publish"}
           </button>
         </div>
@@ -138,6 +181,9 @@ export default function PostEditor() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <label style={labelStyle}>Body (Markdown)</label>
               <div style={{ display: "flex", gap: 4 }}>
+                <button onClick={insertImage} className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 13 }}>
+                  <ImagePlus size={14} /> Insert image
+                </button>
                 <button onClick={() => setView("write")} className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 13, borderColor: view === "write" ? "var(--accent)" : undefined }}>
                   <Code size={14} /> Write
                 </button>
@@ -147,12 +193,14 @@ export default function PostEditor() {
               </div>
             </div>
             {view === "write" ? (
-              <textarea style={{ ...inputStyle, minHeight: 460, fontFamily: "var(--font-mono)", fontSize: 14, lineHeight: 1.7, resize: "vertical" }}
+              <textarea ref={bodyRef} style={{ ...inputStyle, minHeight: 460, fontFamily: "var(--font-mono)", fontSize: 14, lineHeight: 1.7, resize: "vertical" }}
                 value={post.body_markdown} onChange={(e) => upd("body_markdown")(e.target.value)}
                 placeholder="Write in Markdown, or generate a draft with the AI panel →" />
             ) : (
               <div className="card prose" style={{ minHeight: 460 }}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.body_markdown || "*Nothing to preview yet.*"}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: MarkdownImage }}>
+                  {post.body_markdown || "*Nothing to preview yet.*"}
+                </ReactMarkdown>
               </div>
             )}
           </div>
