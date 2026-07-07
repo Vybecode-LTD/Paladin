@@ -1,20 +1,35 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Circle, CheckCircle2 } from "lucide-react";
+import { Plus, Circle, CheckCircle2, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface PostItem {
   id: string; title: string; slug: string; status: string;
-  updated_at: string; created_at: string;
+  published_at: string | null; created_at: string;
 }
 
 export default function PostList() {
+  const { user } = useAuth();
+  const canDelete = user?.role === "editor" || user?.role === "admin";
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get("/admin/posts").then(setPosts).catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  async function handleDelete(e: React.MouseEvent, id: string, title: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm(`Delete "${title}"? This can't be undone.`)) return;
+    try {
+      await api.del(`/admin/posts/${id}`);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Delete failed");
+    }
+  }
 
   return (
     <div>
@@ -38,7 +53,13 @@ export default function PostList() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: p.status === "published" ? "var(--success)" : "var(--text-dim)" }}>{p.status}</span>
-                <span style={{ fontSize: 13, color: "var(--text-dim)" }}>{new Date(p.updated_at).toLocaleDateString()}</span>
+                <span style={{ fontSize: 13, color: "var(--text-dim)" }}>{new Date(p.published_at || p.created_at).toLocaleDateString()}</span>
+                {canDelete && (
+                  <button onClick={(e) => handleDelete(e, p.id, p.title)} className="btn btn-ghost"
+                    style={{ padding: "6px 10px", borderColor: "transparent" }} title="Delete post">
+                    <Trash2 size={16} color="var(--danger)" />
+                  </button>
+                )}
               </div>
             </Link>
           ))}

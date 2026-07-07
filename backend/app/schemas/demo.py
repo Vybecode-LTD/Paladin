@@ -13,6 +13,10 @@ class DemoRequestCreate(BaseModel):
     message: str = ""
 
 
+class DemoRequestUpdate(BaseModel):
+    is_handled: bool
+
+
 class DemoRequestOut(BaseModel):
     id: uuid.UUID
     full_name: str

@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, FileText, Inbox, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon } from "lucide-react";
 import Brandmark from "@/components/Brandmark";
 
 export default function AdminLayout() {
@@ -11,6 +11,7 @@ export default function AdminLayout() {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, min: "author" },
     { to: "/admin/posts", label: "Posts", icon: FileText, min: "author" },
     { to: "/admin/demo-requests", label: "Demo Inbox", icon: Inbox, min: "editor" },
+    { to: "/admin/users", label: "Users", icon: UsersIcon, min: "admin" },
   ];
   const rank: Record<string, number> = { author: 1, editor: 2, admin: 3 };
   const visible = items.filter((i) => rank[user!.role] >= rank[i.min]);

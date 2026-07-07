@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { api } from "@/lib/api";
 
 interface DemoReq {
@@ -10,10 +11,23 @@ interface DemoReq {
 export default function DemoInbox() {
   const [rows, setRows] = useState<DemoReq[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
     api.get("/admin/demo-requests").then(setRows).catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  async function toggleHandled(r: DemoReq) {
+    setUpdating(r.id);
+    try {
+      const updated = await api.patch(`/admin/demo-requests/${r.id}`, { is_handled: !r.is_handled });
+      setRows((prev) => prev.map((row) => (row.id === r.id ? updated : row)));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setUpdating(null);
+    }
+  }
 
   return (
     <div>
@@ -25,7 +39,7 @@ export default function DemoInbox() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {rows.map((r) => (
-            <div key={r.id} className="card">
+            <div key={r.id} className="card" style={{ opacity: r.is_handled ? 0.6 : 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
                 <div>
                   <h3 style={{ fontSize: 18, fontWeight: 700 }}>{r.full_name} <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>· {r.company}</span></h3>
@@ -37,9 +51,17 @@ export default function DemoInbox() {
                   </div>
                   {r.message && <p style={{ marginTop: 12, color: "var(--text-muted)", fontSize: 15 }}>{r.message}</p>}
                 </div>
-                <span style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
-                  {new Date(r.created_at).toLocaleDateString()}
-                </span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
+                  <span style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </span>
+                  <button onClick={() => toggleHandled(r)} disabled={updating === r.id} className="btn btn-ghost"
+                    style={{ padding: "6px 12px", fontSize: 13, whiteSpace: "nowrap" }}>
+                    {r.is_handled
+                      ? <><CheckCircle2 size={14} color="var(--success)" /> Handled</>
+                      : <><Circle size={14} color="var(--text-dim)" /> Mark as handled</>}
+                  </button>
+                </div>
               </div>
             </div>
           ))}

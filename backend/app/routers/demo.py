@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+import uuid
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.middleware.auth import require_role
 from app.models.user import User, UserRole
 from app.models.demo_request import DemoRequest
-from app.schemas.demo import DemoRequestCreate, DemoRequestOut
+from app.schemas.demo import DemoRequestCreate, DemoRequestOut, DemoRequestUpdate
 
 router = APIRouter()
 
@@ -29,3 +30,19 @@ async def list_demo_requests(
         select(DemoRequest).order_by(desc(DemoRequest.created_at))
     )).scalars().all()
     return [DemoRequestOut.model_validate(r) for r in rows]
+
+
+@router.patch("/admin/demo-requests/{request_id}", response_model=DemoRequestOut)
+async def update_demo_request(
+    request_id: uuid.UUID,
+    payload: DemoRequestUpdate,
+    _: User = Depends(require_role(UserRole.editor)),
+    db: AsyncSession = Depends(get_db),
+):
+    dr = await db.get(DemoRequest, request_id)
+    if not dr:
+        raise HTTPException(status_code=404, detail="Demo request not found")
+    dr.is_handled = payload.is_handled
+    await db.commit()
+    await db.refresh(dr)
+    return DemoRequestOut.model_validate(dr)

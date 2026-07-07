@@ -70,3 +70,11 @@ async def create_user(payload: UserCreate,
     await db.commit()
     await db.refresh(user)
     return _user_out(user)
+
+
+@router.get("/auth/users", response_model=list[UserOut])
+async def list_users(_: User = Depends(require_role(UserRole.admin)),
+                     db: AsyncSession = Depends(get_db)):
+    """Admin-only: list every provisioned user."""
+    result = await db.execute(select(User).order_by(User.created_at))
+    return [_user_out(u) for u in result.scalars().all()]

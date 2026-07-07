@@ -13,6 +13,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import PostList from "@/pages/admin/PostList";
 import PostEditor from "@/pages/admin/PostEditor";
 import DemoInbox from "@/pages/admin/DemoInbox";
+import Users from "@/pages/admin/Users";
 import RequireAuth from "@/components/RequireAuth";
 
 export default function App() {
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/admin/posts/new" element={<PostEditor />} />
         <Route path="/admin/posts/:id" element={<PostEditor />} />
         <Route path="/admin/demo-requests" element={<DemoInbox />} />
+        <Route path="/admin/users" element={<Users />} />
       </Route>
     </Routes>
   );
