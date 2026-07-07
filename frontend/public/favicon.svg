@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="8%" y1="4%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#3989da"/>
+      <stop offset="100%" stop-color="#6044cd"/>
+    </linearGradient>
+    <mask id="pulse">
+      <rect x="0" y="0" width="64" height="64" fill="#fff"/>
+      <path d="M13 30 H22 L27 18 L34 40 L39 25 L42 30 H51"
+            stroke="#000" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </mask>
+  </defs>
+  <path
+    d="M14 9 H50 C57 9 58 15 58 23 C58 36 51 47 32 59
+       C13 47 6 36 6 23 C6 15 7 9 14 9 Z"
+    fill="url(#g)" mask="url(#pulse)"/>
+</svg>

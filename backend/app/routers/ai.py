@@ -1,0 +1,39 @@
+"""Admin AI routes. These call the server-side Anthropic proxy so the API key
+never touches the browser. Author role or higher may generate drafts."""
+from fastapi import APIRouter, Depends
+from app.middleware.auth import require_role
+from app.models.user import User, UserRole
+from app.schemas.ai import (
+    DraftRequest, TitlesRequest, ExcerptRequest, SeoRequest, AIResponse,
+)
+from app.services.anthropic_service import anthropic_service
+
+router = APIRouter()
+
+
+@router.post("/admin/ai/draft", response_model=AIResponse)
+async def ai_draft(req: DraftRequest,
+                   _: User = Depends(require_role(UserRole.author))):
+    text = await anthropic_service.draft_post(req.topic, req.tone, req.length)
+    return AIResponse(result=text)
+
+
+@router.post("/admin/ai/titles", response_model=AIResponse)
+async def ai_titles(req: TitlesRequest,
+                    _: User = Depends(require_role(UserRole.author))):
+    text = await anthropic_service.suggest_titles(req.topic)
+    return AIResponse(result=text)
+
+
+@router.post("/admin/ai/excerpt", response_model=AIResponse)
+async def ai_excerpt(req: ExcerptRequest,
+                     _: User = Depends(require_role(UserRole.author))):
+    text = await anthropic_service.write_excerpt(req.body_markdown)
+    return AIResponse(result=text)
+
+
+@router.post("/admin/ai/seo", response_model=AIResponse)
+async def ai_seo(req: SeoRequest,
+                 _: User = Depends(require_role(UserRole.author))):
+    text = await anthropic_service.seo_meta(req.title, req.body_markdown)
+    return AIResponse(result=text)

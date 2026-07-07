@@ -1,0 +1,172 @@
+:root {
+  /* Core palette — light, airy neutrals on a single cool-blue hue (OKLCH H 251)
+     so every grey reads as one material. Computed via oklch-color-engineering
+     for perceptually-even lightness steps. */
+  --bg: #fcfeff;
+  --bg-elevated: #f4f7fb;
+  --bg-card: #f7fafe;
+  --border: #dee1e5;
+  --border-bright: #c3c6c9;
+
+  --text: #1a1c1f;
+  --text-muted: #5c5e61;
+  --text-dim: #8d9094;
+
+  /* Accent — cyan/blue "signal" gradient, retuned for light-background contrast */
+  --accent: #0076d1;
+  --accent-bright: #0085ea;
+  --accent-deep: #0064b3;
+  --accent-glow: rgba(0, 118, 209, 0.16);
+  --accent-secondary: #6044cd;
+  --accent-secondary-bright: #7756f8;
+
+  /* Support */
+  --success: #0d9f6e;
+  --warning: #b37900;
+  --danger: #d64545;
+
+  /* Colorful glyph palette — one tonal family (same L/C, five hues) so varied
+     icon colors still read as "one hand drew it." Each pairs with a light
+     tinted badge background. */
+  --glyph-blue: #3989da;      --glyph-blue-bg: #ddedff;
+  --glyph-violet: #8176d8;    --glyph-violet-bg: #e9e9ff;
+  --glyph-cyan: #00999f;      --glyph-cyan-bg: #c5f6f8;
+  --glyph-amber: #b37900;     --glyph-amber-bg: #ffe7c8;
+  --glyph-coral: #cf5e58;     --glyph-coral-bg: #ffe4e1;
+
+  /* Glass surfaces — bright frosted panels over the flowing background */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(20, 23, 26, 0.07);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-blur: blur(20px) saturate(180%);
+
+  /* Layered elevation — soft graphite ambient/contact shadows + a whisper of
+     brand-blue glow per depth. Restrained on purpose: light-theme depth reads
+     through softness, not darkness. */
+  --shadow-depth-1:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 4px 10px rgba(16, 24, 40, 0.06);
+  --shadow-depth-2:
+    0 2px 4px rgba(16, 24, 40, 0.05),
+    0 12px 28px rgba(16, 24, 40, 0.08),
+    0 0 32px rgba(0, 118, 209, 0.05);
+  --shadow-depth-3:
+    0 4px 8px rgba(16, 24, 40, 0.06),
+    0 24px 48px rgba(16, 24, 40, 0.12),
+    0 0 48px rgba(0, 118, 209, 0.08);
+
+  /* Type */
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Space + radius */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --maxw: 1200px;
+
+  --shadow-glow: 0 0 40px var(--accent-glow);
+  --shadow-card: var(--shadow-depth-2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--accent-bright), var(--accent-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px; border-radius: var(--radius);
+  font-weight: 600; font-size: 15px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.2s ease;
+}
+.btn-primary {
+  background: linear-gradient(160deg, #2c90ef, var(--accent-deep));
+  color: white; box-shadow: 0 4px 20px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px var(--accent-glow); }
+.btn-ghost { background: transparent; border-color: var(--border-bright); color: var(--text); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.eyebrow {
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent);
+}
+
+/* Colorful glyph badges — icon circles that rotate through the tonal glyph
+   palette instead of one repeated brand color. */
+.glyph-badge {
+  width: 46px; height: 46px; border-radius: 12px;
+  display: grid; place-items: center; margin-bottom: 16px;
+}
+.glyph-blue    { background: var(--glyph-blue-bg);   color: var(--glyph-blue); }
+.glyph-violet  { background: var(--glyph-violet-bg); color: var(--glyph-violet); }
+.glyph-cyan    { background: var(--glyph-cyan-bg);   color: var(--glyph-cyan); }
+.glyph-amber   { background: var(--glyph-amber-bg);  color: var(--glyph-amber); }
+.glyph-coral   { background: var(--glyph-coral-bg);  color: var(--glyph-coral); }
+
+.section { padding: 100px 0; }
+.section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -0.02em; }
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 28px;
+  box-shadow: var(--shadow-depth-2), inset 0 1px 0 var(--glass-highlight);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-depth-3), inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Markdown prose (blog + preview) */
+.prose { color: var(--text); line-height: 1.75; }
+.prose h1 { font-size: 30px; font-weight: 800; margin: 8px 0 18px; letter-spacing: -0.02em; }
+.prose h2 { font-size: 24px; font-weight: 700; margin: 32px 0 14px; letter-spacing: -0.01em; }
+.prose h3 { font-size: 19px; font-weight: 700; margin: 24px 0 10px; }
+.prose p { margin: 0 0 18px; color: var(--text-muted); font-size: 17px; }
+.prose ul, .prose ol { margin: 0 0 18px; padding-left: 24px; color: var(--text-muted); }
+.prose li { margin-bottom: 8px; font-size: 17px; }
+.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.prose blockquote { border-left: 3px solid var(--accent); padding-left: 18px; margin: 20px 0; color: var(--text-muted); font-style: italic; }
+.prose code { font-family: var(--font-mono); font-size: 0.9em; background: var(--bg-elevated); padding: 2px 6px; border-radius: 5px; color: var(--accent-deep); }
+.prose pre { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin: 0 0 18px; }
+.prose pre code { background: none; padding: 0; color: var(--text); }
+.prose img { max-width: 100%; border-radius: var(--radius-sm); margin: 12px 0; }
+.prose table { width: 100%; border-collapse: collapse; margin: 0 0 18px; }
+.prose th, .prose td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; font-size: 15px; }
+.prose hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+/* spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
+
+/* mobile */
+@media (max-width: 860px) {
+  .container { padding: 0 18px; }
+  .section { padding: 64px 0; }
+}
