@@ -12,7 +12,7 @@ from app.core.database import engine
 from app.core.ratelimit import limiter
 from app.models import Base
 from app.routers import (
-    health, auth, blog_public, blog_admin, ai, demo,
+    health, auth, blog_public, blog_admin, ai, demo, sitemap,
 )
 
 # Populated by the Docker build's frontend stage (COPY --from=frontend-build
@@ -47,6 +47,11 @@ app.add_middleware(
 
 for r in (health, auth, blog_public, blog_admin, ai, demo):
     app.include_router(r.router, prefix="/api")
+
+# No /api prefix — sitemap.xml is conventionally served from the site root.
+# Registered before the SPA catch-all below so it wins over the static copy
+# that Vite copies into dist/ from frontend/public/.
+app.include_router(sitemap.router)
 
 
 if STATIC_DIR.exists():

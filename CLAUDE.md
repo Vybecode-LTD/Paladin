@@ -19,8 +19,16 @@ The verbatim original copy is frozen in `docs/original-snapshot/` as a revert po
 - **AI:** blog generation runs **server-side** via a FastAPI proxy to Anthropic
   (`backend/app/services/anthropic_service.py`) — the API key NEVER reaches the
   browser. Model: `claude-sonnet-4-6` (configurable via `ANTHROPIC_MODEL`).
-- **Deploy target:** Railway (Dockerfile + railway.toml present, healthcheck at
-  `/api/health`).
+- **Deploy target:** Any Docker host. The single `Dockerfile` builds the frontend
+  then serves it + the API from one FastAPI process on `$PORT` (healthcheck at
+  `/api/health`) — nothing about the image is Railway-specific. `railway.toml` is
+  present for Railway specifically, but a plain
+  `docker build -t paladin . && docker run -p 8000:8000 --env-file backend/.env paladin`
+  works on any server. **If deploying under a domain other than
+  `ashfordbriggs.com`**, update: `SITE_URL` in the backend env (feeds the dynamic
+  `/sitemap.xml`), `frontend/public/robots.txt`'s `Sitemap:` line, and the
+  hardcoded canonical/OG references in `frontend/index.html` and
+  `frontend/src/components/Seo.tsx`.
 
 ## Monorepo layout
 ```
@@ -94,25 +102,41 @@ npm run dev                   # http://localhost:5173  (proxies /api -> :8000)
 ---
 
 ## LAST COMPLETED TASK
-Full scaffold complete and verified in the web session:
-- Backend fully written; every Python file compiles clean (`python -m py_compile`).
-- All frontend pages built (5 marketing pages + working demo form + blog reader +
-  full admin: Login, Dashboard, PostList, DemoInbox, and the AI-assisted PostEditor).
-- Original copy frozen in `docs/original-snapshot/`; expanded copy in `docs/content/`.
-- `__pycache__` cleaned. 69 files total.
+As of 2026-07-07 — full scaffold, security hardening, and a UX/SEO/docs sweep
+are all complete and verified (not just claimed):
+- **Security hardening:** slowapi rate limiting (login 10/min, demo-request
+  5/hour), three unguarded `uuid.UUID()` crash sites fixed (clean 401/404
+  instead of unhandled 500s), password length validation + self-service
+  password change + admin user-management endpoints, Anthropic proxy error
+  handling, length caps on AI and demo-request request schemas.
+- **SEO/UX/accessibility:** shared `<Seo>` component driving per-page
+  title/description/canonical/JSON-LD, `robots.txt` + a **dynamic**
+  `/sitemap.xml` (backend-generated — includes every published blog post,
+  not just the static marketing routes), a 404 route, responsive admin
+  sidebar/grids, a real access-token-refresh flow on the frontend, click-to-copy
+  in the admin post list, Contact/How-It-Works content-parity fixes against
+  `docs/content/`.
+- **Infra/tooling:** GitHub Actions CI (`.github/workflows/ci.yml`), ESLint
+  actually wired up (was referenced in `package.json` but never installed —
+  fixed), `npm audit` clean (bumped Vite 5→6, not the major-breaking 5→8 jump
+  `npm audit fix --force` suggested).
+- **Already done, despite what older notes might imply:** the first Alembic
+  migration (`109933857eb1_init`) is generated and applied to the dev DB;
+  placeholder brand images/OG assets are in `frontend/public/images/`.
+- Six project docs exist in `docs/`: `ROADMAP.md`, `BUGS.md`, `TESTING.md`,
+  `CHANGELOG.md`, `HANDOFF.md`, `AUDIT-LOG.md` — read `docs/HANDOFF.md` first
+  for full session-to-session state.
 
 ## NEXT STEPS (for Claude Code)
-1. `cd backend && python -m pip install -r requirements.txt`; create `.env`;
-   run `python -m seed`; start uvicorn. Confirm `/api/health` and `/docs`.
-2. `cd frontend && npm install && npm run dev`. Confirm the site renders and the
-   Contact demo form POSTs to `/api/demo-requests`.
-3. Log into `/admin/login` with the seeded admin. Create a post via the AI
-   composer (set `ANTHROPIC_API_KEY` first) and publish it; confirm it appears at
-   `/blog`.
-4. Generate the first real Alembic migration:
-   `alembic revision --autogenerate -m "init"` then `alembic upgrade head`.
-   (Dev mode auto-creates tables via lifespan; production relies on Alembic.)
-5. Wire real images/OG assets (paths referenced in `index.html` + blog covers).
-6. Deploy: push to Railway (Dockerfile + railway.toml ready); set env vars
-   (DATABASE_URL auto-provided, JWT_SECRET_KEY, ANTHROPIC_API_KEY, CORS_ORIGINS).
-   Point the frontend build at the deployed API and host it (static).
+1. **Build the automated test suite** — this is the single biggest remaining
+   gap. Zero automated tests exist for backend or frontend; every fix above
+   was verified by hand (curl, browser checks), not by regression-safe tests.
+   See `docs/TESTING.md` for the planned scope (pytest+httpx backend,
+   Vitest+RTL frontend, ~45-65 cases).
+2. **Deploy.** Being handed off to be self-hosted on someone else's own
+   server — the Dockerfile is host-agnostic (see the Deploy target note
+   above), so this is not Railway-only. Before deploying: set real env vars
+   (`DATABASE_URL`, `JWT_SECRET_KEY`, `ANTHROPIC_API_KEY`, `CORS_ORIGINS`,
+   `SITE_URL`), update the domain references listed above if not using
+   `ashfordbriggs.com`, and run `python -m seed` once against the production
+   DB to create the first admin login.

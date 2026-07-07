@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
+    # Public site origin (no trailing slash) — used to build absolute URLs in
+    # the generated sitemap. Change this when deploying under a different domain.
+    site_url: str = "https://ashfordbriggs.com"
+
     # Rate limiting — in-memory (fine for the current single-worker deploy;
     # move to a shared store if this ever scales to multiple workers/instances)
     rate_limit_enabled: bool = True

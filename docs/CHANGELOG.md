@@ -3,6 +3,49 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
+## 2026-07-07 (later) — UX/SEO sweep confirmed + follow-up fixes
+
+The UX/SEO/accessibility pass referenced as "in progress" in the entry below
+completed and was committed (`913d0f1`), alongside the security-hardening
+commit (`575a9ec`). Four follow-up items from that pass's own review notes:
+
+**Added**
+- `GET /sitemap.xml` (`backend/app/routers/sitemap.py`) — generated at request
+  time from the DB, so every published blog post is included, not just the
+  static marketing routes. Registered at the site root (no `/api` prefix),
+  ahead of the SPA catch-all so it wins over the static copy Vite copies from
+  `frontend/public/sitemap.xml` in a production build. New `SITE_URL` setting
+  (`backend/app/core/config.py`, `.env.example`) drives the absolute URLs —
+  change it when deploying under a different domain.
+- `max_length` caps on `DemoRequestCreate` (`backend/app/schemas/demo.py`),
+  mirrored exactly from the `DemoRequest` DB column limits, so an oversized
+  field is a clean 422 instead of a raw `StringDataRightTruncationError` 500
+  (confirmed this was a real gap: a 250-char `full_name` previously reached
+  the DB and crashed before hitting any length check).
+
+**Fixed**
+- `npm audit` in `frontend/`: bumped `vite` 5.4.21 → 6.4.3, resolving the
+  moderate/high `esbuild` dev-server advisory. Deliberately did *not* take
+  `npm audit fix --force`'s suggested jump straight to `vite@8` — v6 already
+  pulls in the patched `esbuild` (`^0.25.0`) with much less breaking-change
+  risk. Build, lint, and the dev server proxy all reverified clean afterward.
+- Root `CLAUDE.md` was stale — still described the original scaffold as the
+  current state and listed the Alembic migration and OG images as pending
+  (both were already done). Refreshed to reflect actual current state and
+  generalized the deploy section: this project is being handed off to be
+  self-hosted on someone else's own server, so the Dockerfile/deploy notes
+  are no longer framed as Railway-only.
+
+**Verified**
+- `/sitemap.xml` live-checked: includes the one published post with a
+  `<lastmod>` tag, static marketing routes still present.
+- Oversized-field demo-request live-checked: 422 with a clean Pydantic
+  `string_too_long` error, not a 500.
+- `npm audit`: 0 vulnerabilities. `npm run build`, `npm run lint`, and a fresh
+  `vite` dev server all confirmed working post-bump.
+
+---
+
 ## 2026-07-07 — Security hardening pass
 
 Backend security-hardening batch, verified live against the running dev server.
