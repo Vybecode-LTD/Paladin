@@ -66,41 +66,60 @@ export default function Home() {
           background: "radial-gradient(ellipse, var(--accent-glow), transparent 70%)",
           filter: "blur(60px)", opacity: 0.5, pointerEvents: "none",
         }} />
-        <div className="container split-row" style={{ position: "relative" }}>
-          <div>
-            <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
-              style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
-              <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
-                Recruiters need<br />superhuman abilities.
-              </span>
-              <span style={{ display: "block", fontSize: "clamp(32px, 4.4vw, 50px)", color: "var(--accent)", marginTop: "0.25em" }}>
-                Meet Paladin
-              </span>
-            </motion.h1>
-            <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
-              style={{ fontSize: "clamp(17px, 1.6vw, 20px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
-              Paladin researches the job, briefs you on the candidate, and coaches
-              you on the live call — on the phone you already use, no app required.
-              In a world racing to replace human interaction with AI, Paladin
-              strengthens the human relationship that recruiting was built on.
-            </motion.p>
-            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
-              style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} /></Link>
-              <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
-            </motion.div>
-            <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
-              style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
-              Built by recruiters, in Jacksonville, FL.
-            </motion.p>
-          </div>
-          <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
-            <ProductScreenshot
-              priority
-              src="/images/product-candidate-profile.png"
-              alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
-            />
+        <div className="container" style={{ position: "relative" }}>
+          <motion.div {...fadeUp} transition={{ duration: 0.5 }}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "center",
+              background: "var(--accent)",
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: "clamp(13px, 1.6vw, 15px)",
+              letterSpacing: "0.01em",
+              padding: "12px 20px",
+              borderRadius: "var(--radius)",
+              boxShadow: "0 4px 20px var(--accent-glow)",
+              marginBottom: 36,
+            }}>
+            Real-time AI Intelligence for Recruiting Calls
           </motion.div>
+          <div className="split-row">
+            <div>
+              <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
+                style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
+                <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
+                  Recruiters need<br />superhuman abilities.
+                </span>
+                <span style={{ display: "block", fontSize: "clamp(32px, 4.4vw, 50px)", color: "var(--accent)", marginTop: "0.25em" }}>
+                  Meet Paladin
+                </span>
+              </motion.h1>
+              <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
+                style={{ fontSize: "clamp(17px, 1.6vw, 20px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
+                Paladin researches the job, briefs you on the candidate, and coaches
+                you on the live call — on the phone you already use, no app required.
+                In a world racing to replace human interaction with AI, Paladin
+                strengthens the human relationship that recruiting was built on.
+              </motion.p>
+              <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
+                style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} /></Link>
+                <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
+              </motion.div>
+              <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
+                style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
+                Built by recruiters, in Jacksonville, FL.
+              </motion.p>
+            </div>
+            <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
+              <ProductScreenshot
+                priority
+                src="/images/product-candidate-profile.png"
+                alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
+              />
+            </motion.div>
+          </div>
         </div>
       </section>
 
