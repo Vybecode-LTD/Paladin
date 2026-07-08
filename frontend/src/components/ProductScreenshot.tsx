@@ -23,8 +23,6 @@ export default function ProductScreenshot({ src, alt, priority, style }: Product
         src={src}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
-        // eslint-disable-next-line react/no-unknown-property -- lowercase DOM attribute; this React version doesn't map the camelCase JSX prop
-        fetchpriority={priority ? "high" : "auto"}
         style={{
           display: "block",
           width: "100%",
