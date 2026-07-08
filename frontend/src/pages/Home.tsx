@@ -70,7 +70,7 @@ export default function Home() {
             <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
               style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
               <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
-                Recruiters need superhuman abilities
+                Recruiters need<br />superhuman abilities.
               </span>
               <span style={{ display: "block", fontSize: "clamp(32px, 4.4vw, 50px)", color: "var(--accent)", marginTop: "0.25em" }}>
                 Meet Paladin
