@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ClipboardList, PhoneCall, Activity, Send, ShieldCheck } from "lucide-react";
 import Seo from "@/components/Seo";
+import ProductScreenshot from "@/components/ProductScreenshot";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
@@ -64,7 +65,71 @@ export default function HowItWorks() {
             </motion.div>
           ))}
         </div>
-        <motion.div {...fadeUp} style={{ marginTop: 48, padding: 28, textAlign: "center", borderRadius: "var(--radius)", border: "1px dashed var(--border-bright)" }}>
+      </section>
+
+      {/* Product in action */}
+      <section className="section container" style={{ paddingTop: 0 }}>
+        <motion.div {...fadeUp} style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 56px" }}>
+          <span className="eyebrow">See It In Action</span>
+          <h2 className="section-title" style={{ marginTop: 12 }}>From candidate list to client-ready report.</h2>
+        </motion.div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 80 }}>
+          <div className="split-row">
+            <motion.div {...fadeUp}>
+              <span className="eyebrow">Step 01 — Prepare</span>
+              <h3 style={{ fontSize: 24, fontWeight: 700, margin: "10px 0" }}>Every candidate, one searchable list.</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
+                Browse candidates, filter by status, and jump straight into the
+                opportunities tied to each one — the starting point before any call.
+              </p>
+            </motion.div>
+            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
+              <ProductScreenshot
+                src="/images/product-candidates-list.png"
+                alt="Paladin candidates list with search, status filter, and each candidate's linked opportunities and fit score"
+              />
+            </motion.div>
+          </div>
+
+          <div className="split-row reverse">
+            <motion.div {...fadeUp}>
+              <span className="eyebrow">Step 03 — Intelligence</span>
+              <h3 style={{ fontSize: 24, fontWeight: 700, margin: "10px 0" }}>Strengths and red flags, surfaced while you're still on the call.</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
+                Paladin weighs what the candidate says against the role in real time —
+                flagging gaps like a geographic mismatch and handing you the exact
+                probing question to ask next.
+              </p>
+            </motion.div>
+            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
+              <ProductScreenshot
+                src="/images/product-analysis-pane.png"
+                alt="Paladin analysis pane showing candidate strengths, a regulatory-experience flag, and a geographic-mismatch red flag with a suggested probing question"
+              />
+            </motion.div>
+          </div>
+
+          <div className="split-row">
+            <motion.div {...fadeUp}>
+              <span className="eyebrow">Step 04 — Deliver</span>
+              <h3 style={{ fontSize: 24, fontWeight: 700, margin: "10px 0" }}>A fit score and report, ready the moment you hang up.</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
+                Every call rolls up into a fitment report with a confidence score —
+                logged against the opportunity, ready to forward to your hiring manager.
+              </p>
+            </motion.div>
+            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
+              <ProductScreenshot
+                src="/images/product-reports.png"
+                alt="Paladin opportunity report view showing a 91% fit score, AI confidence rating, and generated fitment analysis reports"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section container" style={{ paddingTop: 0 }}>
+        <motion.div {...fadeUp} style={{ padding: 28, textAlign: "center", borderRadius: "var(--radius)", border: "1px dashed var(--border-bright)" }}>
           <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
             <strong style={{ color: "var(--text)" }}>What you need:</strong> your existing phone. That's the whole list.
           </p>

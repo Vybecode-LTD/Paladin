@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Brain, Radio, BookOpen, FileCheck, Layers } from "lucide-react";
 import Seo from "@/components/Seo";
+import ProductScreenshot from "@/components/ProductScreenshot";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
@@ -13,13 +14,6 @@ const features = [
   { icon: Radio, glyph: "violet", title: "Live Prompts", body: "As the conversation unfolds, Paladin pushes targeted, context-aware follow-up questions to your screen. Catch a glossed-over gap; go deeper when it counts. The prompts are a co-pilot, not an autopilot — you stay in control." },
   { icon: BookOpen, glyph: "cyan", title: "Real-Time Context", body: "When a candidate drops a framework, tool, or acronym you don't know, Paladin defines it on-screen in plain language, instantly. Interview senior candidates in unfamiliar domains with confidence — and ask the sharper second question." },
   { icon: FileCheck, glyph: "coral", title: "Post-Call Summary", body: "Seconds after you hang up, Paladin delivers a client-ready summary: key takeaways, a skills-match confidence score, and a culture-fit read. Send it straight to your hiring manager — no scramble to reconstruct the call from memory." },
-];
-
-const pane = [
-  "Live transcript of both sides, lightly annotated",
-  "Prompt feed — suggested questions, timed to the conversation",
-  "Context cards — definitions for technical terms as they arise",
-  "Signal markers — moments worth revisiting, flagged in real time",
 ];
 
 export default function Product() {
@@ -59,7 +53,7 @@ export default function Product() {
 
       {/* Intelligence Pane */}
       <section className="section" style={{ background: "var(--bg-elevated)", borderBlock: "1px solid var(--border)" }}>
-        <div className="container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "center" }}>
+        <div className="container split-row">
           <motion.div {...fadeUp}>
             <div className="glyph-badge glyph-amber" style={{ display: "inline-grid", width: 50, height: 50, marginBottom: 18 }}>
               <Layers size={24} color="currentColor" />
@@ -67,16 +61,16 @@ export default function Product() {
             <h2 className="section-title">The Intelligence Pane</h2>
             <p style={{ color: "var(--text-muted)", marginTop: 16, fontSize: 17 }}>
               Everything Paladin surfaces appears in one calm, glanceable panel beside
-              your call — never in your ear, never interrupting your flow.
+              your call — never in your ear, never interrupting your flow. Strengths,
+              red flags, and probing questions to ask, generated straight from the
+              conversation.
             </p>
           </motion.div>
-          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="card">
-            {pane.map((line) => (
-              <div key={line} style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--border)", fontSize: 15, color: "var(--text-muted)" }}>
-                <div style={{ width: 6, height: 6, borderRadius: 99, background: "var(--accent)", marginTop: 8, flexShrink: 0 }} />
-                {line}
-              </div>
-            ))}
+          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
+            <ProductScreenshot
+              src="/images/product-analysis-pane.png"
+              alt="Paladin analysis pane showing candidate strengths, a low-risk regulatory flag, and a geographic-mismatch red flag with a suggested probing question"
+            />
           </motion.div>
         </div>
       </section>

@@ -171,6 +171,27 @@ a { color: inherit; text-decoration: none; }
   .section { padding: 64px 0; }
 }
 
+/* Split hero / feature rows — text column + screenshot column */
+.split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.split-row.reverse > *:first-child { order: 2; }
+.split-row.reverse > *:last-child { order: 1; }
+
+@media (max-width: 900px) {
+  .split-row,
+  .split-row.reverse {
+    grid-template-columns: 1fr;
+  }
+  .split-row > *,
+  .split-row.reverse > * {
+    order: initial !important;
+  }
+}
+
 /* Admin shell */
 .admin-shell {
   display: flex;

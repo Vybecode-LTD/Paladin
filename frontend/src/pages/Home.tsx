@@ -4,6 +4,7 @@ import {
   ArrowRight, Radio, Brain, BookOpen, FileCheck, Phone, XCircle, CheckCircle2,
 } from "lucide-react";
 import Seo from "@/components/Seo";
+import ProductScreenshot from "@/components/ProductScreenshot";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -59,36 +60,45 @@ export default function Home() {
       {/* HERO */}
       <section style={{ position: "relative", padding: "120px 0 90px", overflow: "hidden" }}>
         <div style={{
-          position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
+          position: "absolute", top: "-20%", right: "-10%",
           width: 900, height: 600,
           background: "radial-gradient(ellipse, var(--accent-glow), transparent 70%)",
           filter: "blur(60px)", opacity: 0.5, pointerEvents: "none",
         }} />
-        <div className="container" style={{ position: "relative", textAlign: "center", maxWidth: 860 }}>
-          <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
-            style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
-            <span style={{ display: "block", fontSize: "clamp(24px, 4.8vw, 44px)", whiteSpace: "nowrap" }}>
-              Recruiters need superhuman abilities
-            </span>
-            <span style={{ display: "block", fontSize: "clamp(30px, 6vw, 55px)", color: "var(--accent)", marginTop: "0.25em" }}>
-              Meet Paladin
-            </span>
-          </motion.h1>
-          <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
-            style={{ fontSize: "clamp(17px, 2.2vw, 21px)", color: "var(--text-muted)", maxWidth: 640, margin: "0 auto 34px" }}>
-            Paladin gives recruiters live intelligence during candidate calls —
-            surfacing skills gaps, decoding jargon, and prompting the right question
-            at the right moment. Through your existing phone. No app to install.
-          </motion.p>
-          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
-            style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} /></Link>
-            <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
+        <div className="container split-row" style={{ position: "relative" }}>
+          <div>
+            <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
+              style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
+              <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
+                Recruiters need superhuman abilities
+              </span>
+              <span style={{ display: "block", fontSize: "clamp(32px, 4.4vw, 50px)", color: "var(--accent)", marginTop: "0.25em" }}>
+                Meet Paladin
+              </span>
+            </motion.h1>
+            <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
+              style={{ fontSize: "clamp(17px, 1.6vw, 20px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
+              Paladin gives recruiters live intelligence during candidate calls —
+              surfacing skills gaps, decoding jargon, and prompting the right question
+              at the right moment. Through your existing phone. No app to install.
+            </motion.p>
+            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
+              style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} /></Link>
+              <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
+            </motion.div>
+            <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
+              style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
+              Built by recruiters, in Jacksonville, FL.
+            </motion.p>
+          </div>
+          <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
+            <ProductScreenshot
+              priority
+              src="/images/product-candidate-profile.png"
+              alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
+            />
           </motion.div>
-          <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
-            style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
-            Built by recruiters, in Jacksonville, FL.
-          </motion.p>
         </div>
       </section>
 
