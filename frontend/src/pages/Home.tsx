@@ -79,9 +79,10 @@ export default function Home() {
             </motion.h1>
             <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
               style={{ fontSize: "clamp(17px, 1.6vw, 20px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
-              Paladin gives recruiters live intelligence during candidate calls —
-              surfacing skills gaps, decoding jargon, and prompting the right question
-              at the right moment. Through your existing phone. No app to install.
+              Paladin researches the job, briefs you on the candidate, and coaches
+              you on the live call — on the phone you already use, no app required.
+              In a world racing to replace human interaction with AI, Paladin
+              strengthens the human relationship that recruiting was built on.
             </motion.p>
             <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
               style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
