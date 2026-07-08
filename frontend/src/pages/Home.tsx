@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import Seo from "@/components/Seo";
 import ProductScreenshot from "@/components/ProductScreenshot";
+import LiveCallDemo from "@/components/LiveCallDemo";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -100,6 +101,13 @@ export default function Home() {
             />
           </motion.div>
         </div>
+      </section>
+
+      {/* LIVE CALL DEMO */}
+      <section className="container" style={{ paddingBottom: 40 }}>
+        <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.1 }} style={{ maxWidth: 900, margin: "0 auto" }}>
+          <LiveCallDemo />
+        </motion.div>
       </section>
 
       {/* PROBLEM */}
