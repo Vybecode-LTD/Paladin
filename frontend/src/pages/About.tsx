@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 import Seo from "@/components/Seo";
 import TextScrim from "@/components/TextScrim";
@@ -44,6 +44,7 @@ function FounderMark({ variant, color }: { variant: "telephony" | "intelligence"
 
 export default function About() {
   const fadeUp = useFadeUp();
+  const reduceMotion = useReducedMotion();
 
   return (
     <>
@@ -134,19 +135,30 @@ export default function About() {
             <div className="signal-trace" style={{
               position: "absolute", top: "50%", left: "calc(50% - 12px)", width: 24, transform: "translateY(-50%) rotate(90deg)",
             }} />
-            {founders.map((f, i) => (
-              <motion.div key={f.name} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.1 }} className="card"
-                style={{ marginTop: i === 1 ? 28 : 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                  <FounderMark variant={f.variant as "telephony" | "intelligence"} color={f.color} />
-                  <div>
-                    <h3 style={{ fontSize: 20, fontWeight: 700 }}>{f.name}</h3>
-                    <p style={{ color: f.color, fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.04em", marginTop: 2 }}>{f.signal}</p>
+            {founders.map((f, i) => {
+              // The stagger below is expressed as a framer-motion `y` target
+              // (baked into initial/whileInView) rather than margin or a raw
+              // CSS transform: margin gets subtracted from the grid's default
+              // stretch-to-equal-height sizing (which shrank Matt's card by
+              // exactly the offset), and a raw `style.transform` gets
+              // silently overwritten by framer-motion's own transform
+              // management once the fadeUp y-animation runs.
+              const offset = i === 1 ? 28 : 0;
+              const initial = reduceMotion ? { opacity: 1, y: offset } : { opacity: 0, y: 24 + offset };
+              return (
+                <motion.div key={f.name} initial={initial} whileInView={{ opacity: 1, y: offset }}
+                  viewport={fadeUp.viewport} transition={{ duration: 0.5, delay: i * 0.1 }} className="card">
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                    <FounderMark variant={f.variant as "telephony" | "intelligence"} color={f.color} />
+                    <div>
+                      <h3 style={{ fontSize: 20, fontWeight: 700 }}>{f.name}</h3>
+                      <p style={{ color: f.color, fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.04em", marginTop: 2 }}>{f.signal}</p>
+                    </div>
                   </div>
-                </div>
-                <p style={{ color: "var(--text-muted)", fontSize: 15 }}>{f.bio}</p>
-              </motion.div>
-            ))}
+                  <p style={{ color: "var(--text-muted)", fontSize: 15 }}>{f.bio}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
