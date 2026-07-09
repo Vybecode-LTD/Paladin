@@ -101,12 +101,13 @@ export default function Home() {
                 Built by recruiters, in Jacksonville, FL.
               </motion.p>
             </div>
-            <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }} style={{ height: "100%" }}>
+            <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ProductScreenshot
                 priority
-                stretch
                 src="/images/product-candidate-profile.png"
                 alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
+                style={{ width: "60%" }}
               />
             </motion.div>
           </div>
