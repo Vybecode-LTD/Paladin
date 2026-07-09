@@ -40,7 +40,7 @@ export default function ProductScreenshot({ src, alt, priority, stretch, style }
           objectFit: "cover",
           borderRadius: "var(--radius-lg)",
           border: "1px solid var(--border-bright)",
-          boxShadow: "var(--shadow-depth-3)",
+          boxShadow: "var(--shadow-screenshot)",
         }}
       />
     </div>

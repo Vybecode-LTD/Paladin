@@ -12,11 +12,13 @@ interface Rope {
   hue: number;
   hueTarget: number;
   hueRate: number; // degrees/second — how fast this rope's color morphs
-  vibrancy: number; // 0..1 — how saturated/present this rope is right now
+  vibrancy: number; // 0..1 (up to ~1.6 for the pulse hero) — how saturated/present this rope is right now
   vibrancyTarget: number;
   vibrancyRate: number; // units/second — how fast vibrancy morphs
+  vibrancyLevels: number[]; // this rope's own set of levels to swing between
   lightA: number;
   lightB: number;
+  isPulseHero: boolean; // the one rope that pulses noticeably harder than its neighbors
 }
 
 function rand(min: number, max: number): number {
@@ -41,37 +43,50 @@ function hueDelta(from: number, to: number): number {
 }
 
 // Discrete levels (not a free-floating random) so each transition reads as a
-// deliberate swing from muted to vivid, not a barely-there nudge.
-const VIBRANCY_LEVELS = [0.12, 0.4, 0.7, 1];
+// deliberate swing from muted to vivid, not a barely-there nudge. The pulse
+// hero gets its own wider, more dramatic set (overshoots past 1 for a
+// genuinely heavier peak) so exactly one rope reads as "pulsing hard"
+// against calmer neighbors.
+const VIBRANCY_LEVELS = [0.18, 0.4, 0.6, 0.85];
+const HERO_VIBRANCY_LEVELS = [0.2, 0.7, 1.15, 1.6];
 
-function pickNextVibrancy(exclude: number): number {
-  const options = VIBRANCY_LEVELS.filter((v) => v !== exclude);
+function pickNextVibrancy(exclude: number, levels: number[]): number {
+  const options = levels.filter((v) => v !== exclude);
   return options[Math.floor(Math.random() * options.length)];
 }
 
 function buildRopes(height: number): Rope[] {
   const count = 5;
+  const heroIndex = Math.floor(Math.random() * count);
   return Array.from({ length: count }, (_, i) => {
     const depth = i / (count - 1);
+    const isPulseHero = i === heroIndex;
+    const levels = isPulseHero ? HERO_VIBRANCY_LEVELS : VIBRANCY_LEVELS;
     const startHue = HUES[i % HUES.length];
-    const startVibrancy = VIBRANCY_LEVELS[i % VIBRANCY_LEVELS.length];
+    const startVibrancy = levels[i % levels.length];
     return {
+      // Depth still separates "near" from "far," but gently — every rope
+      // should read as clearly moving, not just the front couple.
       baseY: height * (0.12 + (i / count) * 0.72 + rand(-0.04, 0.04)),
-      amp1: rand(50, 90) * (1 - depth * 0.4),
-      amp2: rand(20, 40) * (1 - depth * 0.4),
+      amp1: rand(50, 90) * (1 - depth * 0.15),
+      amp2: rand(20, 40) * (1 - depth * 0.15),
       freq1: rand(0.8, 1.4),
       freq2: rand(1.6, 2.6),
       phase: rand(0, Math.PI * 2),
-      speed: rand(0.06, 0.12) * (1 - depth * 0.5),
+      speed: rand(0.09, 0.16) * (1 - depth * 0.2),
       depth,
       hue: startHue,
       hueTarget: pickNextHue(startHue),
-      hueRate: rand(2.5, 5), // slow — a full red->blue morph takes minutes
+      hueRate: rand(4, 7), // a full red->blue morph takes roughly a minute or two
       vibrancy: startVibrancy,
-      vibrancyTarget: pickNextVibrancy(startVibrancy),
-      vibrancyRate: rand(0.015, 0.04), // a full muted<->vivid swing takes ~25-60s
+      vibrancyTarget: pickNextVibrancy(startVibrancy, levels),
+      // Hero pulses noticeably faster (a full swing in ~10-18s) than the
+      // calmer neighbors (~30-55s).
+      vibrancyRate: isPulseHero ? rand(0.09, 0.15) : rand(0.018, 0.033),
+      vibrancyLevels: levels,
       lightA: rand(38, 45),
       lightB: rand(52, 60),
+      isPulseHero,
     };
   });
 }
@@ -120,7 +135,7 @@ export default function FlowBackground() {
     const updateVibrancy = (rope: Rope, dt: number) => {
       const delta = rope.vibrancyTarget - rope.vibrancy;
       if (Math.abs(delta) < 0.01) {
-        rope.vibrancyTarget = pickNextVibrancy(rope.vibrancyTarget);
+        rope.vibrancyTarget = pickNextVibrancy(rope.vibrancyTarget, rope.vibrancyLevels);
         return;
       }
       const step = rope.vibrancyRate * dt;
@@ -139,12 +154,16 @@ export default function FlowBackground() {
       }
 
       // Vibrancy drives saturation/alpha/glow/width together — a rope at high
-      // vibrancy reads as "more present" than its neighbors; depth still dims
-      // farther ropes on top of that.
-      const sat = 35 + rope.vibrancy * 43; // 35%–78%
-      const alpha = (0.05 + rope.vibrancy * 0.23) * (1 - rope.depth * 0.35);
-      const glow = (2 + rope.vibrancy * 7) * (1 - rope.depth * 0.4);
-      const lineWidth = (0.8 + rope.vibrancy * 1.4) * (1 - rope.depth * 0.3);
+      // vibrancy reads as "more present" than its neighbors. Depth still adds
+      // a little separation, but gently now — every rope should read as
+      // clearly, visibly moving, not just the front couple. The pulse hero
+      // gets an extra multiplier on top so its swings read as heavier, not
+      // just wider.
+      const heroBoost = rope.isPulseHero ? 1.3 : 1;
+      const sat = Math.min(100, 40 + rope.vibrancy * 40);
+      const alpha = Math.min(0.6, (0.08 + rope.vibrancy * 0.22) * (1 - rope.depth * 0.18) * heroBoost);
+      const glow = (3 + rope.vibrancy * 8) * (1 - rope.depth * 0.2) * heroBoost;
+      const lineWidth = (1 + rope.vibrancy * 1.4) * (1 - rope.depth * 0.15) * (rope.isPulseHero ? 1.15 : 1);
 
       const colA = `hsl(${rope.hue}, ${sat}%, ${rope.lightA}%)`;
       const colB = `hsl(${rope.hue}, ${sat}%, ${rope.lightB}%)`;
