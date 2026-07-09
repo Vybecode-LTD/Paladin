@@ -151,7 +151,7 @@ a { color: inherit; text-decoration: none; }
   color: white; box-shadow: var(--shadow-glow);
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px var(--accent-glow); }
-.btn-ghost { background: transparent; border-color: var(--border-bright); color: var(--text); }
+.btn-ghost { background: var(--bg); border-color: var(--border-bright); color: var(--text); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
 /* Signal — the one shared focus treatment, extending the same accent-glow

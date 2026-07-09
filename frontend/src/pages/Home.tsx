@@ -58,14 +58,24 @@ export default function Home() {
       {/* HERO */}
       <section style={{ position: "relative", padding: "100px 0 90px", overflow: "hidden" }}>
         <div className="container" style={{ position: "relative" }}>
-          <motion.div {...fadeUp} transition={{ duration: 0.5 }}
-            style={{ display: "block", width: "100%", marginBottom: 20 }}>
-            <span className="eyebrow">Real-time AI Intelligence for Recruiting Calls</span>
-          </motion.div>
           <div className="split-row" style={{ alignItems: "stretch" }}>
-            <div>
+            <div style={{ position: "relative" }}>
+              {/* Screening mask — blurs and dims (20%) the FlowBackground
+               * waves specifically where they pass behind the hero text, so
+               * they read as further back / out of focus instead of
+               * competing with the copy. Doesn't touch the screenshot side. */}
+              <div aria-hidden="true" style={{
+                position: "absolute", inset: -24,
+                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+                background: "color-mix(in srgb, var(--bg) 20%, transparent)",
+                pointerEvents: "none",
+              }} />
+              <motion.div {...fadeUp} transition={{ duration: 0.5 }}
+                style={{ position: "relative", display: "block", width: "100%", marginBottom: 20 }}>
+                <span className="eyebrow">Real-time AI Intelligence for Recruiting Calls</span>
+              </motion.div>
               <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
-                style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "0 0 22px" }}>
+                style={{ position: "relative", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "0 0 22px" }}>
                 <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
                   Recruiters need<br />superhuman abilities.
                 </span>
@@ -74,19 +84,19 @@ export default function Home() {
                 </span>
               </motion.h1>
               <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
-                style={{ fontSize: "clamp(15px, 1.6vw, 18px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
+                style={{ position: "relative", fontSize: "clamp(15px, 1.6vw, 18px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
                 Paladin researches the job, briefs you on the candidate, and coaches
                 you on the live call — on the phone you already use, no app required.
                 In a world racing to replace human interaction with AI, Paladin
                 strengthens the human relationship that recruiting was built on.
               </motion.p>
               <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
-                style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                style={{ position: "relative", display: "flex", gap: 14, flexWrap: "wrap" }}>
                 <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} aria-hidden="true" /></Link>
                 <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
               </motion.div>
               <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
-                style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
+                style={{ position: "relative", marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
                 Built by recruiters, in Jacksonville, FL.
               </motion.p>
             </div>
