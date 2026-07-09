@@ -22,6 +22,12 @@ export default function ProductScreenshot({ src, alt, priority, stretch, style }
         background: "radial-gradient(ellipse at center, var(--accent-glow), transparent 70%)",
         filter: "blur(32px)", opacity: 0.7, pointerEvents: "none", zIndex: -1,
       }} />
+      {/* Signature corner notch — a short signal-line tick instead of a generic
+       * rounded-shadow frame, tying the screenshot back to the brand mark. */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: 14, left: -1, width: 28, height: 3, borderRadius: "0 3px 3px 0",
+        background: "linear-gradient(90deg, var(--accent), transparent)", zIndex: 1,
+      }} />
       <img
         src={src}
         alt={alt}

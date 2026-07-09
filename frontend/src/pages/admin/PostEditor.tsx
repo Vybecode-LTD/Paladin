@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { Sparkles, Save, Send, Wand2, Loader2, Eye, Code, ImagePlus, EyeOff } from "lucide-react";
 import { api, aiApi } from "@/lib/api";
 import MarkdownImage from "@/components/MarkdownImage";
+import Waveform from "@/components/Waveform";
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "11px 13px", background: "var(--bg)",
@@ -94,17 +95,19 @@ export default function PostEditor() {
     finally { setAiBusy(null); }
   }
 
-  // ---- Insert image (with an optional caption, rendered as a figure) ----
+  // ---- Insert image (alt text and the visible caption are separate — alt
+  // describes the image for screen readers, caption is visible body copy) ----
   function insertImage() {
     const url = window.prompt("Image URL:");
     if (!url || !url.trim()) return;
+    const alt = window.prompt("Alt text (describes the image — required for accessibility):");
+    if (!alt || !alt.trim()) { alert("Alt text is required."); return; }
     const caption = window.prompt("Caption (optional, shown under the image):") || "";
-    const alt = caption || "Image";
     // Markdown's optional quoted "title" after the URL becomes the figure
     // caption — see MarkdownImage.tsx's custom img renderer.
     const snippet = caption
-      ? `![${alt}](${url.trim()} "${caption.replace(/"/g, "'")}")`
-      : `![${alt}](${url.trim()})`;
+      ? `![${alt.trim()}](${url.trim()} "${caption.replace(/"/g, "'")}")`
+      : `![${alt.trim()}](${url.trim()})`;
 
     const textarea = bodyRef.current;
     if (!textarea) {
@@ -154,16 +157,16 @@ export default function PostEditor() {
         <h1 style={{ fontSize: 26, fontWeight: 800 }}>{isNew ? "New Post" : "Edit Post"}</h1>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button onClick={() => save()} disabled={saving} className="btn btn-ghost">
-            {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+            {saving ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
             {post.status === "published" ? "Save changes" : "Save draft"}
           </button>
           {!isNew && post.status === "published" && (
             <button onClick={unpublish} disabled={saving} className="btn btn-ghost">
-              <EyeOff size={16} /> Unpublish
+              <EyeOff size={16} aria-hidden="true" /> Unpublish
             </button>
           )}
           <button onClick={() => save("published")} disabled={saving} className="btn btn-primary">
-            <Send size={16} /> {post.status === "published" ? "Update" : "Publish"}
+            <Send size={16} aria-hidden="true" /> {post.status === "published" ? "Update" : "Publish"}
           </button>
         </div>
       </div>
@@ -220,7 +223,7 @@ export default function PostEditor() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <label style={labelStyle}>Excerpt</label>
               <button onClick={genExcerpt} disabled={aiBusy === "excerpt"} className="btn btn-ghost" style={{ padding: "4px 10px", fontSize: 12 }}>
-                {aiBusy === "excerpt" ? <Loader2 size={13} className="spin" /> : <Wand2 size={13} />} Generate
+                {aiBusy === "excerpt" ? <Waveform size="thin" bars={5} onLight /> : <Wand2 size={13} aria-hidden="true" />} Generate
               </button>
             </div>
             <textarea style={{ ...inputStyle, minHeight: 70, resize: "vertical" }} value={post.excerpt} onChange={(e) => upd("excerpt")(e.target.value)} />
@@ -231,7 +234,7 @@ export default function PostEditor() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <h4 style={{ fontSize: 14, fontWeight: 700 }}>SEO metadata</h4>
               <button onClick={genSeo} disabled={aiBusy === "seo"} className="btn btn-ghost" style={{ padding: "4px 10px", fontSize: 12 }}>
-                {aiBusy === "seo" ? <Loader2 size={13} className="spin" /> : <Wand2 size={13} />} Auto-generate
+                {aiBusy === "seo" ? <Waveform size="thin" bars={5} onLight /> : <Wand2 size={13} aria-hidden="true" />} Auto-generate
               </button>
             </div>
             <label style={labelStyle}>SEO title</label>
@@ -277,10 +280,10 @@ export default function PostEditor() {
           </div>
 
           <button onClick={genDraft} disabled={aiBusy === "draft" || !aiTopic.trim()} className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
-            {aiBusy === "draft" ? <><Loader2 size={16} className="spin" /> Writing…</> : <><Wand2 size={16} /> Generate full draft</>}
+            {aiBusy === "draft" ? <><Waveform size="thin" bars={6} /> Writing…</> : <><Wand2 size={16} aria-hidden="true" /> Generate full draft</>}
           </button>
           <button onClick={genTitles} disabled={aiBusy === "titles" || !aiTopic.trim()} className="btn btn-ghost" style={{ width: "100%", justifyContent: "center" }}>
-            {aiBusy === "titles" ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />} Brainstorm titles
+            {aiBusy === "titles" ? <Waveform size="thin" bars={6} onLight /> : <Sparkles size={16} aria-hidden="true" />} Brainstorm titles
           </button>
 
           {titleIdeas && (

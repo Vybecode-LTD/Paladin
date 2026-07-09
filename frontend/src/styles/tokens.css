@@ -10,7 +10,9 @@
 
   --text: #1a1c1f;
   --text-muted: #5c5e61;
-  --text-dim: #8d9094;
+  /* Darkened from #8d9094 (was ~3:1 on --bg-elevated, failing WCAG AA) to clear
+     4.5:1 on both --bg and --bg-elevated. */
+  --text-dim: #6b6e72;
 
   /* Accent — cyan/blue "signal" gradient, retuned for light-background contrast */
   --accent: #0076d1;
@@ -33,6 +35,19 @@
   --glyph-cyan: #00999f;      --glyph-cyan-bg: #c5f6f8;
   --glyph-amber: #b37900;     --glyph-amber-bg: #ffe7c8;
   --glyph-coral: #cf5e58;     --glyph-coral-bg: #ffe4e1;
+
+  /* Console — the dark "device screen" register used by LiveCallDemo, the
+     site's one deliberate second-material moment. Derived from the glyph
+     tones above (not one-off hex) so it stays reskinnable from here. */
+  --console-bg: rgba(13, 15, 20, 0.88);
+  --console-border: rgba(255, 255, 255, 0.08);
+  --console-text: rgba(255, 255, 255, 0.85);
+  --console-text-dim: rgba(255, 255, 255, 0.4);
+  --console-glyph-blue: #6ea8ff;
+  --console-glyph-violet: #a99bff;
+  --console-glyph-cyan: #5eead4;
+  --console-glyph-amber: #f2c879;
+  --console-glyph-coral: #ff9c8f;
 
   /* Glass surfaces — bright frosted panels over the flowing background */
   --glass-bg: rgba(255, 255, 255, 0.62);
@@ -60,6 +75,27 @@
   --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
 
+  /* Space — one scale everything pulls from, so a "tighten this gap 4px" ask
+     is a token swap instead of an invented pixel value. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Type scale — mirrors the --radius-* naming convention. */
+  --fs-1: 13px;
+  --fs-2: 15px;
+  --fs-3: 17px;
+  --fs-4: 20px;
+  --fs-5: 26px;
+  --fs-6: 34px;
+  --fs-7: 44px;
+
   /* Space + radius */
   --radius-sm: 8px;
   --radius: 14px;
@@ -67,7 +103,6 @@
   --maxw: 1200px;
 
   --shadow-glow: 0 0 40px var(--accent-glow);
-  --shadow-card: var(--shadow-depth-2);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,23 +122,16 @@ a { color: inherit; text-decoration: none; }
 
 .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
 .gradient-text {
   background: linear-gradient(120deg, var(--accent-bright), var(--accent-deep));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.blue-gradient-text {
-  background: linear-gradient(
-    90deg,
-    hsl(200, 95%, 65%), hsl(212, 90%, 55%), hsl(222, 85%, 48%),
-    hsl(234, 80%, 42%), hsl(246, 75%, 40%)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: -1px -1px 2px rgba(45, 45, 48, 0.5);
 }
 
 .btn {
@@ -114,15 +142,49 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-primary {
   background: linear-gradient(160deg, #2c90ef, var(--accent-deep));
-  color: white; box-shadow: 0 4px 20px var(--accent-glow);
+  color: white; box-shadow: var(--shadow-glow);
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px var(--accent-glow); }
 .btn-ghost { background: transparent; border-color: var(--border-bright); color: var(--text); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
+/* Signal — the one shared focus treatment, extending the same accent-glow
+   language as .btn-primary and the live-dot pulse instead of a browser
+   default outline. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-glow);
+}
+
 .eyebrow {
-  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--accent);
+  font-family: var(--font-mono); font-size: var(--fs-1); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent-deep);
+}
+
+.nav-link { position: relative; padding: 4px 0; display: inline-block; }
+.nav-link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -8px; height: 1px;
+  background: var(--border-bright); transform: scaleX(0); transform-origin: left;
+  transition: transform 0.2s ease;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* Underline-only field style — reads as integrated into a glass card rather
+   than a box-within-a-box. */
+.field-underline {
+  width: 100%; padding: 10px 2px; background: transparent;
+  border: none; border-bottom: 1px solid var(--border-bright);
+  border-radius: 0; color: var(--text); font-size: var(--fs-2);
+  font-family: var(--font-sans); transition: border-color 0.2s ease;
+}
+.field-underline:focus-visible {
+  outline: none; border-radius: 0;
+  box-shadow: none; border-bottom-color: var(--accent);
+}
+.field-underline:focus {
+  border-bottom-color: var(--accent);
 }
 
 /* Colorful glyph badges — icon circles that rotate through the tonal glyph
@@ -137,38 +199,79 @@ a { color: inherit; text-decoration: none; }
 .glyph-amber   { background: var(--glyph-amber-bg);  color: var(--glyph-amber); }
 .glyph-coral   { background: var(--glyph-coral-bg);  color: var(--glyph-coral); }
 
-.section { padding: 100px 0; }
-.section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -0.02em; }
+.section { padding: var(--space-9) 0; }
+.section-title { font-size: clamp(28px, 4vw, var(--fs-7)); font-weight: 700; letter-spacing: -0.02em; }
 
+/* Glass — thin pane for dense grids (stat/feature/blog tiles). Static by
+   default; add .card-interactive for tiles that are themselves a link/button
+   and should lift on hover. Add .card-deep for hero/CTA-weight panels. */
 .card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius); padding: 28px;
+  border-radius: var(--radius); padding: var(--space-5);
   box-shadow: var(--shadow-depth-2), inset 0 1px 0 var(--glass-highlight);
   transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
-.card:hover {
+.card-interactive:hover {
   border-color: var(--border-bright);
   transform: translateY(-4px);
   box-shadow: var(--shadow-depth-3), inset 0 1px 0 var(--glass-highlight);
 }
 
+/* Deep glass — a thicker simulated pane for hero/CTA-weight panels: a second
+   inset layer and a faint gradient (refracted) edge instead of a flat border. */
+.card-deep {
+  position: relative;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-lg); padding: var(--space-7) var(--space-5);
+  box-shadow: var(--shadow-depth-3), inset 0 1px 0 var(--glass-highlight), inset 0 0 0 1px var(--glass-highlight);
+}
+.card-deep::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: linear-gradient(140deg, var(--glass-highlight), var(--glass-border) 60%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Capped, named "important card" gradient wash — reuse this instead of every
+   page inventing its own inline highlight gradient. Compose with .card or
+   .card-deep (e.g. className="card card-glow"). */
+.card-glow { background-image: linear-gradient(140deg, transparent, var(--accent-glow)); }
+
 /* Markdown prose (blog + preview) */
 .prose { color: var(--text); line-height: 1.75; }
 .prose h1 { font-size: 30px; font-weight: 800; margin: 8px 0 18px; letter-spacing: -0.02em; }
-.prose h2 { font-size: 24px; font-weight: 700; margin: 32px 0 14px; letter-spacing: -0.01em; }
+.prose h2 { font-size: 24px; font-weight: 700; margin: 32px 0 14px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.prose h2::before { content: ""; width: 4px; height: 18px; border-radius: 2px; background: var(--accent); flex-shrink: 0; }
 .prose h3 { font-size: 19px; font-weight: 700; margin: 24px 0 10px; }
 .prose p { margin: 0 0 18px; color: var(--text-muted); font-size: 17px; }
 .prose ul, .prose ol { margin: 0 0 18px; padding-left: 24px; color: var(--text-muted); }
 .prose li { margin-bottom: 8px; font-size: 17px; }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.prose blockquote { border-left: 3px solid var(--accent); padding-left: 18px; margin: 20px 0; color: var(--text-muted); font-style: italic; }
+.prose blockquote {
+  margin: 24px 0; padding: 18px 20px 18px 52px; position: relative;
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
+  color: var(--text-muted); font-style: italic;
+  box-shadow: var(--shadow-depth-1), inset 0 1px 0 var(--glass-highlight);
+}
+.prose blockquote::before {
+  content: ""; position: absolute; left: 20px; top: 22px; width: 12px; height: 14px;
+  background: var(--accent);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
+  mask: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
+}
 .prose code { font-family: var(--font-mono); font-size: 0.9em; background: var(--bg-elevated); padding: 2px 6px; border-radius: 5px; color: var(--accent-deep); }
 .prose pre { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin: 0 0 18px; }
 .prose pre code { background: none; padding: 0; color: var(--text); }
-.prose img { max-width: 100%; border-radius: var(--radius-sm); margin: 12px 0; }
+.prose img { max-width: 100%; border-radius: var(--radius-sm); margin: 12px 0; border: 1px solid var(--border); box-shadow: var(--shadow-depth-1); }
 .prose table { width: 100%; border-collapse: collapse; margin: 0 0 18px; }
 .prose th, .prose td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; font-size: 15px; }
 .prose hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
@@ -183,16 +286,20 @@ a { color: inherit; text-decoration: none; }
   50% { transform: scaleY(1); }
 }
 .waveform { display: flex; align-items: center; gap: 3px; height: 24px; }
+.waveform.waveform-thin { height: 16px; gap: 2px; }
 .waveform span {
   display: block;
   width: 3px;
   border-radius: 2px;
-  background: #6ea8ff;
+  background: var(--console-glyph-blue);
   animation-name: wave-bounce;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   transform-origin: center;
 }
+.waveform-thin span { width: 2px; }
+.waveform.waveform-frozen span { animation-play-state: paused; opacity: 0.3; }
+.waveform.waveform-onlight span { background: var(--accent); }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
@@ -200,12 +307,33 @@ a { color: inherit; text-decoration: none; }
 }
 .live-dot { animation: pulse-dot 1.7s ease-in-out infinite; }
 
+/* Signal Line — a thin animated trace, the site's shared signature motif for
+   dividers/timelines outside canvas-drawn areas (nav indicator, footer trace). */
+@keyframes signal-sweep { to { background-position: -200% 0; } }
+.signal-trace {
+  height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg,
+    transparent, var(--glyph-coral) 15%, var(--accent) 40%, var(--glyph-cyan) 65%, transparent 85%);
+  background-size: 200% 100%;
+  animation: signal-sweep 6s linear infinite;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveform span,
+  .live-dot,
+  .spin,
+  .signal-trace {
+    animation: none !important;
+  }
+}
+
 .live-call-grid { display: grid; grid-template-columns: 1fr 1fr; }
 @media (max-width: 720px) {
   .live-call-grid { grid-template-columns: 1fr; }
   .live-call-grid > div:first-child {
     border-right: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--console-border);
   }
 }
 
@@ -213,6 +341,31 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) {
   .container { padding: 0 18px; }
   .section { padding: 64px 0; }
+}
+
+.contact-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: start; }
+@media (max-width: 860px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}
+
+.founders-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 640px) {
+  .founders-grid { grid-template-columns: 1fr; }
+  .founders-grid .signal-trace { display: none; }
+}
+
+/* Scrolling content + sticky side panel (Product's Intelligence Pane). */
+.sticky-pane-row { display: grid; grid-template-columns: 1fr 380px; gap: 56px; align-items: start; }
+@media (max-width: 860px) {
+  .sticky-pane-row { grid-template-columns: 1fr; }
+  .sticky-pane-row > *:last-child { position: static !important; order: -1; }
+}
+
+/* Asymmetric intro + content grid — breaks the repeated "centered kicker,
+   then grid below" section shape used elsewhere on the page. */
+.problem-grid { display: grid; grid-template-columns: minmax(240px, 320px) 1fr; gap: 48px; align-items: start; }
+@media (max-width: 760px) {
+  .problem-grid { grid-template-columns: 1fr; }
 }
 
 /* Split hero / feature rows — text column + screenshot column */

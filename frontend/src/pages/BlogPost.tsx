@@ -7,11 +7,26 @@ import { ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
 import MarkdownImage from "@/components/MarkdownImage";
+import { tagGlyph, readTime } from "@/lib/tagColor";
 
 interface Post {
   title: string; body_markdown: string; cover_image_url: string;
   tags: string; published_at: string | null;
   seo_title: string; seo_description: string; excerpt: string;
+}
+
+function SkeletonArticle() {
+  return (
+    <div className="container" style={{ maxWidth: 680, padding: "70px 24px 60px" }}>
+      <div style={{ width: 120, height: 14, borderRadius: 4, background: "var(--bg-elevated)", marginBottom: 32 }} />
+      <div style={{ width: "80%", height: 40, borderRadius: 6, background: "var(--bg-elevated)", marginBottom: 16 }} />
+      <div style={{ width: 160, height: 14, borderRadius: 4, background: "var(--bg-elevated)", marginBottom: 32 }} />
+      <div style={{ width: "100%", height: 320, borderRadius: "var(--radius)", background: "var(--bg-elevated)", marginBottom: 36 }} />
+      {[100, 95, 88, 92].map((w, i) => (
+        <div key={i} style={{ width: `${w}%`, height: 16, borderRadius: 4, background: "var(--bg-elevated)", marginBottom: 12 }} />
+      ))}
+    </div>
+  );
 }
 
 export default function BlogPost() {
@@ -28,7 +43,7 @@ export default function BlogPost() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  if (loading) return <div className="container" style={{ padding: 80, color: "var(--text-dim)" }}>Loading…</div>;
+  if (loading) return <SkeletonArticle />;
   if (notFound || !post) return (
     <div className="container" style={{ padding: 80, textAlign: "center" }}>
       <h1 style={{ fontSize: 28, marginBottom: 16 }}>Post not found</h1>
@@ -52,26 +67,30 @@ export default function BlogPost() {
           description: seoDescription,
         }}
       />
-      <article className="container" style={{ maxWidth: 760, padding: "70px 24px 60px" }}>
+      <article className="container" style={{ maxWidth: 680, padding: "70px 24px 60px" }}>
         <Link to="/blog" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text-muted)", fontSize: 14, marginBottom: 32 }}>
-          <ArrowLeft size={16} /> Back to blog
+          <ArrowLeft size={16} aria-hidden="true" /> Back to blog
         </Link>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           {post.tags && (
             <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-              {post.tags.split(",").filter(Boolean).map((t) => (
-                <span key={t} style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--glyph-blue)", background: "var(--glyph-blue-bg)", padding: "4px 10px", borderRadius: 6 }}>{t.trim()}</span>
-              ))}
+              {post.tags.split(",").filter(Boolean).map((t) => {
+                const g = tagGlyph(t.trim());
+                return (
+                  <span key={t} style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: `var(--glyph-${g})`, background: `var(--glyph-${g}-bg)`, padding: "4px 10px", borderRadius: 6 }}>{t.trim()}</span>
+                );
+              })}
             </div>
           )}
           <h1 style={{ fontSize: "clamp(30px, 5vw, 46px)", fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: 16 }}>{post.title}</h1>
           {post.published_at && (
             <p style={{ color: "var(--text-dim)", fontSize: 14, fontFamily: "var(--font-mono)", marginBottom: 32 }}>
               {new Date(post.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+              {" · "}{readTime(post.body_markdown)}
             </p>
           )}
           {post.cover_image_url && (
-            <img src={post.cover_image_url} alt={post.title} style={{ width: "100%", borderRadius: "var(--radius)", marginBottom: 36 }} />
+            <img src={post.cover_image_url} alt={post.title} style={{ width: "100%", borderRadius: "var(--radius)", marginBottom: 36, border: "1px solid var(--border)", boxShadow: "var(--shadow-depth-2)" }} />
           )}
           <div className="prose">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: MarkdownImage }}>

@@ -1,24 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, Linkedin, MapPin, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, Linkedin, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" }, transition: { duration: 0.5 },
-};
+import Waveform from "@/components/Waveform";
+import { useFadeUp } from "@/hooks/useReveal";
 
 const ROLES = ["Recruiter", "Recruiting Manager", "HR Director or VP", "Staffing Agency Owner", "Executive — C-Suite", "Other"];
 const SIZES = ["1–5", "6–20", "21–50", "50+"];
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "12px 14px", background: "var(--bg)",
-  border: "1px solid var(--border-bright)", borderRadius: "var(--radius-sm)",
-  color: "var(--text)", fontSize: 15, fontFamily: "var(--font-sans)",
-};
-
 export default function Contact() {
+  const fadeUp = useFadeUp();
   const [form, setForm] = useState({
     full_name: "", company: "", email: "", phone: "", role: "", team_size: "", message: "",
   });
@@ -49,7 +41,7 @@ export default function Contact() {
         path="/contact"
       />
       <section style={{ padding: "90px 0 60px" }} className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 56, alignItems: "start" }}>
+        <div className="contact-grid">
           {/* Left: pitch + channels */}
           <motion.div {...fadeUp}>
             <span className="eyebrow">Contact</span>
@@ -73,7 +65,7 @@ export default function Contact() {
               ].map((c) => (
                 <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div className={`glyph-badge glyph-${c.glyph}`} style={{ width: 40, height: 40, flexShrink: 0 }}>
-                    <c.icon size={18} color="currentColor" />
+                    <c.icon size={18} color="currentColor" aria-hidden="true" />
                   </div>
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>{c.label}</div>
@@ -89,39 +81,41 @@ export default function Contact() {
           <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="card" style={{ padding: 32 }}>
             {status === "done" ? (
               <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <CheckCircle2 size={48} color="var(--success)" style={{ margin: "0 auto 16px" }} />
-                <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Request received.</h3>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <Waveform frozen />
+                </div>
+                <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Signal received.</h3>
                 <p style={{ color: "var(--text-muted)" }}>A real person will reach out to schedule. No spam, promise.</p>
               </div>
             ) : (
-              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 <div>
                   <label htmlFor="contact-full-name" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Full Name *</label>
-                  <input id="contact-full-name" required maxLength={200} style={inputStyle} value={form.full_name} onChange={set("full_name")} />
+                  <input id="contact-full-name" required maxLength={200} className="field-underline" value={form.full_name} onChange={set("full_name")} />
                 </div>
                 <div>
                   <label htmlFor="contact-company" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Company *</label>
-                  <input id="contact-company" required maxLength={200} style={inputStyle} value={form.company} onChange={set("company")} />
+                  <input id="contact-company" required maxLength={200} className="field-underline" value={form.company} onChange={set("company")} />
                 </div>
                 <div>
                   <label htmlFor="contact-email" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Work Email *</label>
-                  <input id="contact-email" required type="email" maxLength={200} style={inputStyle} value={form.email} onChange={set("email")} />
+                  <input id="contact-email" required type="email" maxLength={200} className="field-underline" value={form.email} onChange={set("email")} />
                 </div>
                 <div>
                   <label htmlFor="contact-phone" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Phone</label>
-                  <input id="contact-phone" type="tel" placeholder="(555) 123-4567" maxLength={30} style={inputStyle} value={form.phone} onChange={set("phone")} />
+                  <input id="contact-phone" type="tel" placeholder="(555) 123-4567" maxLength={30} className="field-underline" value={form.phone} onChange={set("phone")} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
                     <label htmlFor="contact-role" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Role</label>
-                    <select id="contact-role" style={inputStyle} value={form.role} onChange={set("role")}>
+                    <select id="contact-role" className="field-underline" value={form.role} onChange={set("role")}>
                       <option value="">Select…</option>
                       {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </div>
                   <div>
                     <label htmlFor="contact-team-size" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Team Size</label>
-                    <select id="contact-team-size" style={inputStyle} value={form.team_size} onChange={set("team_size")}>
+                    <select id="contact-team-size" className="field-underline" value={form.team_size} onChange={set("team_size")}>
                       <option value="">Select…</option>
                       {SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -129,7 +123,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <label htmlFor="contact-message" style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Anything you'd like us to know?</label>
-                  <textarea id="contact-message" rows={3} maxLength={2000} style={{ ...inputStyle, resize: "vertical" }} value={form.message} onChange={set("message")} />
+                  <textarea id="contact-message" rows={3} maxLength={2000} className="field-underline" style={{ resize: "vertical" }} value={form.message} onChange={set("message")} />
                 </div>
                 {status === "error" && <p role="alert" style={{ color: "var(--danger)", fontSize: 14 }}>{error}</p>}
                 <button type="submit" disabled={status === "sending"} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 4 }}>
