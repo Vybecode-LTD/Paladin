@@ -9,6 +9,7 @@ class PostCreate(BaseModel):
     body_markdown: str = ""
     excerpt: str = ""
     cover_image_url: str = ""
+    cover_image_svg: str = ""
     status: PostStatus = PostStatus.draft
     seo_title: str = ""
     seo_description: str = ""
@@ -20,6 +21,7 @@ class PostUpdate(BaseModel):
     body_markdown: str | None = None
     excerpt: str | None = None
     cover_image_url: str | None = None
+    cover_image_svg: str | None = None
     status: PostStatus | None = None
     seo_title: str | None = None
     seo_description: str | None = None
@@ -33,6 +35,7 @@ class PostOut(BaseModel):
     excerpt: str
     body_markdown: str
     cover_image_url: str
+    cover_image_svg: str
     status: PostStatus
     seo_title: str
     seo_description: str
@@ -52,6 +55,7 @@ class PostListItem(BaseModel):
     slug: str
     excerpt: str
     cover_image_url: str
+    cover_image_svg: str
     status: PostStatus
     tags: str
     published_at: datetime | None

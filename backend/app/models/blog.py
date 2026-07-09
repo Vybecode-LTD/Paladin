@@ -23,6 +23,11 @@ class BlogPost(Base):
     excerpt: Mapped[str] = mapped_column(String(500), default="")
     body_markdown: Mapped[str] = mapped_column(Text, default="")
     cover_image_url: Mapped[str] = mapped_column(String(500), default="")
+    # AI-generated vector header (self-contained, sanitized <svg> markup). Kept
+    # in its own Text column — an SVG far exceeds cover_image_url's String(500),
+    # and separating them keeps "pasted photo URL" distinct from "generated
+    # header." Rendered SVG-first, falling back to cover_image_url.
+    cover_image_svg: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[PostStatus] = mapped_column(
         SAEnum(PostStatus, name="post_status"), default=PostStatus.draft, index=True
     )

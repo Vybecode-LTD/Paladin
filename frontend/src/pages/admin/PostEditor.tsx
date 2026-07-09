@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Sparkles, Save, Send, Wand2, Loader2, Eye, Code, ImagePlus, EyeOff } from "lucide-react";
+import { Sparkles, Save, Send, Wand2, Loader2, Eye, Code, ImagePlus, EyeOff, Image as ImageIcon, Trash2 } from "lucide-react";
 import { api, aiApi } from "@/lib/api";
 import MarkdownImage from "@/components/MarkdownImage";
 import Waveform from "@/components/Waveform";
+import { svgToDataUri } from "@/lib/svg";
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "11px 13px", background: "var(--bg)",
@@ -18,13 +19,15 @@ const labelStyle: React.CSSProperties = {
 
 interface PostState {
   title: string; body_markdown: string; excerpt: string; tags: string;
-  cover_image_url: string; seo_title: string; seo_description: string;
+  cover_image_url: string; cover_image_svg: string;
+  seo_title: string; seo_description: string;
   status: "draft" | "published";
 }
 
 const EMPTY: PostState = {
   title: "", body_markdown: "", excerpt: "", tags: "",
-  cover_image_url: "", seo_title: "", seo_description: "", status: "draft",
+  cover_image_url: "", cover_image_svg: "",
+  seo_title: "", seo_description: "", status: "draft",
 };
 
 export default function PostEditor() {
@@ -44,13 +47,15 @@ export default function PostEditor() {
   const [aiLength, setAiLength] = useState("medium");
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [titleIdeas, setTitleIdeas] = useState<string>("");
+  const [coverStyle, setCoverStyle] = useState("editorial");
 
   useEffect(() => {
     if (isNew) return;
     api.get(`/admin/posts/${id}`)
       .then((p) => setPost({
         title: p.title, body_markdown: p.body_markdown, excerpt: p.excerpt,
-        tags: p.tags, cover_image_url: p.cover_image_url, seo_title: p.seo_title,
+        tags: p.tags, cover_image_url: p.cover_image_url,
+        cover_image_svg: p.cover_image_svg || "", seo_title: p.seo_title,
         seo_description: p.seo_description, status: p.status,
       }))
       .catch(() => {})
@@ -94,6 +99,20 @@ export default function PostEditor() {
     } catch (e) { alert(e instanceof Error ? e.message : "SEO generation failed"); }
     finally { setAiBusy(null); }
   }
+
+  // ---- AI header image (vector SVG generated server-side, from the title) ----
+  async function genCover() {
+    if (!post.title.trim()) return alert("Add a title first — the header is generated from it.");
+    setAiBusy("cover");
+    try {
+      // The AI panel's brief (aiTopic), when present, gives the generator extra
+      // subject context; it's optional — the title alone is enough.
+      const { result } = await aiApi.coverImage(post.title, aiTopic, coverStyle);
+      setPost((p) => ({ ...p, cover_image_svg: result }));
+    } catch (e) { alert(e instanceof Error ? e.message : "Header image generation failed"); }
+    finally { setAiBusy(null); }
+  }
+  function removeCover() { setPost((p) => ({ ...p, cover_image_svg: "" })); }
 
   // ---- Insert image (alt text and the visible caption are separate — alt
   // describes the image for screen readers, caption is visible body copy) ----
@@ -208,13 +227,47 @@ export default function PostEditor() {
             )}
           </div>
 
+          {/* AI header image — an on-brand vector (SVG) generated from the title.
+              Rendered SVG-first on the public post; cover_image_url is the
+              fallback for an externally-hosted photo. */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
+              <label style={labelStyle}>Header image (AI vector)</label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <select value={coverStyle} onChange={(e) => setCoverStyle(e.target.value)}
+                  style={{ ...inputStyle, width: "auto", padding: "5px 8px", fontSize: 12 }} aria-label="Header image style">
+                  <option value="editorial">Editorial</option>
+                  <option value="signal">Signal motif</option>
+                  <option value="minimal">Minimal</option>
+                </select>
+                <button onClick={genCover} disabled={aiBusy === "cover"} className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }}>
+                  {aiBusy === "cover" ? <Waveform size="thin" bars={5} onLight /> : <ImageIcon size={13} aria-hidden="true" />}
+                  {post.cover_image_svg ? " Regenerate" : " Generate"}
+                </button>
+                {post.cover_image_svg && (
+                  <button onClick={removeCover} className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }}>
+                    <Trash2 size={13} aria-hidden="true" /> Remove
+                  </button>
+                )}
+              </div>
+            </div>
+            {post.cover_image_svg ? (
+              <img src={svgToDataUri(post.cover_image_svg)} alt="Generated blog header preview"
+                style={{ width: "100%", aspectRatio: "1200 / 630", objectFit: "cover", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", display: "block", boxShadow: "var(--shadow-depth-1)" }} />
+            ) : (
+              <div style={{ width: "100%", aspectRatio: "1200 / 630", borderRadius: "var(--radius-sm)", border: "1px dashed var(--border-bright)", display: "grid", placeItems: "center", textAlign: "center", padding: 20, color: "var(--text-dim)", fontSize: 13, background: "var(--bg-elevated)" }}>
+                <span>Generate an on-brand vector header from the post title.<br />Runs through the secure backend proxy — nothing is stored until you save.</span>
+              </div>
+            )}
+          </div>
+
           <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={labelStyle}>Tags (comma-separated)</label>
               <input style={inputStyle} value={post.tags} onChange={(e) => upd("tags")(e.target.value)} placeholder="hiring, ai, recruiting" />
             </div>
             <div>
-              <label style={labelStyle}>Cover image URL</label>
+              <label style={labelStyle}>Cover image URL <span style={{ color: "var(--text-dim)" }}>(fallback)</span></label>
               <input style={inputStyle} value={post.cover_image_url} onChange={(e) => upd("cover_image_url")(e.target.value)} placeholder="https://…" />
             </div>
           </div>

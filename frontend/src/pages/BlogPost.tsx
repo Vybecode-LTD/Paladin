@@ -9,9 +9,11 @@ import Seo from "@/components/Seo";
 import MarkdownImage from "@/components/MarkdownImage";
 import TextScrim from "@/components/TextScrim";
 import { tagGlyph, readTime } from "@/lib/tagColor";
+import { svgToDataUri } from "@/lib/svg";
 
 interface Post {
   title: string; body_markdown: string; cover_image_url: string;
+  cover_image_svg: string;
   tags: string; published_at: string | null;
   seo_title: string; seo_description: string; excerpt: string;
 }
@@ -53,6 +55,7 @@ export default function BlogPost() {
   );
 
   const seoDescription = post.seo_description || post.excerpt;
+  const coverSrc = post.cover_image_svg ? svgToDataUri(post.cover_image_svg) : post.cover_image_url;
 
   return (
     <>
@@ -91,8 +94,8 @@ export default function BlogPost() {
                 {" · "}{readTime(post.body_markdown)}
               </p>
             )}
-            {post.cover_image_url && (
-              <img src={post.cover_image_url} alt={post.title} style={{ width: "100%", borderRadius: "var(--radius)", marginBottom: 36, border: "1px solid var(--border)", boxShadow: "var(--shadow-depth-2)" }} />
+            {coverSrc && (
+              <img src={coverSrc} alt={post.title} style={{ width: "100%", borderRadius: "var(--radius)", marginBottom: 36, border: "1px solid var(--border)", boxShadow: "var(--shadow-depth-2)" }} />
             )}
             <div className="prose">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: MarkdownImage }}>

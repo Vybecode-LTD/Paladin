@@ -5,10 +5,11 @@ import { api } from "@/lib/api";
 import { tagGlyph } from "@/lib/tagColor";
 import Seo from "@/components/Seo";
 import TextScrim from "@/components/TextScrim";
+import { svgToDataUri } from "@/lib/svg";
 
 interface PostItem {
   id: string; title: string; slug: string; excerpt: string;
-  cover_image_url: string; tags: string; published_at: string | null;
+  cover_image_url: string; cover_image_svg: string; tags: string; published_at: string | null;
 }
 
 const fadeUp = {
@@ -72,6 +73,7 @@ export default function BlogIndex() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
             {posts.map((p, i) => {
               const featured = i === 0;
+              const coverSrc = p.cover_image_svg ? svgToDataUri(p.cover_image_svg) : p.cover_image_url;
               return (
                 <motion.div key={p.id} {...fadeUp} transition={{ duration: 0.4, delay: i * 0.05 }}
                   style={{ gridColumn: featured ? "span 2" : undefined }}>
@@ -82,8 +84,8 @@ export default function BlogIndex() {
                       boxShadow: featured ? "var(--shadow-depth-3), inset 0 1px 0 var(--glass-highlight)" : undefined,
                       borderColor: featured ? "var(--border-bright)" : undefined,
                     }}>
-                    {p.cover_image_url && (
-                      <img src={p.cover_image_url} alt="" style={{ width: "100%", height: featured ? "100%" : 180, minHeight: featured ? 200 : undefined, objectFit: "cover", borderRadius: "var(--radius-sm)", marginBottom: featured ? 0 : 16, border: "1px solid var(--border)" }} />
+                    {coverSrc && (
+                      <img src={coverSrc} alt="" style={{ width: "100%", height: featured ? "100%" : 180, minHeight: featured ? 200 : undefined, objectFit: "cover", borderRadius: "var(--radius-sm)", marginBottom: featured ? 0 : 16, border: "1px solid var(--border)" }} />
                     )}
                     <div>
                       {p.tags && (

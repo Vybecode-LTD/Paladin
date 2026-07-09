@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.middleware.auth import require_role
 from app.models.user import User, UserRole
 from app.schemas.ai import (
-    DraftRequest, TitlesRequest, ExcerptRequest, SeoRequest, AIResponse,
+    DraftRequest, TitlesRequest, ExcerptRequest, SeoRequest, CoverImageRequest,
+    AIResponse,
 )
 from app.services.anthropic_service import anthropic_service, AIServiceError
 
@@ -49,3 +50,13 @@ async def ai_seo(req: SeoRequest,
     except AIServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc))
     return AIResponse(result=text)
+
+
+@router.post("/admin/ai/cover-image", response_model=AIResponse)
+async def ai_cover_image(req: CoverImageRequest,
+                         _: User = Depends(require_role(UserRole.author))):
+    try:
+        svg = await anthropic_service.cover_image(req.title, req.brief, req.style)
+    except AIServiceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return AIResponse(result=svg)

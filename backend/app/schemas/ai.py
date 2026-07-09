@@ -20,5 +20,11 @@ class SeoRequest(BaseModel):
     body_markdown: str = Field(min_length=1, max_length=20000)
 
 
+class CoverImageRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=300)
+    brief: str = Field(default="", max_length=600)   # optional subject/context
+    style: str = Field(default="editorial", max_length=40)
+
+
 class AIResponse(BaseModel):
     result: str

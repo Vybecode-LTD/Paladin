@@ -131,4 +131,6 @@ export const aiApi = {
   excerpt: (body_markdown: string) => api.post("/admin/ai/excerpt", { body_markdown }),
   seo: (title: string, body_markdown: string) =>
     api.post("/admin/ai/seo", { title, body_markdown }),
+  coverImage: (title: string, brief: string, style: string) =>
+    api.post("/admin/ai/cover-image", { title, brief, style }),
 };
