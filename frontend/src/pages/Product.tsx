@@ -137,10 +137,12 @@ export default function Product() {
       <section className="section" style={{ background: "var(--bg-elevated)", borderBlock: "1px solid var(--border)" }}>
         <div className="container">
           <motion.div {...fadeUp} style={{ maxWidth: 640, marginBottom: 48 }}>
-            <div className="glyph-badge glyph-amber" style={{ display: "inline-grid", width: 50, height: 50 }}>
-              <Layers size={24} color="currentColor" aria-hidden="true" />
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div className="glyph-badge glyph-amber" style={{ display: "inline-grid", width: 50, height: 50, flexShrink: 0 }}>
+                <Layers size={24} color="currentColor" aria-hidden="true" />
+              </div>
+              <h2 className="section-title" style={{ margin: 0 }}>The Intelligence Pane</h2>
             </div>
-            <h2 className="section-title" style={{ marginTop: 18 }}>The Intelligence Pane</h2>
             <p style={{ color: "var(--text-muted)", marginTop: 16, fontSize: 17 }}>
               Everything Paladin surfaces appears in one calm, glanceable panel beside
               your call — never in your ear, never interrupting your flow. Scroll to see
