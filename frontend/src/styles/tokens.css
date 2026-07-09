@@ -39,10 +39,10 @@
   /* Console — the dark "device screen" register used by LiveCallDemo, the
      site's one deliberate second-material moment. Derived from the glyph
      tones above (not one-off hex) so it stays reskinnable from here. */
-  --console-bg: rgba(13, 15, 20, 0.88);
-  --console-border: rgba(255, 255, 255, 0.08);
-  --console-text: rgba(255, 255, 255, 0.85);
-  --console-text-dim: rgba(255, 255, 255, 0.4);
+  --console-bg: rgba(40, 44, 54, 0.8);
+  --console-border: rgba(255, 255, 255, 0.13);
+  --console-text: rgba(255, 255, 255, 0.88);
+  --console-text-dim: rgba(255, 255, 255, 0.52);
   --console-glyph-blue: #6ea8ff;
   --console-glyph-violet: #a99bff;
   --console-glyph-cyan: #5eead4;

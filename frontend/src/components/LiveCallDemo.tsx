@@ -15,6 +15,19 @@ const intel = [
     icon: "⚠️",
     text: <>Resume says "contributed to," not "architected."</>,
   },
+  {
+    border: "color-mix(in srgb, var(--console-glyph-cyan) 40%, transparent)",
+    bg: "color-mix(in srgb, var(--console-glyph-cyan) 10%, transparent)",
+    color: "var(--console-glyph-cyan)",
+    icon: "✅",
+    text: "Settlement ownership confirmed — strong signal on the core requirement.",
+  },
+];
+
+const scores = [
+  { label: "Consistency", value: 80, color: "var(--console-glyph-blue)" },
+  { label: "Specificity", value: 72, color: "var(--console-glyph-cyan)" },
+  { label: "Communication", value: 70, color: "var(--console-glyph-amber)" },
 ];
 
 /** Recreation of the Paladin live-call Intelligence Pane — the "console"
@@ -66,8 +79,11 @@ export default function LiveCallDemo() {
             <p style={{ fontSize: 15, color: "var(--console-text)", marginBottom: 16, lineHeight: 1.55 }}>
               <strong style={{ color: "var(--console-glyph-violet)" }}>Candidate:</strong> "...I architected the entire payment platform migration..."
             </p>
-            <p style={{ fontSize: 15, color: "var(--console-text)", marginBottom: 24, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 15, color: "var(--console-text)", marginBottom: 16, lineHeight: 1.55 }}>
               <strong style={{ color: "var(--console-glyph-cyan)" }}>You:</strong> "Which team owned settlement during the cutover?"
+            </p>
+            <p style={{ fontSize: 15, color: "var(--console-text)", marginBottom: 24, lineHeight: 1.55 }}>
+              <strong style={{ color: "var(--console-glyph-violet)" }}>Candidate:</strong> "Mine — I signed off on every settlement run myself."
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <Waveform />
@@ -79,7 +95,7 @@ export default function LiveCallDemo() {
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", color: "var(--console-text-dim)", marginBottom: 18 }}>
               INTELLIGENCE
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 22 }}>
               {intel.map((c, i) => (
                 <div key={i} style={{
                   padding: "13px 15px", borderRadius: 10,
@@ -89,6 +105,21 @@ export default function LiveCallDemo() {
                   {c.icon} {c.text}
                 </div>
               ))}
+            </div>
+            <div style={{ borderTop: "1px solid var(--console-border)", paddingTop: 18 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {scores.map((s) => (
+                  <div key={s.label}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 12, color: "var(--console-text-dim)" }}>
+                      <span>{s.label}</span>
+                      <span style={{ color: "var(--console-text)", fontFamily: "var(--font-mono)" }}>{s.value}%</span>
+                    </div>
+                    <div style={{ height: 4, borderRadius: 99, background: "var(--console-border)", overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${s.value}%`, borderRadius: 99, background: s.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
