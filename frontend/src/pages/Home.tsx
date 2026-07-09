@@ -107,7 +107,7 @@ export default function Home() {
                 priority
                 src="/images/product-candidate-profile.png"
                 alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
-                style={{ width: "60%" }}
+                style={{ width: "75%" }}
               />
             </motion.div>
           </div>
