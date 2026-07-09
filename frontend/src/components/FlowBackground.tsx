@@ -161,7 +161,7 @@ export default function FlowBackground() {
       // just wider.
       const heroBoost = rope.isPulseHero ? 1.3 : 1;
       const sat = Math.min(100, 40 + rope.vibrancy * 40);
-      const alpha = Math.min(0.6, (0.08 + rope.vibrancy * 0.22) * (1 - rope.depth * 0.18) * heroBoost);
+      const alpha = Math.min(0.6, (0.08 + rope.vibrancy * 0.22) * (1 - rope.depth * 0.18) * heroBoost) * 0.9;
       const glow = (3 + rope.vibrancy * 8) * (1 - rope.depth * 0.2) * heroBoost;
       const lineWidth = (1 + rope.vibrancy * 1.4) * (1 - rope.depth * 0.15) * (rope.isPulseHero ? 1.15 : 1);
 
