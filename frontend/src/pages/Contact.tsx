@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, Linkedin, MapPin } from "lucide-react";
+import { Mail, Linkedin, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
 import Waveform from "@/components/Waveform";
@@ -60,7 +60,7 @@ export default function Contact() {
                 {[
                   { icon: Mail, glyph: "blue", label: "General inquiries", value: "inquiries@ashfordbriggs.com", href: "mailto:inquiries@ashfordbriggs.com" },
                   { icon: Mail, glyph: "violet", label: "Sales & trials", value: "info@ashfordbriggs.com", href: "mailto:info@ashfordbriggs.com" },
-                  { icon: Phone, glyph: "cyan", label: "Matt Barker", value: "mbarker@ashfordbriggs.com · (603) 556-8277", href: "tel:+16035568277" },
+                  { icon: Mail, glyph: "cyan", label: "Matt Barker", value: "mbarker@ashfordbriggs.com", href: "mailto:mbarker@ashfordbriggs.com" },
                   { icon: Mail, glyph: "coral", label: "John Evans", value: "jevans@ashfordbriggs.com", href: "mailto:jevans@ashfordbriggs.com" },
                   { icon: Linkedin, glyph: "amber", label: "LinkedIn", value: "ashford-briggs-llc", href: "https://linkedin.com/company/ashford-briggs-llc" },
                   { icon: MapPin, glyph: "coral", label: "HQ", value: "Jacksonville, FL · Founded 2026", href: undefined },

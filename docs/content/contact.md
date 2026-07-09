@@ -24,7 +24,7 @@ schedule.
 ## Direct channels
 - **General inquiries:** inquiries@ashfordbriggs.com
 - **Sales & trials:** info@ashfordbriggs.com
-- **Matt Barker:** mbarker@ashfordbriggs.com · (603) 556-8277
+- **Matt Barker:** mbarker@ashfordbriggs.com
 - **John Evans:** jevans@ashfordbriggs.com
 - **LinkedIn:** linkedin.com/company/ashford-briggs-llc
 
