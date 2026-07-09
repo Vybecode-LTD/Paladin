@@ -138,7 +138,7 @@ export default function Product() {
         <div className="container">
           <motion.div {...fadeUp} style={{ maxWidth: 640, marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div className="glyph-badge glyph-amber" style={{ display: "inline-grid", width: 50, height: 50, flexShrink: 0 }}>
+              <div className="glyph-badge glyph-amber" style={{ display: "inline-grid", width: 50, height: 50, flexShrink: 0, marginBottom: 0 }}>
                 <Layers size={24} color="currentColor" aria-hidden="true" />
               </div>
               <h2 className="section-title" style={{ margin: 0 }}>The Intelligence Pane</h2>
