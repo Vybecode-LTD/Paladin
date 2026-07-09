@@ -60,14 +60,19 @@ export default function Home() {
         <div className="container" style={{ position: "relative" }}>
           <div className="split-row" style={{ alignItems: "stretch" }}>
             <div style={{ position: "relative" }}>
-              {/* Screening mask — blurs and dims (20%) the FlowBackground
-               * waves specifically where they pass behind the hero text, so
-               * they read as further back / out of focus instead of
-               * competing with the copy. Doesn't touch the screenshot side. */}
+              {/* Screening mask — blurs and dims the FlowBackground waves
+               * specifically where they pass behind the hero text, so they
+               * read as further back / out of focus instead of competing
+               * with the copy. A large bleed plus an angled (100deg — 10deg
+               * past a flat horizontal) gradient mask feathers both the blur
+               * and the tint out softly well past the text, instead of
+               * stopping at a hard rectangular edge. */}
               <div aria-hidden="true" style={{
-                position: "absolute", inset: -24,
-                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-                background: "color-mix(in srgb, var(--bg) 20%, transparent)",
+                position: "absolute", inset: -70,
+                backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+                background: "color-mix(in srgb, var(--bg) 42%, transparent)",
+                WebkitMaskImage: "linear-gradient(100deg, black 0%, black 42%, transparent 82%)",
+                maskImage: "linear-gradient(100deg, black 0%, black 42%, transparent 82%)",
                 pointerEvents: "none",
               }} />
               <motion.div {...fadeUp} transition={{ duration: 0.5 }}
