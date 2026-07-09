@@ -73,7 +73,7 @@ export default function Home() {
               Real-time AI Intelligence for Recruiting Calls
             </span>
           </motion.div>
-          <div className="split-row">
+          <div className="split-row" style={{ alignItems: "stretch" }}>
             <div>
               <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
                 style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "22px 0" }}>
@@ -101,9 +101,10 @@ export default function Home() {
                 Built by recruiters, in Jacksonville, FL.
               </motion.p>
             </div>
-            <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
+            <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }} style={{ height: "100%" }}>
               <ProductScreenshot
                 priority
+                stretch
                 src="/images/product-candidate-profile.png"
                 alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
               />
