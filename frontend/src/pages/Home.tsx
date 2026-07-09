@@ -72,15 +72,11 @@ export default function Home() {
               display: "block",
               width: "100%",
               textAlign: "center",
-              background: "var(--accent)",
-              color: "#fff",
+              color: "var(--accent)",
               fontWeight: 700,
               fontSize: "clamp(13px, 1.6vw, 15px)",
               letterSpacing: "0.01em",
-              padding: "12px 20px",
-              borderRadius: "var(--radius)",
-              boxShadow: "0 4px 20px var(--accent-glow)",
-              marginBottom: 36,
+              marginBottom: 20,
             }}>
             Real-time AI Intelligence for Recruiting Calls
           </motion.div>
