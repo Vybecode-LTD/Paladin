@@ -59,7 +59,7 @@ export default function Home() {
         }}
       />
       {/* HERO */}
-      <section style={{ position: "relative", padding: "120px 0 90px", overflow: "hidden" }}>
+      <section style={{ position: "relative", padding: "100px 0 90px", overflow: "hidden" }}>
         <div style={{
           position: "absolute", top: "-20%", right: "-10%",
           width: 900, height: 600,
