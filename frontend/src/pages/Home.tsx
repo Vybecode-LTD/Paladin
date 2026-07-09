@@ -68,17 +68,10 @@ export default function Home() {
         }} />
         <div className="container" style={{ position: "relative" }}>
           <motion.div {...fadeUp} transition={{ duration: 0.5 }}
-            style={{
-              display: "block",
-              width: "100%",
-              textAlign: "center",
-              color: "var(--accent)",
-              fontWeight: 700,
-              fontSize: "clamp(13px, 1.6vw, 15px)",
-              letterSpacing: "0.01em",
-              marginBottom: 20,
-            }}>
-            Real-time AI Intelligence for Recruiting Calls
+            style={{ display: "block", width: "100%", textAlign: "center", marginBottom: 20 }}>
+            <span className="rainbow-text" style={{ display: "inline-block", fontWeight: 700, fontSize: "clamp(26px, 3.2vw, 30px)", letterSpacing: "0.01em" }}>
+              Real-time AI Intelligence for Recruiting Calls
+            </span>
           </motion.div>
           <div className="split-row">
             <div>

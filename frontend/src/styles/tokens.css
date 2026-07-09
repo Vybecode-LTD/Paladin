@@ -94,6 +94,18 @@ a { color: inherit; text-decoration: none; }
   -webkit-text-fill-color: transparent;
 }
 
+.rainbow-text {
+  background: linear-gradient(
+    90deg,
+    hsl(0, 90%, 55%), hsl(45, 90%, 55%), hsl(90, 80%, 45%),
+    hsl(160, 80%, 40%), hsl(200, 90%, 50%), hsl(260, 85%, 60%), hsl(320, 85%, 55%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0.5;
+}
+
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 13px 26px; border-radius: var(--radius);
