@@ -24,6 +24,8 @@ class CoverImageRequest(BaseModel):
     title: str = Field(min_length=1, max_length=300)
     brief: str = Field(default="", max_length=600)   # optional subject/context
     style: str = Field(default="editorial", max_length=40)
+    adjustments: str | None = Field(default=None, max_length=2000)  # optional revision notes
+    current_svg: str | None = Field(default=None, max_length=60000)  # SVG being revised, if any
 
 
 class AIResponse(BaseModel):

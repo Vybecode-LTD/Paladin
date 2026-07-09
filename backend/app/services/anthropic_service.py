@@ -216,19 +216,44 @@ class AnthropicService:
             "<svg and end with </svg>. No prose, no explanation, no code fences."
         )
 
-    async def cover_image(self, title: str, brief: str = "",
-                          style: str = "editorial") -> str:
+    async def cover_image(self, title: str, brief: str = "", style: str = "editorial",
+                          adjustments: str = "", current_svg: str | None = None) -> str:
         """Generate → sanitize → validate → (repair once) an on-brand SVG header.
+
+        If both `adjustments` and `current_svg` are provided (non-empty), this
+        revises the given SVG instead of generating a new one from scratch.
+        Otherwise this behaves exactly as a from-scratch generation.
 
         Returns sanitized SVG markup. Raises AIServiceError if a valid SVG could
         not be produced after one repair attempt."""
         system = self._cover_system(style)
-        user = (
-            f'Post title: "{title}"\n'
-            + (f"Context / subject: {brief}\n" if brief.strip() else "")
-            + "\nDesign the header now. Return ONLY the SVG."
-        )
 
+        if adjustments.strip() and current_svg and current_svg.strip():
+            user = (
+                f'Post title: "{title}"\n'
+                + (f"Context / subject: {brief}\n" if brief.strip() else "")
+                + "\nHere is the current image:\n"
+                f"{current_svg.strip()}\n\n"
+                "Here are the requested changes:\n"
+                f"{adjustments.strip()}\n\n"
+                "Revise the current image to apply ONLY the requested changes "
+                "above. Preserve the existing design intent, composition, and "
+                "any elements not covered by the requested changes — this is a "
+                "targeted revision, not a new, unrelated image. Return a "
+                "complete, valid, revised SVG. Return ONLY the SVG."
+            )
+        else:
+            user = (
+                f'Post title: "{title}"\n'
+                + (f"Context / subject: {brief}\n" if brief.strip() else "")
+                + "\nDesign the header now. Return ONLY the SVG."
+            )
+
+        return await self._generate_svg(system, user)
+
+    async def _generate_svg(self, system: str, user: str) -> str:
+        """Shared generate → sanitize → validate → (repair once) pipeline used
+        by both from-scratch and revision cover-image prompts."""
         raw = await self._call(system, user, max_tokens=3000)
         svg = sanitize_svg(extract_svg(raw) or "")
         ok, reason = validate_svg(svg)

@@ -48,6 +48,7 @@ export default function PostEditor() {
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [titleIdeas, setTitleIdeas] = useState<string>("");
   const [coverStyle, setCoverStyle] = useState("editorial");
+  const [adjustNotes, setAdjustNotes] = useState("");
 
   useEffect(() => {
     if (isNew) return;
@@ -106,9 +107,15 @@ export default function PostEditor() {
     setAiBusy("cover");
     try {
       // The AI panel's brief (aiTopic), when present, gives the generator extra
-      // subject context; it's optional — the title alone is enough.
-      const { result } = await aiApi.coverImage(post.title, aiTopic, coverStyle);
+      // subject context; it's optional — the title alone is enough. When an
+      // image already exists, adjustNotes + the current SVG turn this into a
+      // revision generate instead of a from-scratch one.
+      const { result } = await aiApi.coverImage(
+        post.title, aiTopic, coverStyle,
+        adjustNotes.trim() || undefined, post.cover_image_svg || undefined
+      );
       setPost((p) => ({ ...p, cover_image_svg: result }));
+      setAdjustNotes("");
     } catch (e) { alert(e instanceof Error ? e.message : "Header image generation failed"); }
     finally { setAiBusy(null); }
   }
@@ -251,6 +258,14 @@ export default function PostEditor() {
                 )}
               </div>
             </div>
+            {post.cover_image_svg && (
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ ...labelStyle, fontSize: 12 }}>Make changes (optional)</label>
+                <textarea style={{ ...inputStyle, minHeight: 50, resize: "vertical", fontSize: 13 }}
+                  value={adjustNotes} onChange={(e) => setAdjustNotes(e.target.value)}
+                  placeholder="e.g. make the glyph bigger, use warmer colors, add more negative space…" />
+              </div>
+            )}
             {post.cover_image_svg ? (
               <img src={svgToDataUri(post.cover_image_svg)} alt="Generated blog header preview"
                 style={{ width: "100%", aspectRatio: "1200 / 630", objectFit: "cover", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", display: "block", boxShadow: "var(--shadow-depth-1)" }} />

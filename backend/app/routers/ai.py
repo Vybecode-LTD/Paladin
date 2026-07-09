@@ -56,7 +56,10 @@ async def ai_seo(req: SeoRequest,
 async def ai_cover_image(req: CoverImageRequest,
                          _: User = Depends(require_role(UserRole.author))):
     try:
-        svg = await anthropic_service.cover_image(req.title, req.brief, req.style)
+        svg = await anthropic_service.cover_image(
+            req.title, req.brief, req.style,
+            adjustments=req.adjustments or "", current_svg=req.current_svg,
+        )
     except AIServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc))
     return AIResponse(result=svg)
