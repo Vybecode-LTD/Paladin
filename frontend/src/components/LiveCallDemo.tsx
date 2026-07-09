@@ -24,16 +24,11 @@ const intel = [
   },
 ];
 
-const scores = [
-  { label: "Consistency", value: 80, color: "var(--glyph-blue)" },
-  { label: "Specificity", value: 72, color: "var(--glyph-cyan)" },
-  { label: "Communication", value: 70, color: "var(--glyph-amber)" },
-];
-
-/** Recreation of the Paladin live-call Intelligence Pane. Light glass —
- * matching the site's own .card material (frosted white, soft shadow)
- * rather than the dark "console" register used elsewhere, so this mockup
- * reads as an extension of the page instead of a separate dark screen. */
+/** Recreation of the Paladin live-call Intelligence Pane. A solid,
+ * almost-white card (not the translucent glass .card material) with a
+ * moderate shadow, rather than the dark "console" register used elsewhere,
+ * so this mockup reads as an extension of the page instead of a separate
+ * dark screen. */
 export default function LiveCallDemo() {
   return (
     <div style={{ position: "relative" }}>
@@ -47,11 +42,9 @@ export default function LiveCallDemo() {
         position: "relative",
         borderRadius: "var(--radius-lg)",
         overflow: "hidden",
-        background: "var(--glass-bg)",
-        backdropFilter: "var(--glass-blur)",
-        WebkitBackdropFilter: "var(--glass-blur)",
-        border: "1px solid var(--glass-border)",
-        boxShadow: "var(--shadow-depth-1), inset 0 1px 0 var(--glass-highlight)",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-depth-2)",
       }}>
         <div className="signal-trace" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, borderRadius: 0 }} />
 
@@ -96,7 +89,7 @@ export default function LiveCallDemo() {
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", color: "var(--text-dim)", marginBottom: 18 }}>
               INTELLIGENCE
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 22 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {intel.map((c, i) => (
                 <div key={i} style={{
                   padding: "13px 15px", borderRadius: 10,
@@ -106,21 +99,6 @@ export default function LiveCallDemo() {
                   {c.icon} {c.text}
                 </div>
               ))}
-            </div>
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 18 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {scores.map((s) => (
-                  <div key={s.label}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 12, color: "var(--text-dim)" }}>
-                      <span>{s.label}</span>
-                      <span style={{ color: "var(--text)", fontFamily: "var(--font-mono)" }}>{s.value}%</span>
-                    </div>
-                    <div style={{ height: 4, borderRadius: 99, background: "var(--border)", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${s.value}%`, borderRadius: 99, background: s.color }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
