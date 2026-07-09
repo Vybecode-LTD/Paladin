@@ -54,7 +54,10 @@ async def update_smtp_settings(
     row.use_tls = payload.use_tls
     row.from_name = payload.from_name
     if payload.password:
-        row.encrypted_password = encrypt_secret(payload.password)
+        try:
+            row.encrypted_password = encrypt_secret(payload.password)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
 
     await db.commit()
     await db.refresh(row)

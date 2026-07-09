@@ -33,7 +33,10 @@ async def _send(
         raise EmailServiceError("SMTP is not configured yet — set it up in Settings first.")
     if not cfg.encrypted_password:
         raise EmailServiceError("SMTP password is not set — set it up in Settings first.")
-    password = decrypt_secret(cfg.encrypted_password)
+    try:
+        password = decrypt_secret(cfg.encrypted_password)
+    except ValueError as exc:
+        raise EmailServiceError(str(exc))
 
     message = EmailMessage()
     message["From"] = f'"{cfg.from_name}" <{from_email}>' if cfg.from_name else from_email
