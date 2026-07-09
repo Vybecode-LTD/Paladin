@@ -9,6 +9,7 @@ import Waveform from "@/components/Waveform";
 import TextScrim from "@/components/TextScrim";
 
 const nav = [
+  { to: "/", label: "Home", end: true },
   { to: "/product", label: "Product" },
   { to: "/how-it-works", label: "How It Works" },
   { to: "/about", label: "About" },
@@ -56,7 +57,7 @@ function Header() {
         </Link>
         <nav style={{ display: "flex", gap: 28, alignItems: "center" }}>
           {nav.map((n) => (
-            <NavLink key={n.to} to={n.to} className="nav-link">
+            <NavLink key={n.to} to={n.to} end={n.end} className="nav-link">
               {({ isActive }) => (
                 <span style={{ position: "relative", display: "inline-block", color: isActive ? "var(--accent-bright)" : "var(--text-muted)", fontSize: 15, fontWeight: 500 }}>
                   {n.label}
