@@ -85,7 +85,7 @@ export default function Home() {
                 </span>
               </motion.h1>
               <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
-                style={{ fontSize: "clamp(17px, 1.6vw, 20px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
+                style={{ fontSize: "clamp(15px, 1.6vw, 18px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
                 Paladin researches the job, briefs you on the candidate, and coaches
                 you on the live call — on the phone you already use, no app required.
                 In a world racing to replace human interaction with AI, Paladin
@@ -107,7 +107,7 @@ export default function Home() {
                 priority
                 src="/images/product-candidate-profile.png"
                 alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
-                style={{ width: "75%" }}
+                style={{ width: "112.5%", flexShrink: 0 }}
               />
             </motion.div>
           </div>
