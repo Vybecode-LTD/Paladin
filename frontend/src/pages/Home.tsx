@@ -57,6 +57,11 @@ export default function Home() {
       />
       {/* HERO */}
       <section style={{ position: "relative", padding: "100px 0 90px", overflow: "hidden" }}>
+        {/* Dims the FlowBackground waves ~30% behind the hero specifically,
+         * without touching their opacity anywhere else on the site — the
+         * canvas is a single fixed layer shared by every page, so this scrim
+         * (not the canvas itself) is what's locally adjustable per section. */}
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "color-mix(in srgb, var(--bg) 30%, transparent)" }} />
         <div className="container" style={{ position: "relative" }}>
           <motion.div {...fadeUp} transition={{ duration: 0.5 }}
             style={{ display: "block", width: "100%", marginBottom: 20 }}>

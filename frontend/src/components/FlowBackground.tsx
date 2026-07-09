@@ -4,9 +4,23 @@ interface Rope {
   baseY: number;
   amp1: number;
   amp2: number;
+  amp3: number;
   freq1: number;
   freq2: number;
-  phase: number;
+  freq3: number;
+  // Each harmonic gets its own fully independent phase (not derived from one
+  // shared value) — that shared-derivation was why every rope's two humps
+  // moved in the same fixed relationship, making them all read as the same
+  // underlying shape shifted around, rather than genuinely independent.
+  phase1: number;
+  phase2: number;
+  phase3: number;
+  // A large per-rope shift in x-space so two ropes with similar wavelengths
+  // still never crest at the same x at the same time.
+  xOffset: number;
+  // Asymmetric warp: crests and troughs scale differently, so the silhouette
+  // is not a mirror-symmetric sine — each rope leans its own direction.
+  skew: number;
   speed: number;
   depth: number; // 0 = nearest/brightest, 1 = farthest/dimmest
   hue: number;
@@ -67,12 +81,20 @@ function buildRopes(height: number): Rope[] {
     return {
       // Depth still separates "near" from "far," but gently — every rope
       // should read as clearly moving, not just the front couple.
-      baseY: height * (0.12 + (i / count) * 0.72 + rand(-0.04, 0.04)),
-      amp1: rand(50, 90) * (1 - depth * 0.15),
-      amp2: rand(20, 40) * (1 - depth * 0.15),
-      freq1: rand(0.8, 1.4),
-      freq2: rand(1.6, 2.6),
-      phase: rand(0, Math.PI * 2),
+      // Wider, non-overlapping-feeling jitter on vertical placement too, so
+      // the 5 baselines don't read as an evenly-ruled grid.
+      baseY: height * (0.1 + (i / count) * 0.72 + rand(-0.09, 0.09)),
+      amp1: rand(45, 95) * (1 - depth * 0.15),
+      amp2: rand(18, 42) * (1 - depth * 0.15),
+      amp3: rand(7, 20) * (1 - depth * 0.15),
+      freq1: rand(0.55, 1.65),
+      freq2: rand(1.7, 3.1),
+      freq3: rand(3.4, 5.8),
+      phase1: rand(0, Math.PI * 2),
+      phase2: rand(0, Math.PI * 2),
+      phase3: rand(0, Math.PI * 2),
+      xOffset: rand(0, 50000),
+      skew: rand(-0.4, 0.4),
       speed: rand(0.09, 0.16) * (1 - depth * 0.2),
       depth,
       hue: startHue,
@@ -146,11 +168,15 @@ export default function FlowBackground() {
       const step = 48;
       const points: [number, number][] = [];
       for (let x = -step; x <= width + step; x += step) {
-        const y =
-          rope.baseY +
-          rope.amp1 * Math.sin(x * 0.0022 * rope.freq1 + rope.phase + t * rope.speed) +
-          rope.amp2 * Math.sin(x * 0.004 * rope.freq2 + rope.phase * 1.6 + t * rope.speed * 0.6);
-        points.push([x, y]);
+        const xs = x + rope.xOffset;
+        const raw =
+          rope.amp1 * Math.sin(xs * 0.0022 * rope.freq1 + rope.phase1 + t * rope.speed) +
+          rope.amp2 * Math.sin(xs * 0.004 * rope.freq2 + rope.phase2 + t * rope.speed * 0.6) +
+          rope.amp3 * Math.sin(xs * 0.0065 * rope.freq3 + rope.phase3 + t * rope.speed * 1.35);
+        // Scale crests and troughs unevenly — kills the mirror symmetry a
+        // pure sine sum still has around its own baseline.
+        const warped = raw >= 0 ? raw * (1 + rope.skew) : raw * (1 - rope.skew);
+        points.push([x, rope.baseY + warped]);
       }
 
       // Vibrancy drives saturation/alpha/glow/width together — a rope at high
