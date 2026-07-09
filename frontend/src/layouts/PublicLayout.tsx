@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import {
-  motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, useReducedMotion,
+  motion, AnimatePresence, useScroll, useTransform, useReducedMotion,
 } from "framer-motion";
 import FlowBackground from "@/components/FlowBackground";
 import Brandmark from "@/components/Brandmark";
@@ -19,7 +18,6 @@ const nav = [
 function Header() {
   const { scrollY } = useScroll();
   const reduceMotion = useReducedMotion();
-  const [hidden, setHidden] = useState(false);
 
   const headerBg = useTransform(scrollY, [0, 120], ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.78)"]);
   const blurPx = useTransform(scrollY, [0, 120], [10, 20]);
@@ -27,18 +25,8 @@ function Header() {
   const shadowAlpha = useTransform(scrollY, [0, 120], [0.02, 0.08]);
   const boxShadow = useTransform(shadowAlpha, (v) => `0 1px 2px rgba(16,24,40,${v}), 0 4px 10px rgba(16,24,40,${v * 1.5})`);
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (reduceMotion) return;
-    const prev = scrollY.getPrevious() ?? latest;
-    const diff = latest - prev;
-    if (latest > 160 && diff > 0) setHidden(true);
-    else if (diff < 0) setHidden(false);
-  });
-
   return (
     <motion.header
-      animate={{ y: hidden ? -80 : 0 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{
         position: "sticky", top: 0, zIndex: 50,
         background: headerBg,
