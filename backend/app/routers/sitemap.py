@@ -8,7 +8,7 @@ from app.models.blog import BlogPost, PostStatus
 
 router = APIRouter()
 
-STATIC_ROUTES = ["/", "/product", "/how-it-works", "/about", "/contact", "/blog"]
+STATIC_ROUTES = ["/", "/product", "/how-it-works", "/about", "/contact", "/blog", "/privacy", "/terms"]
 
 
 @router.get("/sitemap.xml", include_in_schema=False)

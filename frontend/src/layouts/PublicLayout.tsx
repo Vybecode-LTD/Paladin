@@ -170,8 +170,15 @@ export default function PublicLayout() {
             </div>
           </div>
         </div>
-        <div className="container" style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
+        <div className="container" style={{
+          marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--border)",
+          display: "flex", flexWrap: "wrap", gap: "10px 20px", justifyContent: "space-between", alignItems: "center",
+        }}>
           <span style={{ color: "var(--text-dim)", fontSize: 13 }}>© 2026 Ashford & Briggs LLC. All rights reserved.</span>
+          <div style={{ display: "flex", gap: 20 }}>
+            <Link to="/privacy" style={{ color: "var(--text-dim)", fontSize: 13 }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ color: "var(--text-dim)", fontSize: 13 }}>Terms of Service</Link>
+          </div>
         </div>
       </footer>
     </>
