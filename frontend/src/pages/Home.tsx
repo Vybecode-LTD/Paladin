@@ -63,16 +63,21 @@ export default function Home() {
               {/* Screening mask — blurs and dims the FlowBackground waves
                * specifically where they pass behind the hero text, so they
                * read as further back / out of focus instead of competing
-               * with the copy. A large bleed plus an angled (100deg — 10deg
-               * past a flat horizontal) gradient mask feathers both the blur
-               * and the tint out softly well past the text, instead of
-               * stopping at a hard rectangular edge. */}
+               * with the copy. The box bleeds 70px past the text on every
+               * side (room for the feather to extend into); two gradients
+               * combined via mask-composite:intersect feather BOTH axes —
+               * the angled (100deg) one for left/right, a plain vertical one
+               * for top/bottom. Without the vertical one, the box's own top/
+               * bottom edges were still a hard, unfeathered cut (visible as
+               * a blocked-out rectangle above the eyebrow text). */}
               <div aria-hidden="true" style={{
                 position: "absolute", inset: -70,
                 backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                 background: "color-mix(in srgb, var(--bg) 42%, transparent)",
-                WebkitMaskImage: "linear-gradient(100deg, black 0%, black 42%, transparent 82%)",
-                maskImage: "linear-gradient(100deg, black 0%, black 42%, transparent 82%)",
+                WebkitMaskImage: "linear-gradient(100deg, transparent 0%, black 38%, black 45%, transparent 85%), linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+                maskImage: "linear-gradient(100deg, transparent 0%, black 38%, black 45%, transparent 85%), linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+                WebkitMaskComposite: "source-in",
+                maskComposite: "intersect",
                 pointerEvents: "none",
               }} />
               <motion.div {...fadeUp} transition={{ duration: 0.5 }}
