@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon, Menu, X } from "lucide-react";
+import {
+  LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon, Menu, X,
+  Settings as SettingsIcon, UserCircle,
+} from "lucide-react";
 import Brandmark from "@/components/Brandmark";
 
 export default function AdminLayout() {
@@ -14,6 +17,7 @@ export default function AdminLayout() {
     { to: "/admin/posts", label: "Posts", icon: FileText, min: "author" },
     { to: "/admin/demo-requests", label: "Demo Inbox", icon: Inbox, min: "editor" },
     { to: "/admin/users", label: "Users", icon: UsersIcon, min: "admin" },
+    { to: "/admin/settings", label: "Settings", icon: SettingsIcon, min: "admin" },
   ];
   const rank: Record<string, number> = { author: 1, editor: 2, admin: 3 };
   const visible = items.filter((i) => rank[user!.role] >= rank[i.min]);
@@ -47,7 +51,13 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-          <div style={{ fontSize: 13, color: "var(--text-muted)", padding: "0 8px 4px" }}>{user!.full_name || user!.email}</div>
+          <NavLink to="/admin/profile" onClick={() => setMenuOpen(false)} style={({ isActive }) => ({
+            display: "flex", alignItems: "center", gap: 8, padding: "0 8px 4px",
+            fontSize: 13, color: isActive ? "var(--accent-bright)" : "var(--text-muted)",
+            textDecoration: "none",
+          })}>
+            <UserCircle size={15} /> {user!.full_name || user!.email}
+          </NavLink>
           <div style={{ fontSize: 12, color: "var(--accent)", padding: "0 8px 12px", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>{user!.role}</div>
           <button onClick={() => { logout(); nav("/admin/login"); }} className="btn btn-ghost" style={{ width: "100%", justifyContent: "center", padding: "9px" }}>
             <LogOut size={16} /> Sign out

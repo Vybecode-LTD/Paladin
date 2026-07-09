@@ -20,6 +20,12 @@ class DemoRequestUpdate(BaseModel):
     is_handled: bool
 
 
+class DemoReplyRequest(BaseModel):
+    """The admin's message body. Subject and From address are fixed by the
+    business — see services/email_service.py — not part of this request."""
+    body: str = Field(min_length=1, max_length=5000)
+
+
 class DemoRequestOut(BaseModel):
     id: uuid.UUID
     full_name: str
@@ -31,6 +37,8 @@ class DemoRequestOut(BaseModel):
     message: str
     is_handled: bool
     created_at: datetime
+    replied_at: datetime | None = None
+    reply_body: str | None = None
 
     class Config:
         from_attributes = True

@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7
 
+    # Fernet key encrypting secrets stored at rest (currently: SMTP password).
+    # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    # Changing this after secrets are stored makes them undecryptable — treat
+    # it like JWT_SECRET_KEY: generate once per environment, never rotate
+    # casually, never commit the real value.
+    encryption_key: str = "change-me-generate-a-real-fernet-key"
+
     # Anthropic — server-side proxy for AI blog generation
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-6"

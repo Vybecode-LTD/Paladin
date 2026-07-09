@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +9,9 @@ from app.core.ratelimit import limiter
 from app.middleware.auth import require_role
 from app.models.user import User, UserRole
 from app.models.demo_request import DemoRequest
-from app.schemas.demo import DemoRequestCreate, DemoRequestOut, DemoRequestUpdate
+from app.schemas.demo import DemoReplyRequest, DemoRequestCreate, DemoRequestOut, DemoRequestUpdate
+from app.services import email_service
+from app.services.email_service import EmailServiceError
 
 router = APIRouter()
 
@@ -46,6 +49,33 @@ async def update_demo_request(
     if not dr:
         raise HTTPException(status_code=404, detail="Demo request not found")
     dr.is_handled = payload.is_handled
+    await db.commit()
+    await db.refresh(dr)
+    return DemoRequestOut.model_validate(dr)
+
+
+@router.post("/admin/demo-requests/{request_id}/reply", response_model=DemoRequestOut)
+async def reply_to_demo_request(
+    request_id: uuid.UUID,
+    payload: DemoReplyRequest,
+    current_user: User = Depends(require_role(UserRole.editor)),
+    db: AsyncSession = Depends(get_db),
+):
+    dr = await db.get(DemoRequest, request_id)
+    if not dr:
+        raise HTTPException(status_code=404, detail="Demo request not found")
+
+    try:
+        await email_service.send_demo_reply(
+            db, to_email=dr.email, to_name=dr.full_name, body=payload.body,
+        )
+    except EmailServiceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+    dr.replied_at = datetime.now(timezone.utc)
+    dr.reply_body = payload.body
+    dr.replied_by_id = current_user.id
+    dr.is_handled = True
     await db.commit()
     await db.refresh(dr)
     return DemoRequestOut.model_validate(dr)

@@ -15,6 +15,8 @@ import PostList from "@/pages/admin/PostList";
 import PostEditor from "@/pages/admin/PostEditor";
 import DemoInbox from "@/pages/admin/DemoInbox";
 import Users from "@/pages/admin/Users";
+import Profile from "@/pages/admin/Profile";
+import Settings from "@/pages/admin/Settings";
 import RequireAuth from "@/components/RequireAuth";
 
 export default function App() {
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="/admin/posts/:id" element={<PostEditor />} />
         <Route path="/admin/demo-requests" element={<DemoInbox />} />
         <Route path="/admin/users" element={<Users />} />
+        <Route path="/admin/profile" element={<Profile />} />
+        <Route path="/admin/settings" element={<Settings />} />
       </Route>
     </Routes>
   );

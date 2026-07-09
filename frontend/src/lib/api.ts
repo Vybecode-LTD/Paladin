@@ -96,6 +96,15 @@ export const api = {
       })
     ),
 
+  put: (path: string, body: unknown) =>
+    withAuthRetry(() =>
+      fetch(`${BASE}${path}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify(body),
+      })
+    ),
+
   del: (path: string) =>
     withAuthRetry(() =>
       fetch(`${BASE}${path}`, {

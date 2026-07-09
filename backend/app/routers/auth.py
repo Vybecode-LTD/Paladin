@@ -13,7 +13,8 @@ from app.core.security import (
 from app.middleware.auth import get_current_user, require_role
 from app.models.user import User, UserRole
 from app.schemas.auth import (
-    UserCreate, UserOut, UserUpdate, ChangePasswordRequest, LoginResponse, RefreshRequest,
+    UserCreate, UserOut, UserUpdate, ChangePasswordRequest, ChangeEmailRequest,
+    LoginResponse, RefreshRequest,
 )
 
 router = APIRouter()
@@ -85,6 +86,25 @@ async def change_own_password(payload: ChangePasswordRequest,
         raise HTTPException(status_code=401, detail="Current password is incorrect")
     user.hashed_password = hash_password(payload.new_password)
     await db.commit()
+
+
+@router.patch("/auth/me/email", response_model=UserOut)
+async def change_own_email(payload: ChangeEmailRequest,
+                           user: User = Depends(get_current_user),
+                           db: AsyncSession = Depends(get_db)):
+    """Self-service email change — requires the current password."""
+    if not verify_password(payload.current_password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+    if payload.new_email != user.email:
+        existing = await db.execute(
+            select(User).where(User.email == payload.new_email, User.id != user.id)
+        )
+        if existing.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Email already registered")
+        user.email = payload.new_email
+        await db.commit()
+        await db.refresh(user)
+    return _user_out(user)
 
 
 @router.post("/auth/users", response_model=UserOut, status_code=201)

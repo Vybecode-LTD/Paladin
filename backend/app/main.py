@@ -14,6 +14,10 @@ from app.models import Base
 from app.routers import (
     health, auth, blog_public, blog_admin, ai, demo, sitemap,
 )
+# Aliased: a plain `from app.routers import settings` would silently shadow
+# the `app.core.config.settings` import above (both bind the name `settings`
+# in this module) and break every settings.* reference below.
+from app.routers import settings as settings_router
 
 # Populated by the Docker build's frontend stage (COPY --from=frontend-build
 # .../dist ./static). Absent in local dev, where the frontend runs separately
@@ -45,7 +49,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for r in (health, auth, blog_public, blog_admin, ai, demo):
+for r in (health, auth, blog_public, blog_admin, ai, demo, settings_router):
     app.include_router(r.router, prefix="/api")
 
 # No /api prefix — sitemap.xml is conventionally served from the site root.

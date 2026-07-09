@@ -25,6 +25,11 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=128)
 
 
+class ChangeEmailRequest(BaseModel):
+    current_password: str
+    new_email: EmailStr
+
+
 class UserOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
