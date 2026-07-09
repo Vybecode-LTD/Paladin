@@ -51,7 +51,7 @@ export default function BlogIndex() {
           <motion.div {...fadeUp}>
             <span className="eyebrow">Blog</span>
             <h1 style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 16px" }}>
-              Field notes on <span className="gradient-text">recruiting & AI.</span>
+              Field notes on<br /><span className="gradient-text">recruiting & AI.</span>
             </h1>
             <p style={{ fontSize: 18, color: "var(--text-muted)" }}>
               Ideas on hiring in the age of generative AI — from the team building Paladin.
