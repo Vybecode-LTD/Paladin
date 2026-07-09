@@ -95,8 +95,8 @@ export default function Home() {
               style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ProductScreenshot
                 priority
-                src="/images/product-candidate-profile.png"
-                alt="Paladin candidate profile showing contact details, fit score, and linked opportunities"
+                src="/images/product-live-call.png"
+                alt="Paladin's live call view showing the interview script, live transcript, and Intelligence Pane with consistency, specificity, and communication scores"
                 style={{ width: "112.5%", flexShrink: 0 }}
               />
             </motion.div>
