@@ -21,7 +21,7 @@ export default function TextScrim({ children, style, bleed = 70 }: TextScrimProp
       <div aria-hidden="true" style={{
         position: "absolute", inset: -bleed, zIndex: -1,
         backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-        background: "color-mix(in srgb, var(--bg) 42%, transparent)",
+        background: "color-mix(in srgb, var(--bg) 60%, transparent)",
         WebkitMaskImage:
           "linear-gradient(100deg, transparent 0%, black 38%, black 45%, transparent 85%), " +
           "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
