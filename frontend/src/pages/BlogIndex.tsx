@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { api } from "@/lib/api";
 import { tagGlyph } from "@/lib/tagColor";
 import Seo from "@/components/Seo";
+import TextScrim from "@/components/TextScrim";
 
 interface PostItem {
   id: string; title: string; slug: string; excerpt: string;
@@ -45,15 +46,17 @@ export default function BlogIndex() {
         path="/blog"
       />
       <section style={{ padding: "90px 0 60px" }} className="container">
-        <motion.div {...fadeUp} style={{ maxWidth: 680, marginBottom: 48 }}>
-          <span className="eyebrow">Blog</span>
-          <h1 style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 16px" }}>
-            Field notes on <span className="gradient-text">recruiting & AI.</span>
-          </h1>
-          <p style={{ fontSize: 18, color: "var(--text-muted)" }}>
-            Ideas on hiring in the age of generative AI — from the team building Paladin.
-          </p>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 680, marginBottom: 48 }}>
+          <motion.div {...fadeUp}>
+            <span className="eyebrow">Blog</span>
+            <h1 style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 16px" }}>
+              Field notes on <span className="gradient-text">recruiting & AI.</span>
+            </h1>
+            <p style={{ fontSize: 18, color: "var(--text-muted)" }}>
+              Ideas on hiring in the age of generative AI — from the team building Paladin.
+            </p>
+          </motion.div>
+        </TextScrim>
 
         {loading ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 import Seo from "@/components/Seo";
+import TextScrim from "@/components/TextScrim";
 import { useFadeUp } from "@/hooks/useReveal";
 
 const founders = [
@@ -78,46 +79,52 @@ export default function About() {
         }}
       />
       <section style={{ padding: "100px 0 60px" }} className="container">
-        <motion.div {...fadeUp} style={{ maxWidth: 760 }}>
-          <span className="eyebrow">About</span>
-          <h1 style={{ fontSize: "clamp(36px, 6vw, 60px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
-            We're betting on the <span className="gradient-text">human conversation.</span>
-          </h1>
-          <p style={{ fontSize: 19, color: "var(--text-muted)" }}>
-            Ashford & Briggs builds tools that make recruiters sharper — not obsolete.
-            Paladin is our first.
-          </p>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 760 }}>
+          <motion.div {...fadeUp}>
+            <span className="eyebrow">About</span>
+            <h1 style={{ fontSize: "clamp(36px, 6vw, 60px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
+              We're betting on the <span className="gradient-text">human conversation.</span>
+            </h1>
+            <p style={{ fontSize: 19, color: "var(--text-muted)" }}>
+              Ashford & Briggs builds tools that make recruiters sharper — not obsolete.
+              Paladin is our first.
+            </p>
+          </motion.div>
+        </TextScrim>
       </section>
 
       <section className="section container" style={{ maxWidth: 820 }}>
-        <motion.div {...fadeUp}>
-          <h2 className="section-title" style={{ marginBottom: 20 }}>The story</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: 17, marginBottom: 18 }}>
-            Recruiting changed the day generative AI put a polished résumé within
-            everyone's reach. Overnight, the document recruiters had relied on for
-            decades stopped being a trustworthy signal. The industry's response was to
-            add more automation — more filters, more async screens, more ways to avoid
-            talking to people.
-          </p>
-          <p style={{ color: "var(--text-muted)", fontSize: 17, marginBottom: 18 }}>
-            We think that's backwards. When every written signal can be faked, the live
-            conversation becomes <em>more</em> valuable, not less. So we built Paladin to
-            make that conversation as sharp as it can possibly be: real-time intelligence
-            that rides along on the call and hands the recruiter better information at
-            exactly the moment they need it.
-          </p>
-        </motion.div>
+        <TextScrim>
+          <motion.div {...fadeUp}>
+            <h2 className="section-title" style={{ marginBottom: 20 }}>The story</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: 17, marginBottom: 18 }}>
+              Recruiting changed the day generative AI put a polished résumé within
+              everyone's reach. Overnight, the document recruiters had relied on for
+              decades stopped being a trustworthy signal. The industry's response was to
+              add more automation — more filters, more async screens, more ways to avoid
+              talking to people.
+            </p>
+            <p style={{ color: "var(--text-muted)", fontSize: 17, marginBottom: 18 }}>
+              We think that's backwards. When every written signal can be faked, the live
+              conversation becomes <em>more</em> valuable, not less. So we built Paladin to
+              make that conversation as sharp as it can possibly be: real-time intelligence
+              that rides along on the call and hands the recruiter better information at
+              exactly the moment they need it.
+            </p>
+          </motion.div>
+        </TextScrim>
 
         <motion.div {...fadeUp} className="card card-glow" style={{ marginTop: 32 }}>
           <h3 style={{ fontSize: 15, color: "var(--accent-bright)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Mission</h3>
           <p style={{ fontSize: 20, fontWeight: 600 }}>To keep the human at the center of hiring — and give that human superpowers.</p>
         </motion.div>
 
-        <motion.div {...fadeUp} style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 10, color: "var(--text-muted)" }}>
-          <MapPin size={18} color="var(--accent-bright)" aria-hidden="true" />
-          <span>Jacksonville, Florida · Founded 2026 · A small team that ships.</span>
-        </motion.div>
+        <TextScrim style={{ marginTop: 32 }}>
+          <motion.div {...fadeUp} style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text-muted)" }}>
+            <MapPin size={18} color="var(--accent-bright)" aria-hidden="true" />
+            <span>Jacksonville, Florida · Founded 2026 · A small team that ships.</span>
+          </motion.div>
+        </TextScrim>
       </section>
 
       <section className="section" style={{ background: "var(--bg-elevated)", borderBlock: "1px solid var(--border)" }}>
@@ -146,7 +153,9 @@ export default function About() {
 
       <section className="container" style={{ padding: "80px 0 40px", textAlign: "center" }}>
         <motion.div {...fadeUp}>
-          <h2 className="section-title" style={{ marginBottom: 24 }}>Want to see what we've built?</h2>
+          <TextScrim style={{ display: "block", width: "fit-content", margin: "0 auto" }}>
+            <h2 className="section-title" style={{ marginBottom: 24 }}>Want to see what we've built?</h2>
+          </TextScrim>
           <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} aria-hidden="true" /></Link>
         </motion.div>
       </section>

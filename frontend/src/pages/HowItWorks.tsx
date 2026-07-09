@@ -6,6 +6,7 @@ import ProductScreenshot from "@/components/ProductScreenshot";
 import SignalLine from "@/components/SignalLine";
 import Waveform from "@/components/Waveform";
 import Brandmark from "@/components/Brandmark";
+import TextScrim from "@/components/TextScrim";
 import { useFadeUp } from "@/hooks/useReveal";
 
 const steps = [
@@ -83,21 +84,25 @@ export default function HowItWorks() {
         }}
       />
       <section style={{ padding: "100px 0 40px" }} className="container">
-        <motion.div {...fadeUp} style={{ maxWidth: 720 }}>
-          <span className="eyebrow">How It Works</span>
-          <h1 style={{ fontSize: "clamp(36px, 6vw, 60px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
-            Four steps. One live call. <span className="gradient-text">Zero friction.</span>
-          </h1>
-          <p style={{ fontSize: 19, color: "var(--text-muted)" }}>
-            Paladin fits the way you already recruit. No new dialer, no app for the
-            candidate, no change to your workflow — just better information, in the moment.
-          </p>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 720 }}>
+          <motion.div {...fadeUp}>
+            <span className="eyebrow">How It Works</span>
+            <h1 style={{ fontSize: "clamp(36px, 6vw, 60px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
+              Four steps. One live call. <span className="gradient-text">Zero friction.</span>
+            </h1>
+            <p style={{ fontSize: 19, color: "var(--text-muted)" }}>
+              Paladin fits the way you already recruit. No new dialer, no app for the
+              candidate, no change to your workflow — just better information, in the moment.
+            </p>
+          </motion.div>
+        </TextScrim>
       </section>
 
       {/* Compact at-a-glance strip — a real h2, not a repeated card list */}
       <section className="container" style={{ paddingBottom: 56 }}>
-        <motion.h2 {...fadeUp} className="eyebrow" style={{ display: "block", marginBottom: 20 }}>The four steps, at a glance</motion.h2>
+        <TextScrim style={{ display: "block", width: "fit-content" }} bleed={40}>
+          <motion.h2 {...fadeUp} className="eyebrow" style={{ display: "block", marginBottom: 20 }}>The four steps, at a glance</motion.h2>
+        </TextScrim>
         <SignalLine>
           {steps.map((s) => (
             <motion.div key={s.n} {...fadeUp} style={{ position: "relative", paddingLeft: 60, minHeight: 28, display: "flex", alignItems: "center" }}>
@@ -117,18 +122,22 @@ export default function HowItWorks() {
 
       {/* See it in action — the primary explanation, real screenshots */}
       <section className="section container" style={{ paddingTop: 0 }}>
-        <motion.div {...fadeUp} style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 56px" }}>
-          <span className="eyebrow">See It In Action</span>
-          <h2 className="section-title" style={{ marginTop: 12 }}>From candidate list to client-ready report.</h2>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 640, margin: "0 auto 56px" }}>
+          <motion.div {...fadeUp} style={{ textAlign: "center" }}>
+            <span className="eyebrow">See It In Action</span>
+            <h2 className="section-title" style={{ marginTop: 12 }}>From candidate list to client-ready report.</h2>
+          </motion.div>
+        </TextScrim>
         <div style={{ display: "flex", flexDirection: "column", gap: 80 }}>
           {steps.map((s, i) => (
             <div key={s.n} className={i % 2 === 1 ? "split-row reverse" : "split-row"}>
-              <motion.div {...fadeUp}>
-                <span className="eyebrow">{s.eyebrow}</span>
-                <h3 style={{ fontSize: 24, fontWeight: 700, margin: "10px 0" }}>{s.heading}</h3>
-                <p style={{ color: "var(--text-muted)", fontSize: 16 }}>{s.body}</p>
-              </motion.div>
+              <TextScrim>
+                <motion.div {...fadeUp}>
+                  <span className="eyebrow">{s.eyebrow}</span>
+                  <h3 style={{ fontSize: 24, fontWeight: 700, margin: "10px 0" }}>{s.heading}</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: 16 }}>{s.body}</p>
+                </motion.div>
+              </TextScrim>
               <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
                 {s.shot ? <ProductScreenshot src={s.shot.src} alt={s.shot.alt} /> : <ConnectVisual />}
               </motion.div>
@@ -138,11 +147,13 @@ export default function HowItWorks() {
       </section>
 
       <section className="section container" style={{ paddingTop: 0 }}>
-        <motion.div {...fadeUp} style={{ padding: 28, textAlign: "center", borderRadius: "var(--radius)", border: "1px dashed var(--border-bright)" }}>
-          <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
-            <strong style={{ color: "var(--text)" }}>What you need:</strong> your existing phone. That's the whole list.
-          </p>
-        </motion.div>
+        <TextScrim>
+          <motion.div {...fadeUp} style={{ padding: 28, textAlign: "center", borderRadius: "var(--radius)", border: "1px dashed var(--border-bright)" }}>
+            <p style={{ color: "var(--text-muted)", fontSize: 16 }}>
+              <strong style={{ color: "var(--text)" }}>What you need:</strong> your existing phone. That's the whole list.
+            </p>
+          </motion.div>
+        </TextScrim>
 
         <motion.div {...fadeUp} className="card" style={{ marginTop: 24, display: "grid", gridTemplateColumns: "auto 1fr", gap: 24, alignItems: "center" }}>
           <Brandmark size={44} />

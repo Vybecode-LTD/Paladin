@@ -6,6 +6,7 @@ import {
 import FlowBackground from "@/components/FlowBackground";
 import Brandmark from "@/components/Brandmark";
 import Waveform from "@/components/Waveform";
+import TextScrim from "@/components/TextScrim";
 
 const nav = [
   { to: "/product", label: "Product" },
@@ -143,7 +144,7 @@ export default function PublicLayout() {
           <div className="signal-trace" style={{ marginBottom: 56 }} />
         </div>
         <div className="container" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 40 }}>
-          <div>
+          <TextScrim>
             <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 700, marginBottom: 12 }}>
               <Brandmark size={22} />
               Ashford & Briggs
@@ -155,18 +156,20 @@ export default function PublicLayout() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <Waveform size="thin" bars={8} />
               <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-dim)", letterSpacing: "0.04em" }}>
-                ALWAYS LISTENING
+                MEET PALADIN
               </span>
             </div>
-          </div>
-          <div>
+          </TextScrim>
+          <TextScrim>
             <h4 style={{ fontSize: 13, color: "var(--text-dim)", textTransform: "uppercase", marginBottom: 14, letterSpacing: "0.06em" }}>Contact</h4>
             <a href="mailto:inquiries@ashfordbriggs.com" style={{ display: "block", color: "var(--text-muted)", fontSize: 14, marginBottom: 8 }}>inquiries@ashfordbriggs.com</a>
             <a href="https://linkedin.com/company/ashford-briggs-llc" style={{ display: "block", color: "var(--text-muted)", fontSize: 14 }}>LinkedIn</a>
-          </div>
+          </TextScrim>
         </div>
-        <div className="container" style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--border)", color: "var(--text-dim)", fontSize: 13 }}>
-          © 2026 Ashford & Briggs LLC. All rights reserved.
+        <div className="container" style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
+          <TextScrim style={{ display: "block", width: "fit-content" }} bleed={30}>
+            <span style={{ color: "var(--text-dim)", fontSize: 13 }}>© 2026 Ashford & Briggs LLC. All rights reserved.</span>
+          </TextScrim>
         </div>
       </footer>
     </>

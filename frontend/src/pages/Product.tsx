@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Brain, Radio, BookOpen, FileCheck, Layers } from "lucide-react";
 import Seo from "@/components/Seo";
+import TextScrim from "@/components/TextScrim";
 import { useFadeUp } from "@/hooks/useReveal";
 
 const features = [
@@ -117,17 +118,19 @@ export default function Product() {
         }}
       />
       <section style={{ padding: "100px 0 60px" }} className="container">
-        <motion.div {...fadeUp} style={{ maxWidth: 760 }}>
-          <span className="eyebrow">The Product</span>
-          <h1 style={{ fontSize: "clamp(38px, 6vw, 64px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
-            <span className="gradient-text">Paladin</span>
-          </h1>
-          <p style={{ fontSize: 20, color: "var(--text-muted)" }}>
-            Real-time counter-intelligence for recruiting calls. It listens to both
-            sides of the conversation and turns it into live, on-screen intelligence —
-            so you lead the call instead of scrambling to keep up.
-          </p>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 760 }}>
+          <motion.div {...fadeUp}>
+            <span className="eyebrow">The Product</span>
+            <h1 style={{ fontSize: "clamp(38px, 6vw, 64px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 20px" }}>
+              <span className="gradient-text">Paladin</span>
+            </h1>
+            <p style={{ fontSize: 20, color: "var(--text-muted)" }}>
+              Real-time counter-intelligence for recruiting calls. It listens to both
+              sides of the conversation and turns it into live, on-screen intelligence —
+              so you lead the call instead of scrambling to keep up.
+            </p>
+          </motion.div>
+        </TextScrim>
       </section>
 
       {/* The Intelligence Pane — one persistent panel, annotated live as you scroll */}

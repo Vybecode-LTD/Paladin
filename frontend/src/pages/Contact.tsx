@@ -4,6 +4,7 @@ import { Mail, Phone, Linkedin, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
 import Waveform from "@/components/Waveform";
+import TextScrim from "@/components/TextScrim";
 import { useFadeUp } from "@/hooks/useReveal";
 
 const ROLES = ["Recruiter", "Recruiting Manager", "HR Director or VP", "Staffing Agency Owner", "Executive — C-Suite", "Other"];
@@ -43,39 +44,41 @@ export default function Contact() {
       <section style={{ padding: "90px 0 60px" }} className="container">
         <div className="contact-grid">
           {/* Left: pitch + channels */}
-          <motion.div {...fadeUp}>
-            <span className="eyebrow">Contact</span>
-            <h1 style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 18px" }}>
-              See Paladin on a <span className="gradient-text">live call.</span>
-            </h1>
-            <p style={{ fontSize: 18, color: "var(--text-muted)", marginBottom: 36 }}>
-              The fastest way to understand Paladin is to watch the Intelligence Pane work
-              on a real recruiting scenario. Tell us a little about your team and we'll set
-              it up.
-            </p>
+          <TextScrim>
+            <motion.div {...fadeUp}>
+              <span className="eyebrow">Contact</span>
+              <h1 style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "16px 0 18px" }}>
+                See Paladin on a <span className="gradient-text">live call.</span>
+              </h1>
+              <p style={{ fontSize: 18, color: "var(--text-muted)", marginBottom: 36 }}>
+                The fastest way to understand Paladin is to watch the Intelligence Pane work
+                on a real recruiting scenario. Tell us a little about your team and we'll set
+                it up.
+              </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {[
-                { icon: Mail, glyph: "blue", label: "General inquiries", value: "inquiries@ashfordbriggs.com", href: "mailto:inquiries@ashfordbriggs.com" },
-                { icon: Mail, glyph: "violet", label: "Sales & trials", value: "info@ashfordbriggs.com", href: "mailto:info@ashfordbriggs.com" },
-                { icon: Phone, glyph: "cyan", label: "Matt Barker", value: "mbarker@ashfordbriggs.com · (603) 556-8277", href: "tel:+16035568277" },
-                { icon: Mail, glyph: "coral", label: "John Evans", value: "jevans@ashfordbriggs.com", href: "mailto:jevans@ashfordbriggs.com" },
-                { icon: Linkedin, glyph: "amber", label: "LinkedIn", value: "ashford-briggs-llc", href: "https://linkedin.com/company/ashford-briggs-llc" },
-                { icon: MapPin, glyph: "coral", label: "HQ", value: "Jacksonville, FL · Founded 2026", href: undefined },
-              ].map((c) => (
-                <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div className={`glyph-badge glyph-${c.glyph}`} style={{ width: 40, height: 40, flexShrink: 0 }}>
-                    <c.icon size={18} color="currentColor" aria-hidden="true" />
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {[
+                  { icon: Mail, glyph: "blue", label: "General inquiries", value: "inquiries@ashfordbriggs.com", href: "mailto:inquiries@ashfordbriggs.com" },
+                  { icon: Mail, glyph: "violet", label: "Sales & trials", value: "info@ashfordbriggs.com", href: "mailto:info@ashfordbriggs.com" },
+                  { icon: Phone, glyph: "cyan", label: "Matt Barker", value: "mbarker@ashfordbriggs.com · (603) 556-8277", href: "tel:+16035568277" },
+                  { icon: Mail, glyph: "coral", label: "John Evans", value: "jevans@ashfordbriggs.com", href: "mailto:jevans@ashfordbriggs.com" },
+                  { icon: Linkedin, glyph: "amber", label: "LinkedIn", value: "ashford-briggs-llc", href: "https://linkedin.com/company/ashford-briggs-llc" },
+                  { icon: MapPin, glyph: "coral", label: "HQ", value: "Jacksonville, FL · Founded 2026", href: undefined },
+                ].map((c) => (
+                  <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div className={`glyph-badge glyph-${c.glyph}`} style={{ width: 40, height: 40, flexShrink: 0 }}>
+                      <c.icon size={18} color="currentColor" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>{c.label}</div>
+                      {c.href ? <a href={c.href} style={{ fontSize: 15, color: "var(--text-muted)" }}>{c.value}</a>
+                        : <div style={{ fontSize: 15, color: "var(--text-muted)" }}>{c.value}</div>}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>{c.label}</div>
-                    {c.href ? <a href={c.href} style={{ fontSize: 15, color: "var(--text-muted)" }}>{c.value}</a>
-                      : <div style={{ fontSize: 15, color: "var(--text-muted)" }}>{c.value}</div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </TextScrim>
 
           {/* Right: form */}
           <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="card" style={{ padding: 32 }}>

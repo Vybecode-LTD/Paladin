@@ -6,6 +6,7 @@ import ProductScreenshot from "@/components/ProductScreenshot";
 import LiveCallDemo from "@/components/LiveCallDemo";
 import Waveform from "@/components/Waveform";
 import Brandmark from "@/components/Brandmark";
+import TextScrim from "@/components/TextScrim";
 import { useFadeUp, useGlassReveal } from "@/hooks/useReveal";
 
 const stats = [
@@ -59,33 +60,13 @@ export default function Home() {
       <section style={{ position: "relative", padding: "100px 0 90px", overflow: "hidden" }}>
         <div className="container" style={{ position: "relative" }}>
           <div className="split-row" style={{ alignItems: "stretch" }}>
-            <div style={{ position: "relative" }}>
-              {/* Screening mask — blurs and dims the FlowBackground waves
-               * specifically where they pass behind the hero text, so they
-               * read as further back / out of focus instead of competing
-               * with the copy. The box bleeds 70px past the text on every
-               * side (room for the feather to extend into); two gradients
-               * combined via mask-composite:intersect feather BOTH axes —
-               * the angled (100deg) one for left/right, a plain vertical one
-               * for top/bottom. Without the vertical one, the box's own top/
-               * bottom edges were still a hard, unfeathered cut (visible as
-               * a blocked-out rectangle above the eyebrow text). */}
-              <div aria-hidden="true" style={{
-                position: "absolute", inset: -70,
-                backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                background: "color-mix(in srgb, var(--bg) 42%, transparent)",
-                WebkitMaskImage: "linear-gradient(100deg, transparent 0%, black 38%, black 45%, transparent 85%), linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
-                maskImage: "linear-gradient(100deg, transparent 0%, black 38%, black 45%, transparent 85%), linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
-                WebkitMaskComposite: "source-in",
-                maskComposite: "intersect",
-                pointerEvents: "none",
-              }} />
+            <TextScrim>
               <motion.div {...fadeUp} transition={{ duration: 0.5 }}
-                style={{ position: "relative", display: "block", width: "100%", marginBottom: 20 }}>
+                style={{ display: "block", width: "100%", marginBottom: 20 }}>
                 <span className="eyebrow">Real-time AI Intelligence for Recruiting Calls</span>
               </motion.div>
               <motion.h1 {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}
-                style={{ position: "relative", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "0 0 22px" }}>
+                style={{ fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, margin: "0 0 22px" }}>
                 <span style={{ display: "block", fontSize: "clamp(26px, 3.4vw, 40px)" }}>
                   Recruiters need<br />superhuman abilities.
                 </span>
@@ -94,22 +75,22 @@ export default function Home() {
                 </span>
               </motion.h1>
               <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}
-                style={{ position: "relative", fontSize: "clamp(15px, 1.6vw, 18px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
+                style={{ fontSize: "clamp(15px, 1.6vw, 18px)", color: "var(--text-muted)", maxWidth: 520, margin: "0 0 34px" }}>
                 Paladin researches the job, briefs you on the candidate, and coaches
                 you on the live call — on the phone you already use, no app required.
                 In a world racing to replace human interaction with AI, Paladin
                 strengthens the human relationship that recruiting was built on.
               </motion.p>
               <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
-                style={{ position: "relative", display: "flex", gap: 14, flexWrap: "wrap" }}>
+                style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
                 <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} aria-hidden="true" /></Link>
                 <Link to="/how-it-works" className="btn btn-ghost">See how it works</Link>
               </motion.div>
               <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.2 }}
-                style={{ position: "relative", marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
+                style={{ marginTop: 22, fontSize: 14, color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
                 Built by recruiters, in Jacksonville, FL.
               </motion.p>
-            </div>
+            </TextScrim>
             <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}
               style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ProductScreenshot
@@ -126,34 +107,38 @@ export default function Home() {
       {/* LIVE CALL DEMO */}
       <section className="container" style={{ paddingBottom: 40 }}>
         <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.05 }} style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{ textAlign: "center", marginBottom: 18, fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em", color: "var(--text-dim)" }}>
-            This is what a live call looks like inside Paladin —
-          </p>
+          <TextScrim style={{ display: "block", width: "fit-content", margin: "0 auto 18px" }} bleed={40}>
+            <p style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em", color: "var(--text-dim)" }}>
+              This is what a live call looks like inside Paladin —
+            </p>
+          </TextScrim>
           <LiveCallDemo />
         </motion.div>
       </section>
 
       {/* PROBLEM */}
       <section className="section container">
-        <div className="problem-grid">
-          <motion.div {...fadeUp}>
-            <h2 className="section-title" style={{ fontSize: "clamp(24px, 3vw, 34px)" }}>Recruiting is drowning in AI-generated noise.</h2>
-            <p style={{ color: "var(--text-muted)", marginTop: 16, fontSize: 16 }}>
-              The résumé is no longer a reliable signal. The phone call is — if you
-              can hear what matters in real time.
-            </p>
-          </motion.div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", borderTop: "1px solid var(--border)" }}>
-            {stats.map((s, i) => (
-              <motion.div key={s.n} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.06 }}
-                style={{ padding: "24px 20px 0 0" }}>
-                <div className="gradient-text" style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.n}</div>
-                <p style={{ color: "var(--text-muted)", marginTop: 8, fontSize: 15 }}>{s.label}</p>
-                <p style={{ color: "var(--text-dim)", marginTop: 10, fontSize: 12, fontFamily: "var(--font-mono)" }}>{s.src}</p>
-              </motion.div>
-            ))}
+        <TextScrim>
+          <div className="problem-grid">
+            <motion.div {...fadeUp}>
+              <h2 className="section-title" style={{ fontSize: "clamp(24px, 3vw, 34px)" }}>Recruiting is drowning in AI-generated noise.</h2>
+              <p style={{ color: "var(--text-muted)", marginTop: 16, fontSize: 16 }}>
+                The résumé is no longer a reliable signal. The phone call is — if you
+                can hear what matters in real time.
+              </p>
+            </motion.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", borderTop: "1px solid var(--border)" }}>
+              {stats.map((s, i) => (
+                <motion.div key={s.n} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.06 }}
+                  style={{ padding: "24px 20px 0 0" }}>
+                  <div className="gradient-text" style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.n}</div>
+                  <p style={{ color: "var(--text-muted)", marginTop: 8, fontSize: 15 }}>{s.label}</p>
+                  <p style={{ color: "var(--text-dim)", marginTop: 10, fontSize: 12, fontFamily: "var(--font-mono)" }}>{s.src}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        </TextScrim>
       </section>
 
       {/* PRODUCT PILLARS */}
@@ -183,13 +168,15 @@ export default function Home() {
 
       {/* DIFFERENTIATION */}
       <section className="section container">
-        <motion.div {...fadeUp} style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 48px" }}>
-          <span className="eyebrow" style={{ fontSize: 26, fontWeight: 700 }}>Paladin vs. the alternatives</span>
-          <h2 className="section-title" style={{ marginTop: 12 }}>
-            <span style={{ fontSize: "clamp(21px, 3vw, 33px)" }}>Do other products work in real-time? No.</span><br />
-            <span className="gradient-text">Paladin does.</span>
-          </h2>
-        </motion.div>
+        <TextScrim style={{ maxWidth: 720, margin: "0 auto 48px" }}>
+          <motion.div {...fadeUp} style={{ textAlign: "center" }}>
+            <span className="eyebrow" style={{ fontSize: 26, fontWeight: 700 }}>Paladin vs. the alternatives</span>
+            <h2 className="section-title" style={{ marginTop: 12 }}>
+              <span style={{ fontSize: "clamp(21px, 3vw, 33px)" }}>Do other products work in real-time? No.</span><br />
+              <span className="gradient-text">Paladin does.</span>
+            </h2>
+          </motion.div>
+        </TextScrim>
         <motion.div {...glassReveal} className="card" style={{ padding: 0, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15 }}>
             <caption className="sr-only">Paladin compared to ATS filters, LinkedIn, HireVue, and chatbots</caption>
