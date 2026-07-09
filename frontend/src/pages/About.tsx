@@ -152,7 +152,7 @@ export default function About() {
 
       <section className="container" style={{ padding: "80px 0 40px", textAlign: "center" }}>
         <motion.div {...fadeUp}>
-          <TextScrim style={{ display: "block", width: "fit-content", margin: "0 auto" }}>
+          <TextScrim style={{ display: "block", width: "fit-content", margin: "0 auto" }} bleed={16}>
             <h2 className="section-title" style={{ marginBottom: 24 }}>Want to see what we've built?</h2>
           </TextScrim>
           <Link to="/contact" className="btn btn-primary">Request a Demo <ArrowRight size={18} aria-hidden="true" /></Link>
