@@ -3,8 +3,11 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-preDeployCommand = "alembic upgrade head"
-startCommand = 'sh -c "uvicorn app.main:app --host 0.0.0.0 --port $PORT"'
+# Deliberately no startCommand / preDeployCommand here. A startCommand
+# overrides the image CMD, and the Dockerfile's CMD is what runs
+# `alembic upgrade head` (and the optional admin seed) before uvicorn.
+# Railway also ignored preDeployCommand from this file (manifest showed
+# null), so the Dockerfile is the single start path on any Docker host.
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"

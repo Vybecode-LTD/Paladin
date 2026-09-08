@@ -21,5 +21,7 @@ COPY --from=frontend-build /frontend/dist ./static
 
 EXPOSE 8000
 
-# Run migrations then start. On first deploy, seed the admin separately.
-CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Run migrations, bootstrap the first admin only when SEED_ADMIN_PASSWORD is
+# set (seed.py is idempotent: it skips if that user already exists), then
+# start. Shell-form CMD so `&&`, `${PORT}` and the `||` guard all work.
+CMD alembic upgrade head  && { [ -z "$SEED_ADMIN_PASSWORD" ] || python -m seed; }  && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
