@@ -1,0 +1,46 @@
+name: Sync docs to ashfordbriggs-docs
+
+# Keeps github.com/Vybecode-LTD/ashfordbriggs-docs (partner-facing) in step with
+# docs/ here. Needs a repository secret DOCS_REPO_TOKEN: a fine-grained GitHub
+# token with "Contents: Read and write" on the ashfordbriggs-docs repository.
+# Until that secret exists the job just prints a notice; run
+# scripts/sync-docs.sh locally instead.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "deploy/ubuntu/**"
+      - "scripts/sync-docs.sh"
+      - ".github/workflows/sync-docs.yml"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for the docs repo token
+        id: tok
+        env:
+          T: ${{ secrets.DOCS_REPO_TOKEN }}
+        run: |
+          if [ -z "$T" ]; then
+            echo "::notice::DOCS_REPO_TOKEN is not set; skipping the docs sync. Run scripts/sync-docs.sh locally."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clone the docs repo
+        if: steps.tok.outputs.skip != 'true'
+        run: git clone --quiet "https://x-access-token:${{ secrets.DOCS_REPO_TOKEN }}@github.com/Vybecode-LTD/ashfordbriggs-docs.git" ../ashfordbriggs-docs
+
+      - name: Sync and push
+        if: steps.tok.outputs.skip != 'true'
+        run: |
+          git config --global user.name "paladin-docs-sync"
+          git config --global user.email "docs-sync@users.noreply.github.com"
+          DOCS_REPO="$(pwd)/../ashfordbriggs-docs" bash scripts/sync-docs.sh

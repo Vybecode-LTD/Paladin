@@ -14,7 +14,8 @@ PBX systems and other sites. **Touch only the Paladin footprint listed here.**
 | Service | `paladin.service` (systemd; runs as the `paladin` system user; `ExecStartPre` applies migrations) |
 | App listener | `127.0.0.1:8000` only |
 | Database | existing Postgres 14 on the box; role `paladin`, database `paladin` |
-| Apache vhost | `/etc/apache2/sites-enabled/www.ashfordbriggs.com.conf` (reverse proxy to 8000; `ServerName ashfordbriggs.com`, `ServerAlias devwww.ashfordbriggs.com`). The previous static-site version is kept at `sites-available/www.ashfordbriggs.com.conf.bak-2026-09-09-static`. |
+| Apache vhost | `/etc/apache2/sites-enabled/www.ashfordbriggs.com.conf` (`:80` only; reverse proxy to 8000; `ServerName ashfordbriggs.com`, `ServerAlias devwww.ashfordbriggs.com`). The previous static-site version is kept at `sites-available/www.ashfordbriggs.com.conf.bak-2026-09-09-static`. |
+| SSH access used for the deploy | the `claude-paladin-deploy` line in `~mbarker/.ssh/authorized_keys`; remove it with `sed -i '/claude-paladin-deploy/d' ~/.ssh/authorized_keys` when no longer wanted |
 | Apache logs for this site only | `/var/log/apache2/paladin-access.log`, `paladin-error.log` |
 | App logs | `journalctl -u paladin` |
 
@@ -33,12 +34,24 @@ internet ──443──▶ front proxy (LAN gateway 10.0.0.1, holds the Let's E
 Consequences:
 - **No certificate lives on this server for devwww.** `certbot` here fails
   (the HTTP-01 challenge is answered by the front proxy). Do not try.
-- The `:443` block of the vhost still references the old, expired
-  `ashfordbriggs.com` certificate; it is only reachable from the LAN/tailnet
-  and is left as it was.
-- uvicorn trusts `X-Forwarded-*` from `127.0.0.1` (Apache) and `10.0.0.1`
-  (the front proxy), so per-IP rate limits see the real visitor as long as
-  the front proxy sends `X-Forwarded-For`.
+- The vhost has **only a `:80` block**. The `:443` block from the original
+  static-site vhost was dropped on 2026-09-09: nothing legitimate reaches it
+  (the front proxy talks to `:80`), and the only certificate it could use is
+  the expired `ashfordbriggs.com` one.
+- **Rate limiting is degraded, by the front proxy, not by this box.** The
+  vhost's access log records every candidate forwarded-address header
+  (`xff=`, `xrip=`, `fwd=`, `cf=`), and the front proxy sends none of them,
+  so the app sees every visitor as `10.0.0.1` and its per-IP limits become
+  global caps. uvicorn is already configured to trust `X-Forwarded-For` from
+  `127.0.0.1` (Apache) and `10.0.0.1`, so the moment the front proxy is set
+  to forward the client address, real per-visitor limiting starts working
+  with no change here. Until then `.env` raises the caps
+  (`AUTH_RATE_LIMIT=60/minute`, `DEMO_RATE_LIMIT=60/hour`,
+  `AI_RATE_LIMIT=200/hour`) so a shared bucket cannot lock the demo out;
+  delete those three lines and restart the service once the proxy forwards
+  addresses. Check with:
+  `sudo grep -o 'xff=[^ ]*' /var/log/apache2/paladin-access.log | tail -3`
+  (anything other than `xff="-"` means it is fixed).
 - The vhost sends `X-Robots-Tag: noindex, nofollow`: this is a demo, it must
   not get indexed. The frontend's canonical/OG tags still say
   `ashfordbriggs.com` on purpose (that is the eventual production domain).

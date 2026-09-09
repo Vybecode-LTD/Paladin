@@ -5,6 +5,21 @@ formal tags/releases — this log tracks work sessions, not package versions.
 
 ## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
 
+**Documentation repo** for the partners: github.com/Vybecode-LTD/ashfordbriggs-docs
+now carries a synced copy of `docs/` plus the `deploy/ubuntu` files under
+`paladin-website/`. Source of truth stays here; `scripts/sync-docs.sh` (and the
+`sync-docs` GitHub Action, once a `DOCS_REPO_TOKEN` secret exists) replaces
+that folder wholesale. Added two partner-facing documents to `docs/`:
+`OVERVIEW.md` (what the site is, environments, roles, stack, layout) and
+`DEPLOY-RAILWAY.md` (the display deployment and its gotchas).
+
+**Dev server follow-ups (2026-09-09, later):** the vhost is now `:80` only
+(the expired-cert `:443` block was dropped), it logs every forwarded-address
+header, and that log proved the front proxy sends none, so the app's per-IP
+rate limits act as global caps there. Raised them in the dev `.env`
+(60/min login, 60/hour demo, 200/hour AI) with the revert documented in
+`DEPLOY-DEV-SERVER.md`.
+
 **Deployed** the site to the company's shared dev server as
 https://devwww.ashfordbriggs.com (details and update procedure in
 `docs/DEPLOY-DEV-SERVER.md`). Manual path: Python 3.10 venv, systemd unit

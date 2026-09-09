@@ -221,6 +221,12 @@ are all complete and verified (not just claimed):
   `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
   first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
   and the seed variables were removed afterwards.
+- **Partner-facing docs repo:** github.com/Vybecode-LTD/ashfordbriggs-docs is a
+  synced copy of `docs/` + `deploy/ubuntu/` (folder `paladin-website/`). Never
+  edit it there. After changing docs here, run `scripts/sync-docs.sh` (needs
+  `../ashfordbriggs-docs` cloned) or let the `sync-docs` Action do it once the
+  `DOCS_REPO_TOKEN` secret is set. `docs/OVERVIEW.md` is the partners' entry
+  point; keep it current when environments or roles change.
 - **Dev/demo server (live since 2026-09-09):** https://devwww.ashfordbriggs.com
   on the company's shared Ubuntu box `ab-webserver`, installed the manual way
   (venv + systemd `paladin.service` + existing Postgres 14 + Apache reverse
