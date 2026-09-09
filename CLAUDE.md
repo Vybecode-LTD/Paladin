@@ -189,10 +189,11 @@ are all complete and verified (not just claimed):
 ## DEPLOYMENT (live) — as of 2026-09-08
 - **Host:** Railway project **"Ashford & Briggs"**
   (id `006280bb-57cc-4b59-bc3a-0acfcc3fa623`), environment `production`.
-  Two services matter: **`Paladin`** (built from this repo's root
+  Exactly two services: **`Paladin`** (built from this repo's root
   `Dockerfile`, GitHub-connected to `main`, auto-deploys on every push) and
-  **`Postgres`** (Railway plugin). `frontend` and `backend` are dead
-  leftovers — see NEXT STEPS.
+  **`Postgres`** (Railway plugin). Two stray `frontend`/`backend` services
+  that failed on every push were deleted on 2026-09-09 — do not recreate
+  them; this monorepo deploys as one service.
 - **URL:** https://paladin-production-bc0b.up.railway.app
   (health at `/api/health`, admin at `/admin/login`).
 - **Env vars on `Paladin`:** `DATABASE_URL=${{Postgres.DATABASE_URL}}` (a
@@ -234,7 +235,3 @@ are all complete and verified (not just claimed):
    `frontend/index.html`, `frontend/src/components/Seo.tsx` and
    `frontend/public/robots.txt` already say `ashfordbriggs.com` — change them
    only if a different domain is chosen.
-3. **Delete the two dead Railway services** `frontend` and `backend` in the
-   "Ashford & Briggs" project. They were created alongside `Paladin`, use the
-   wrong build setup for this monorepo, fail on every push to `main`, and
-   serve nothing.

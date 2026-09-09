@@ -70,8 +70,8 @@ write time only.
    https://paladin-production-bc0b.up.railway.app — full details, env vars
    and the gotchas that cost time are in the DEPLOYMENT section of
    `CLAUDE.md`. Still open: attach the custom domain (then update `SITE_URL`
-   / `CORS_ORIGINS`) and delete the dead `frontend` / `backend` Railway
-   services.
+   / `CORS_ORIGINS`). The stray `frontend` / `backend` services were deleted
+   on 2026-09-09; the project is now just `Paladin` + `Postgres`.
 
 ## Blockers / risks to know about
 

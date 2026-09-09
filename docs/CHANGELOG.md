@@ -31,6 +31,10 @@ and got it live: https://paladin-production-bc0b.up.railway.app
   removed afterwards.
 - Verified live: `/`, `/blog`, `/api/blog/posts` (200 `[]`), `/sitemap.xml`
   (200, correct origin), admin login and authenticated admin routes (200).
+- 2026-09-09: deleted the stray `frontend` and `backend` services (wrong
+  build setup for this monorepo, failed on every push). Note: the GraphQL
+  `serviceDelete` mutation is *not* authorized for a project token, but
+  `railway service delete --service <name> --yes` (CLI ≥ 5.4x) is.
 
 ## 2026-07-07 — Blog editor completeness pass + deploy handoff docs
 
