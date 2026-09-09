@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Save, Send } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import SenderSettings from "@/components/SenderSettings";
 
 interface SmtpSettings {
   host: string;
@@ -126,9 +127,29 @@ export default function Settings() {
     }
   }
 
+  const sectionTitle: React.CSSProperties = {
+    fontSize: 20, fontWeight: 700, marginBottom: 6,
+  };
+  const sectionNote: React.CSSProperties = {
+    fontSize: 14, color: "var(--text-muted)", marginBottom: 18,
+    maxWidth: "70ch", lineHeight: 1.55,
+  };
+
   return (
     <div>
       <h1 style={{ fontSize: 30, fontWeight: 800, marginBottom: 28 }}>Settings</h1>
+
+      {/* Two mail configurations on one screen is a reasonable thing to be
+          confused by, so each section says what it is for. They are separate
+          because they are separate: one is a person answering a single demo
+          request, the other is a campaign to a list, and they should be able
+          to send from different domains with different reputations. */}
+      <h2 style={sectionTitle}>Demo replies</h2>
+      <p style={sectionNote}>
+        The company's own mail server, used when someone answers a demo request from the
+        inbox. One message at a time, to one person.
+      </p>
+
       {loading ? (
         <p style={{ color: "var(--text-dim)" }}>Loading…</p>
       ) : (
@@ -215,6 +236,16 @@ export default function Settings() {
           </form>
         </div>
       )}
+
+      <div style={{ borderTop: "1px solid var(--border)", margin: "40px 0 28px" }} />
+
+      <h2 style={sectionTitle}>Campaign sending</h2>
+      <p style={sectionNote}>
+        How campaigns to a list are sent, and where their tracking and unsubscribe links
+        point. Kept separate from the settings above on purpose: campaigns should send from
+        their own domain, so a problem with one can never affect the other.
+      </p>
+      <SenderSettings />
     </div>
   );
 }

@@ -20,6 +20,13 @@ import DemoInbox from "@/pages/admin/DemoInbox";
 import Users from "@/pages/admin/Users";
 import Profile from "@/pages/admin/Profile";
 import Settings from "@/pages/admin/Settings";
+import AnalyticsLayout from "@/pages/admin/analytics/AnalyticsLayout";
+import AnalyticsOverview from "@/pages/admin/analytics/Overview";
+import AnalyticsCampaigns from "@/pages/admin/analytics/Campaigns";
+import CampaignEditor from "@/pages/admin/analytics/CampaignEditor";
+import CampaignDetail from "@/pages/admin/analytics/CampaignDetail";
+import AnalyticsContacts from "@/pages/admin/analytics/Contacts";
+import AnalyticsTrust from "@/pages/admin/analytics/Trust";
 import RequireAuth from "@/components/RequireAuth";
 
 /** React Router doesn't reset scroll position on navigation by itself — without
@@ -67,6 +74,18 @@ export default function App() {
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/profile" element={<Profile />} />
           <Route path="/admin/settings" element={<Settings />} />
+
+          {/* Analytics is one sidebar entry with its own tab bar, rather than
+              five more entries in a sidebar that already has five. */}
+          <Route path="/admin/analytics" element={<AnalyticsLayout />}>
+            <Route index element={<AnalyticsOverview />} />
+            <Route path="campaigns" element={<AnalyticsCampaigns />} />
+            <Route path="campaigns/new" element={<CampaignEditor />} />
+            <Route path="campaigns/:id" element={<CampaignDetail />} />
+            <Route path="campaigns/:id/edit" element={<CampaignEditor />} />
+            <Route path="contacts" element={<AnalyticsContacts />} />
+            <Route path="trust" element={<AnalyticsTrust />} />
+          </Route>
         </Route>
       </Routes>
     </>

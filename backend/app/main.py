@@ -18,6 +18,10 @@ from app.routers import (
 # the `app.core.config.settings` import above (both bind the name `settings`
 # in this module) and break every settings.* reference below.
 from app.routers import settings as settings_router
+from app.routers import (
+    sender_settings, contacts_admin, campaigns_admin, webhooks, tracking,
+    analytics_admin, attribution, trust_admin,
+)
 
 # Populated by the Docker build's frontend stage (COPY --from=frontend-build
 # .../dist ./static). Absent in local dev, where the frontend runs separately
@@ -49,13 +53,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for r in (health, auth, blog_public, blog_admin, ai, demo, settings_router):
+for r in (health, auth, blog_public, blog_admin, ai, demo, settings_router,
+          sender_settings, contacts_admin, campaigns_admin, webhooks,
+          analytics_admin, attribution, trust_admin):
     app.include_router(r.router, prefix="/api")
 
 # No /api prefix — sitemap.xml is conventionally served from the site root.
 # Registered before the SPA catch-all below so it wins over the static copy
 # that Vite copies into dist/ from frontend/public/.
 app.include_router(sitemap.router)
+
+# Same reason, and the ordering is load-bearing: these URLs are printed inside
+# mail that has already been sent, so they must stay short and stable, and the
+# SPA catch-all further down would otherwise swallow them and return index.html
+# to an unsubscribe request.
+app.include_router(tracking.router)
 
 
 if STATIC_DIR.exists():

@@ -1,0 +1,18 @@
+[Unit]
+Description=Run the Paladin campaign send worker every minute
+Requires=paladin-worker.service
+
+[Timer]
+# A minute is frequent enough that "send now" feels immediate, and the
+# worker's advisory lock makes an overlapping tick a no-op — a pass that is
+# still running simply causes the next one to exit straight away.
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+# Without this a missed window (server asleep, unit masked) is skipped
+# entirely rather than run once on the next opportunity.
+Persistent=true
+Unit=paladin-worker.service
+
+[Install]
+WantedBy=timers.target
