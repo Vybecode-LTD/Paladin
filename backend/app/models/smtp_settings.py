@@ -23,6 +23,8 @@ class SmtpSettings(Base):
     encrypted_password: Mapped[str | None] = mapped_column(String(500), nullable=True)
     use_tls: Mapped[bool] = mapped_column(Boolean, default=True)
     from_name: Mapped[str] = mapped_column(String(200), default="")
+    # Sender address for demo replies; "" -> email_service.DEMO_REPLY_FROM.
+    from_email: Mapped[str] = mapped_column(String(255), default="")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),

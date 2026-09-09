@@ -58,7 +58,7 @@ users are created from the admin UI.
 | Backend | FastAPI, async SQLAlchemy 2 with asyncpg, Alembic migrations |
 | Database | PostgreSQL (14 on the dev server, 17 in the production compose stack, Railway's plugin for the display site) |
 | Auth | JWT access + refresh tokens, bcrypt password hashes, per-IP rate limiting on login, demo requests and AI calls |
-| Email | The company's own SMTP server, configured in the admin Settings screen; the password is stored encrypted |
+| Email | The company's own SMTP server, configured in the admin Settings screen (host, port, TLS, account, sender address and name); the password is stored encrypted. The sender address must be one the account is allowed to send as; blank falls back to info@ashfordbriggs.com |
 | Build / run | One Dockerfile builds the frontend and serves it with the backend; the same image is used by Railway, the production compose stack, and CI's smoke test. The dev server runs the equivalent manual install. |
 
 ## Repository layout (`Vybecode-LTD/Paladin`)

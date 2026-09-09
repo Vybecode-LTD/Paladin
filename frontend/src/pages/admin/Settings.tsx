@@ -10,6 +10,7 @@ interface SmtpSettings {
   password_set: boolean;
   use_tls: boolean;
   from_name: string;
+  from_email: string;
   updated_at: string | null;
 }
 
@@ -20,6 +21,7 @@ const EMPTY_FORM = {
   password: "",
   use_tls: true,
   from_name: "",
+  from_email: "",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -57,6 +59,7 @@ export default function Settings() {
           password: "",
           use_tls: data.use_tls,
           from_name: data.from_name,
+          from_email: data.from_email,
         });
         setPasswordSet(data.password_set);
       })
@@ -88,6 +91,7 @@ export default function Settings() {
         password: form.password ? form.password : null,
         use_tls: form.use_tls,
         from_name: form.from_name,
+        from_email: form.from_email,
       });
       setForm({
         host: data.host,
@@ -96,6 +100,7 @@ export default function Settings() {
         password: "",
         use_tls: data.use_tls,
         from_name: data.from_name,
+        from_email: data.from_email,
       });
       setPasswordSet(data.password_set);
       setSaved(true);
@@ -170,11 +175,22 @@ export default function Settings() {
               <label htmlFor="use_tls" style={{ fontSize: 14, color: "var(--text)" }}>Use STARTTLS (port 587). Port 465 always uses implicit TLS.</label>
             </div>
             <div>
+              <label style={labelStyle}>From email</label>
+              <input type="email" style={inputStyle} value={form.from_email}
+                placeholder="info@ashfordbriggs.com"
+                onChange={(e) => setForm({ ...form, from_email: e.target.value })} />
+              <p style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+                Address demo replies are sent from. It must be one this SMTP account is
+                allowed to send as, or the mail server will reject it. Leave blank to use
+                info@ashfordbriggs.com.
+              </p>
+            </div>
+            <div>
               <label style={labelStyle}>From name</label>
               <input style={inputStyle} value={form.from_name}
                 onChange={(e) => setForm({ ...form, from_name: e.target.value })} />
               <p style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
-                Display name shown alongside the fixed sender address info@ashfordbriggs.com.
+                Display name shown alongside the sender address.
               </p>
             </div>
             {error && <p style={{ color: "var(--danger)", fontSize: 14 }}>{error}</p>}

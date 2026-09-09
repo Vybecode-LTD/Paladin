@@ -5,6 +5,14 @@ formal tags/releases — this log tracks work sessions, not package versions.
 
 ## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
 
+**Changed (owner decision, after BUG-007):** the demo-reply **sender address
+is now configurable** in the admin Settings screen (`from_email`, migration
+`d4a1c9e7b2f8`). It defaults to `info@ashfordbriggs.com` when blank, so
+existing deployments behave as before. Reason: mail providers reject a From
+address the authenticated account does not own, and the dev server's SMTP
+account is not an ashfordbriggs.com mailbox. Regression tests cover the
+fallback.
+
 **Fixed (BUG-007, later that day):** the admin SMTP test on the dev server
 ended in a 504 for a port-465 mail host. The Settings "Use TLS" switch only
 ever meant STARTTLS, so port 465 got a plaintext connection that waited 30 s.

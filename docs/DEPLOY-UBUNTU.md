@@ -257,8 +257,11 @@ Caddy obtains the certificate during the first request or two; if the
    ```
 
 4. In the admin **Settings** screen, enter the company's SMTP host, port,
-   username, password and sender name. Demo-request replies are sent through
-   that server; until it is configured, the reply action reports "SMTP is not
+   username, password, sender address and sender name. The sender address
+   must be one the SMTP account is allowed to send as (providers reject
+   anything else with `553 Sender address rejected`); leave it blank to use
+   `info@ashfordbriggs.com`. Demo-request replies are sent through that
+   server; until it is configured, the reply action reports "SMTP is not
    configured yet". The password is stored encrypted with `ENCRYPTION_KEY`.
 5. Create the other users (admin → Users). Roles: `author` can write and
    publish their own posts and use the AI assistant; `editor` can also manage

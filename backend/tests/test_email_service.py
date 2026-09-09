@@ -8,7 +8,33 @@ from the front proxy. These tests pin the mapping so it cannot regress.
 """
 import pytest
 
-from app.services.email_service import SMTP_TIMEOUT_SECONDS, smtp_tls_options
+from app.services.email_service import (
+    DEMO_REPLY_FROM,
+    SMTP_TIMEOUT_SECONDS,
+    resolve_from_email,
+    smtp_tls_options,
+)
+
+
+# --- sender address -----------------------------------------------------------
+# The From address is admin-configurable since 2026-09-09; an empty value keeps
+# the historical default so existing rows behave exactly as before.
+
+@pytest.mark.parametrize("configured", ["", "   ", None])
+def test_empty_or_missing_sender_falls_back_to_default(configured):
+    assert resolve_from_email(configured) == DEMO_REPLY_FROM
+
+
+def test_configured_sender_is_used_verbatim_but_trimmed():
+    assert resolve_from_email("info@basefra.me") == "info@basefra.me"
+    assert resolve_from_email("  info@basefra.me  ") == "info@basefra.me"
+
+
+def test_default_sender_is_the_ashford_briggs_info_address():
+    assert DEMO_REPLY_FROM == "info@ashfordbriggs.com"
+
+
+# --- TLS mode -----------------------------------------------------------------
 
 
 def test_port_465_always_uses_implicit_tls_regardless_of_switch():

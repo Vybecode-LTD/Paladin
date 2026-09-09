@@ -19,12 +19,13 @@ def _to_out(row: SmtpSettings | None) -> SmtpSettingsOut:
     if row is None:
         return SmtpSettingsOut(
             host="", port=587, username="", password_set=False,
-            use_tls=True, from_name="", updated_at=None,
+            use_tls=True, from_name="", from_email="", updated_at=None,
         )
     return SmtpSettingsOut(
         host=row.host, port=row.port, username=row.username,
         password_set=bool(row.encrypted_password),
-        use_tls=row.use_tls, from_name=row.from_name, updated_at=row.updated_at,
+        use_tls=row.use_tls, from_name=row.from_name, from_email=row.from_email,
+        updated_at=row.updated_at,
     )
 
 
@@ -53,6 +54,7 @@ async def update_smtp_settings(
     row.username = payload.username
     row.use_tls = payload.use_tls
     row.from_name = payload.from_name
+    row.from_email = payload.from_email
     if payload.password:
         try:
             row.encrypted_password = encrypt_secret(payload.password)
