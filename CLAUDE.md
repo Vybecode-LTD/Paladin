@@ -221,6 +221,12 @@ are all complete and verified (not just claimed):
   `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
   first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
   and the seed variables were removed afterwards.
+- **Dev/demo server (live since 2026-09-09):** https://devwww.ashfordbriggs.com
+  on the company's shared Ubuntu box `ab-webserver`, installed the manual way
+  (venv + systemd `paladin.service` + existing Postgres 14 + Apache reverse
+  proxy behind a front proxy that owns TLS). **That server also hosts PBX and
+  other systems: touch only the Paladin footprint.** Everything about it,
+  including the update procedure, is in `docs/DEPLOY-DEV-SERVER.md`.
 - **Next host (Ubuntu server, once the partners approve):**
   `docs/DEPLOY-UBUNTU.md` is the exact runbook; `deploy/ubuntu/` holds the
   Compose file, Caddyfile and `.env.example`. CI's `deploy-image` job builds

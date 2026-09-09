@@ -3,7 +3,17 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-09 (latest) — Ubuntu deployment runbook + proxy-aware rate limits
+## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
+
+**Deployed** the site to the company's shared dev server as
+https://devwww.ashfordbriggs.com (details and update procedure in
+`docs/DEPLOY-DEV-SERVER.md`). Manual path: Python 3.10 venv, systemd unit
+running as a dedicated `paladin` user, own role/database on the existing
+Postgres 14, Apache vhost reverse-proxying to 127.0.0.1:8000 behind a front
+proxy that terminates TLS. Verified live: health, blog API, sitemap with the
+devwww origin, all frontend routes, admin login, `X-Robots-Tag: noindex`.
+Lesson recorded there: certbot cannot run on that box for devwww because the
+front proxy answers the challenge; no certificate is needed locally.
 
 Prepared the move from the Railway display deployment to a self-managed
 Ubuntu server (pending partner approval).
