@@ -194,13 +194,24 @@ are all complete and verified (not just claimed):
   **`Postgres`** (Railway plugin). Two stray `frontend`/`backend` services
   that failed on every push were deleted on 2026-09-09 — do not recreate
   them; this monorepo deploys as one service.
-- **URL:** https://paladin-production-bc0b.up.railway.app
-  (health at `/api/health`, admin at `/admin/login`).
+- **URL (temporary display domain):** https://puppyinfo.us — attached as a
+  Railway custom domain on 2026-09-09 for demo/display purposes only. The
+  generated Railway domain is https://paladin-production-c90f.up.railway.app
+  (the earlier `-bc0b` one was regenerated and is dead). Health at
+  `/api/health`, admin at `/admin/login`.
+- **The real domain comes later.** `ashfordbriggs.com` is still hardcoded in
+  the frontend (canonical/OG in `Seo.tsx` and `index.html`, `robots.txt`,
+  JSON-LD in `Home.tsx`/`About.tsx`, the copy-link in `admin/PostList.tsx`,
+  Privacy/Terms text). That is deliberate — leave it. When the site moves to
+  its final domain, only `SITE_URL` and `CORS_ORIGINS` on the `Paladin`
+  service need to change, unless the final domain is not `ashfordbriggs.com`.
 - **Env vars on `Paladin`:** `DATABASE_URL=${{Postgres.DATABASE_URL}}` (a
   Railway reference, not a pasted URL), `JWT_SECRET_KEY`, `ENCRYPTION_KEY`,
-  `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `CORS_ORIGINS`, `SITE_URL`,
-  `DEBUG=false`, plus the JWT expiry settings. Production secrets were
-  generated fresh (not the dev ones); none are in git.
+  `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `DEBUG=false`, the JWT expiry
+  settings, and the only two domain-dependent ones:
+  `SITE_URL=https://puppyinfo.us` (feeds the dynamic `/sitemap.xml`) and
+  `CORS_ORIGINS=https://puppyinfo.us,https://www.puppyinfo.us,https://paladin-production-c90f.up.railway.app`.
+  Production secrets were generated fresh (not the dev ones); none are in git.
 - **Start path:** the Dockerfile `CMD` runs `alembic upgrade head`, then
   `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
   first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
@@ -227,11 +238,12 @@ are all complete and verified (not just claimed):
    was verified by hand (curl, browser checks), not by regression-safe tests.
    See `docs/TESTING.md` for the planned scope (pytest+httpx backend,
    Vitest+RTL frontend, ~45-65 cases).
-2. **Attach the real domain.** The site is live on Railway (see DEPLOYMENT
-   above) under a generated `*.up.railway.app` URL. When `ashfordbriggs.com`
-   (or whichever domain is chosen) is pointed at it: add the custom domain to
-   the `Paladin` service in Railway, then set `SITE_URL` and `CORS_ORIGINS` on
-   that service to the new origin. The hardcoded canonical/OG references in
-   `frontend/index.html`, `frontend/src/components/Seo.tsx` and
-   `frontend/public/robots.txt` already say `ashfordbriggs.com` — change them
-   only if a different domain is chosen.
+2. **Move to the real domain (later, per the owner).** The site currently
+   runs on the temporary display domain puppyinfo.us (see DEPLOYMENT above).
+   When the final domain is ready: add it as a custom domain on the `Paladin`
+   service in Railway, then change `SITE_URL` and `CORS_ORIGINS` on that
+   service to the new origin. The frontend's hardcoded canonical/OG/JSON-LD
+   references already say `ashfordbriggs.com`, so they need editing only if
+   the final domain is something else. Delete the dead static
+   `frontend/public/sitemap.xml` at that point — the backend generates the
+   real one and wins the route.

@@ -6,7 +6,8 @@ formal tags/releases — this log tracks work sessions, not package versions.
 ## 2026-09-08 (latest) — First production deploy (Railway)
 
 Redeployed the whole site into a fresh Railway project ("Ashford & Briggs")
-and got it live: https://paladin-production-bc0b.up.railway.app
+and got it live on the generated Railway URL (since replaced — see the
+2026-09-09 notes below).
 
 **Changed**
 - `railway.toml`: removed `startCommand` and `preDeployCommand`. The
@@ -35,6 +36,12 @@ and got it live: https://paladin-production-bc0b.up.railway.app
   build setup for this monorepo, failed on every push). Note: the GraphQL
   `serviceDelete` mutation is *not* authorized for a project token, but
   `railway service delete --service <name> --yes` (CLI ≥ 5.4x) is.
+- 2026-09-09: owner attached **puppyinfo.us** as a temporary display domain
+  and set `SITE_URL` / `CORS_ORIGINS` to it (the generated Railway domain was
+  regenerated to `paladin-production-c90f`). Verified: sitemap emits
+  puppyinfo.us URLs, CORS preflight allows the origin, all routes 200. The
+  ashfordbriggs.com references in the frontend are intentionally untouched —
+  that is the eventual production domain.
 
 ## 2026-07-07 — Blog editor completeness pass + deploy handoff docs
 

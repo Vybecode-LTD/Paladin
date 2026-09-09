@@ -66,12 +66,13 @@ write time only.
    coverage.
 5. **Wire real images/OG assets** — paths are referenced in `index.html` and
    blog cover slots but real files aren't in place.
-6. ~~Deploy to Railway~~ **Done 2026-09-08.** Live at
-   https://paladin-production-bc0b.up.railway.app — full details, env vars
-   and the gotchas that cost time are in the DEPLOYMENT section of
-   `CLAUDE.md`. Still open: attach the custom domain (then update `SITE_URL`
-   / `CORS_ORIGINS`). The stray `frontend` / `backend` services were deleted
-   on 2026-09-09; the project is now just `Paladin` + `Postgres`.
+6. ~~Deploy to Railway~~ **Done 2026-09-08.** Live on the temporary display
+   domain https://puppyinfo.us (custom domain attached 2026-09-09; the real
+   domain comes later) — full details, env vars and the gotchas that cost
+   time are in the DEPLOYMENT section of `CLAUDE.md`. Still open: move to the
+   final domain when the owner is ready (only `SITE_URL` / `CORS_ORIGINS`
+   change). The stray `frontend` / `backend` services were deleted on
+   2026-09-09; the project is now just `Paladin` + `Postgres`.
 
 ## Blockers / risks to know about
 
