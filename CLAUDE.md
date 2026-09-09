@@ -34,6 +34,8 @@ specific domain, and do not guess:
    `.gitignore`).
 
 Only proceed with deployment work once you have real answers to the above.
+For an Ubuntu server the answers map straight onto `docs/DEPLOY-UBUNTU.md`,
+which is the runbook to follow rather than improvising.
 Guessing at any of them is how a deploy silently breaks — wrong CORS origin,
 sitemap pointing at the wrong domain, a `DATABASE_URL` that doesn't exist.
 
@@ -59,7 +61,10 @@ The verbatim original copy is frozen in `docs/original-snapshot/` as a revert po
   `/api/health`) — nothing about the image is Railway-specific. `railway.toml` is
   present for Railway specifically, but a plain
   `docker build -t paladin . && docker run -p 8000:8000 --env-file backend/.env paladin`
-  works on any server. **If deploying under a domain other than
+  works on any server. **Self-managed Ubuntu/VPS: follow `docs/DEPLOY-UBUNTU.md`**
+  (Docker Compose + Postgres + Caddy; files in `deploy/ubuntu/`; CI's
+  `deploy-image` job builds and boots that exact image on every push).
+  **If deploying under a domain other than
   `ashfordbriggs.com`**, update: `SITE_URL` in the backend env (feeds the dynamic
   `/sitemap.xml`), `frontend/public/robots.txt`'s `Sitemap:` line, and the
   hardcoded canonical/OG references in `frontend/index.html` and
@@ -216,6 +221,15 @@ are all complete and verified (not just claimed):
   `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
   first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
   and the seed variables were removed afterwards.
+- **Next host (Ubuntu server, once the partners approve):**
+  `docs/DEPLOY-UBUNTU.md` is the exact runbook; `deploy/ubuntu/` holds the
+  Compose file, Caddyfile and `.env.example`. CI's `deploy-image` job builds
+  the image and boots it against Postgres (migrations, seeded admin login,
+  health) on every push, so the runbook's path is continuously tested.
+- **Rate limiting behind a proxy:** the Dockerfile starts uvicorn with
+  `--proxy-headers --forwarded-allow-ips='*'` so slowapi keys on the real
+  client IP. Without it every visitor shares one bucket. Safe only because
+  port 8000 is never published directly.
 - **Gotchas learned the hard way — do not repeat:**
   1. A `startCommand` in `railway.toml` *or* in the service's dashboard
      settings overrides the Dockerfile CMD and silently skips migrations
@@ -240,6 +254,7 @@ are all complete and verified (not just claimed):
    Vitest+RTL frontend, ~45-65 cases).
 2. **Move to the real domain (later, per the owner).** The site currently
    runs on the temporary display domain puppyinfo.us (see DEPLOYMENT above).
+   The final host will be a self-managed Ubuntu server: `docs/DEPLOY-UBUNTU.md`.
    When the final domain is ready: add it as a custom domain on the `Paladin`
    service in Railway, then change `SITE_URL` and `CORS_ORIGINS` on that
    service to the new origin. The frontend's hardcoded canonical/OG/JSON-LD

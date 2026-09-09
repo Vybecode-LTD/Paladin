@@ -1,0 +1,71 @@
+# Ashford & Briggs / Paladin: single-server deployment (Ubuntu + Docker).
+#
+#   cd deploy/ubuntu && cp .env.example .env   # fill it in, then:
+#   docker compose up -d --build
+#
+# Full runbook: docs/DEPLOY-UBUNTU.md. Everything is configured through the
+# .env file next to this file; nothing here needs editing for a normal deploy.
+name: paladin
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paladin
+      POSTGRES_USER: paladin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/ubuntu/.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paladin -d paladin"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # No `ports:` on purpose. Postgres is reachable only from the other
+    # containers on this compose network, never from the internet.
+
+  app:
+    build:
+      context: ../..            # repo root: the Dockerfile builds frontend + backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Derived from POSTGRES_PASSWORD so the password lives in exactly one
+      # place. The app normalizes postgresql:// to postgresql+asyncpg:// itself.
+      DATABASE_URL: postgresql://paladin:${POSTGRES_PASSWORD}@db:5432/paladin
+      PORT: "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # No `ports:` on purpose. Only Caddy can reach the app, which is what
+    # makes the Dockerfile's --forwarded-allow-ips='*' safe. Never publish
+    # 8000 to the host.
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"           # HTTP/3
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in deploy/ubuntu/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data        # Let's Encrypt certificates: keep this volume
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

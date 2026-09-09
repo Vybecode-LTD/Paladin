@@ -35,6 +35,17 @@ repeatable/regression-safe — nothing prevents these same bugs from being
 reintroduced by a future change, because there's no test asserting the
 behavior. That's the primary argument for phase 4 below.
 
+## Deploy-path smoke test (automated in CI since 2026-09-09)
+
+The `deploy-image` job in `.github/workflows/ci.yml` is the first automated
+end-to-end check in the project. On every push it validates
+`deploy/ubuntu/docker-compose.yml`, builds the production image from the root
+`Dockerfile`, boots it against a throwaway Postgres 17, and asserts that:
+the Alembic migrations ran, the seeded admin was created and can log in
+(`POST /api/auth/login` returns an access token), `/api/health` and
+`/api/blog/posts` return 200, and `/` serves the built React app. It does not
+replace the unit/integration suite below; it proves the deploy path itself.
+
 ## Planned automated suite (not started)
 
 ### Backend — pytest + httpx

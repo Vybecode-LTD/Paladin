@@ -3,7 +3,32 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-08 (latest) — First production deploy (Railway)
+## 2026-09-09 (latest) — Ubuntu deployment runbook + proxy-aware rate limits
+
+Prepared the move from the Railway display deployment to a self-managed
+Ubuntu server (pending partner approval).
+
+**Added**
+- `docs/DEPLOY-UBUNTU.md`: step-by-step runbook (server prep, Docker, code
+  transfer, `.env`, launch, first login, backups/restore, updates, carrying
+  content over from Railway, troubleshooting, a no-Docker appendix).
+- `deploy/ubuntu/docker-compose.yml` (app + Postgres 17 + Caddy),
+  `deploy/ubuntu/Caddyfile` (automatic HTTPS), `deploy/ubuntu/.env.example`
+  (every variable with its generation command).
+- CI job `deploy-image`: validates the compose file, builds the production
+  image, boots it against Postgres and checks migrations ran, the seeded
+  admin can log in, `/api/blog/posts` and `/` respond. This is the first
+  automated end-to-end check of the deploy path.
+
+**Fixed**
+- `Dockerfile`: uvicorn now runs with `--proxy-headers
+  --forwarded-allow-ips='*'`. slowapi keys rate limits on
+  `request.client.host`; behind Railway's edge (and behind Caddy on the VPS)
+  that was the proxy's address, so the login (10/min) and demo-request
+  (5/hour) limits were shared by every visitor. Applies to the Railway
+  deployment as well.
+
+## 2026-09-08 — First production deploy (Railway)
 
 Redeployed the whole site into a fresh Railway project ("Ashford & Briggs")
 and got it live on the generated Railway URL (since replaced — see the

@@ -21,7 +21,19 @@ COPY --from=frontend-build /frontend/dist ./static
 
 EXPOSE 8000
 
-# Run migrations, bootstrap the first admin only when SEED_ADMIN_PASSWORD is
-# set (seed.py is idempotent: it skips if that user already exists), then
-# start. Shell-form CMD so `&&`, `${PORT}` and the `||` guard all work.
-CMD alembic upgrade head  && { [ -z "$SEED_ADMIN_PASSWORD" ] || python -m seed; }  && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Boot sequence (shell-form CMD so &&, ${PORT} and the || guard all work):
+#   1. apply migrations
+#   2. create the first admin ONLY if SEED_ADMIN_PASSWORD is set
+#      (seed.py is idempotent: it skips a user that already exists)
+#   3. start uvicorn on $PORT (Railway injects it; plain Docker defaults to 8000)
+#
+# --proxy-headers / --forwarded-allow-ips='*': this container is only ever
+# reached through a reverse proxy (Railway's edge, or Caddy/Nginx on a VPS).
+# Without these, request.client.host is the proxy's IP, so slowapi's per-IP
+# rate limits (login 10/min, demo 5/hour) would be shared by every visitor.
+# '*' is safe precisely because nothing but the proxy can reach us; never
+# publish port 8000 directly to the internet.
+CMD alembic upgrade head \
+ && { [ -z "$SEED_ADMIN_PASSWORD" ] || python -m seed; } \
+ && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} \
+      --proxy-headers --forwarded-allow-ips='*'

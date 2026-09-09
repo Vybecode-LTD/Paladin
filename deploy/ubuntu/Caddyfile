@@ -1,0 +1,17 @@
+# Reverse proxy with automatic HTTPS (Let's Encrypt) in front of the app.
+# SITE_DOMAIN is injected from deploy/ubuntu/.env by docker-compose.yml.
+# Caddy provisions and renews the certificate itself; nothing to configure
+# as long as DNS points at this server and ports 80/443 are open.
+
+{$SITE_DOMAIN} {
+    encode zstd gzip
+    reverse_proxy app:8000
+}
+
+# Optional: serve www too (needs a DNS record for it, and add it to
+# CORS_ORIGINS in .env). Uncomment when the www record exists; before that,
+# leaving it enabled only produces certificate-retry noise in the logs.
+#
+# www.{$SITE_DOMAIN} {
+#     redir https://{$SITE_DOMAIN}{uri} permanent
+# }

@@ -61,3 +61,48 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  deploy-image:
+    name: Deploy image (Dockerfile + compose smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate deploy/ubuntu/docker-compose.yml
+        working-directory: deploy/ubuntu
+        run: |
+          cp .env.example .env
+          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci/' .env
+          docker compose config -q
+
+      - name: Build the production image
+        run: docker build -t paladin:ci .
+
+      - name: Boot it against Postgres and exercise migrations, seed, login
+        run: |
+          set -e
+          docker network create ci
+          docker run -d --name db --network ci \
+            -e POSTGRES_USER=paladin -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=paladin \
+            postgres:17-alpine
+          for i in $(seq 1 30); do docker exec db pg_isready -U paladin -d paladin && break; sleep 2; done
+          docker run -d --name app --network ci -p 8000:8000 \
+            -e DATABASE_URL=postgresql://paladin:ci@db:5432/paladin \
+            -e JWT_SECRET_KEY=ci-only-not-a-real-secret \
+            -e ENCRYPTION_KEY=$(python3 -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())") \
+            -e SEED_ADMIN_EMAIL=ci@example.com -e SEED_ADMIN_PASSWORD=ci-password-123 \
+            paladin:ci
+          ok=0
+          for i in $(seq 1 45); do
+            if curl -fsS http://localhost:8000/api/health; then ok=1; break; fi
+            sleep 2
+          done
+          echo; docker logs app
+          test "$ok" = 1
+          docker logs app 2>&1 | grep -q "Running upgrade" || { echo "migrations did not run"; exit 1; }
+          docker logs app 2>&1 | grep -q "Created admin"    || { echo "seed did not run"; exit 1; }
+          curl -fsS http://localhost:8000/api/blog/posts | grep -q '^\['
+          curl -fsS -X POST http://localhost:8000/api/auth/login \
+            -d 'username=ci@example.com&password=ci-password-123' | grep -q access_token
+          curl -fsS http://localhost:8000/ | grep -q '<div id="root">'

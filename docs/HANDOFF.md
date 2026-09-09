@@ -73,6 +73,9 @@ write time only.
    final domain when the owner is ready (only `SITE_URL` / `CORS_ORIGINS`
    change). The stray `frontend` / `backend` services were deleted on
    2026-09-09; the project is now just `Paladin` + `Postgres`.
+   **The eventual production host is an Ubuntu server:** the full runbook is
+   `docs/DEPLOY-UBUNTU.md` with the Compose/Caddy/env files in
+   `deploy/ubuntu/`, and CI's `deploy-image` job keeps that path working.
 
 ## Blockers / risks to know about
 
