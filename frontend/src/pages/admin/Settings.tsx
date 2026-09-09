@@ -167,7 +167,7 @@ export default function Settings() {
                 checked={form.use_tls}
                 onChange={(e) => setForm({ ...form, use_tls: e.target.checked })}
               />
-              <label htmlFor="use_tls" style={{ fontSize: 14, color: "var(--text)" }}>Use TLS</label>
+              <label htmlFor="use_tls" style={{ fontSize: 14, color: "var(--text)" }}>Use STARTTLS (port 587). Port 465 always uses implicit TLS.</label>
             </div>
             <div>
               <label style={labelStyle}>From name</label>

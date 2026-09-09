@@ -13,6 +13,21 @@ from app.models.smtp_settings import SmtpSettings
 DEMO_REPLY_FROM = "info@ashfordbriggs.com"
 DEMO_REPLY_SUBJECT = "Your request for demo access to Paladin"
 
+# Fail before a reverse proxy's typical ~30 s limit, so the admin sees the real
+# SMTP error instead of an opaque 504 from the proxy (seen on the dev server).
+SMTP_TIMEOUT_SECONDS = 15
+
+
+def smtp_tls_options(port: int, use_tls: bool) -> dict[str, bool]:
+    """Map the Settings screen's single "use TLS" switch onto aiosmtplib's two
+    mutually exclusive modes. Port 465 is implicit TLS by convention (the
+    server speaks TLS before any SMTP greeting), so it always gets ``use_tls``
+    and never STARTTLS; every other port treats the switch as STARTTLS.
+    Passing both would make aiosmtplib raise ValueError."""
+    if port == 465:
+        return {"use_tls": True, "start_tls": False}
+    return {"use_tls": False, "start_tls": bool(use_tls)}
+
 
 class EmailServiceError(Exception):
     """SMTP isn't configured yet, or the send itself failed — caught by
@@ -51,8 +66,8 @@ async def _send(
             port=cfg.port,
             username=cfg.username,
             password=password,
-            start_tls=cfg.use_tls,
-            timeout=30,
+            timeout=SMTP_TIMEOUT_SECONDS,
+            **smtp_tls_options(cfg.port, cfg.use_tls),
         )
     except (aiosmtplib.SMTPException, OSError) as exc:
         raise EmailServiceError(f"Could not send email: {exc}")
