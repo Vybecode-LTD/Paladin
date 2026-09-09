@@ -1,80 +1,94 @@
 # Roadmap — Ashford & Briggs / Paladin
 
-How this project is progressing from scaffold to production. Updated as phases complete.
+How this project is progressing from scaffold to production. Updated as phases
+complete. **Last updated 2026-09-09.**
 
 ## Phases
 
 ### 1. Scaffold — COMPLETE
 Backend (FastAPI + async SQLAlchemy + Alembic) and frontend (React + Vite + TS)
-fully scaffolded. Five marketing pages, blog reader, full admin (login, dashboard,
-post list, demo inbox, AI-assisted post editor). Original copy frozen in
-`docs/original-snapshot/`, expanded copy drafted in `docs/content/`.
+fully scaffolded. Five marketing pages, blog reader, full admin (login,
+dashboard, post list, demo inbox, AI-assisted post editor). Original copy frozen
+in `docs/original-snapshot/`, expanded copy in `docs/content/`.
 
 ### 2. Security hardening — COMPLETE (2026-07-07)
-- Rate limiting on login (10/min) and demo-request submission (5/hour) via slowapi.
-- Fixed three unguarded `uuid.UUID()` calls that raised unhandled 500s on malformed
-  IDs — now clean 404/401.
-- Password length validation (8-128 chars).
-- Self-service password-change endpoint + admin user-management endpoint.
-- Error handling around the Anthropic proxy call (clean 502 instead of 500).
-- `max_length` caps on AI request schemas.
-- `.env.example` now defaults `DEBUG=false`.
+Rate limiting on login (10/min) and demo requests (5/hour); three unguarded
+`uuid.UUID()` calls fixed (clean 401/404 instead of unhandled 500s); password
+length validation; self-service password change and admin user management;
+error handling around the Anthropic proxy; `max_length` caps on AI schemas;
+`DEBUG=false` by default. Committed. See `BUGS.md` (BUG-001…003) and `CHANGELOG.md`.
 
-See `docs/BUGS.md` for the specific defects closed and `docs/CHANGELOG.md` for the
-full entry. Not yet committed to git — working tree has uncommitted changes to the
-affected backend files.
+### 3. UX / SEO / accessibility — COMPLETE
+Per-page SEO metadata via a shared `<Seo>` component, `robots.txt`, a **dynamic**
+backend-generated `/sitemap.xml` covering every published post, JSON-LD, a 404
+route, responsive admin layout, click-to-copy in the post list, a real
+access-token-refresh flow (closing BUG-004), content-parity fixes, and GitHub
+Actions CI.
 
-### 3. UX / SEO / accessibility polish — IN PROGRESS
-Running in parallel with the security pass. Scope:
-- Per-page SEO meta tags, `robots.txt`, `sitemap.xml`, JSON-LD structured data.
-- 404 catch-all route on the frontend.
-- Admin sidebar/grid responsive CSS fixes.
-- Click-to-copy in the admin post list.
-- Real access-token-refresh flow on the frontend (access tokens are 60 min and
-  currently never refreshed on expiry/401 — user gets silently logged out).
-- Content-parity fixes for Contact and How It Works pages against `docs/content/`.
-- GitHub Actions CI pipeline.
+*(Earlier versions of this file listed this phase as in progress. It is done.)*
 
-Status of each item is not yet confirmed complete as of this writing — verify
-against the actual diff before marking done.
+### 4. Deployment — COMPLETE for dev; production pending
+- **Railway display site** — stood up 2026-09-08, **retired 2026-09-09** at the
+  owner's request. `DEPLOY-RAILWAY.md` is kept as history; `railway.toml` removed.
+- **Dev/demo server** — live since 2026-09-09 at https://devwww.ashfordbriggs.com
+  on the shared company Ubuntu box, installed the manual way (venv + systemd +
+  existing Postgres 14 + Apache reverse proxy behind a front proxy that owns
+  TLS). Runbook: `DEPLOY-DEV-SERVER.md`. **That box also runs PBX and three
+  other sites — touch only the Paladin footprint.**
+- **Production** — does not exist yet; server access is being arranged by the
+  owner. Runbook ready at `DEPLOY-UBUNTU.md` with the files in `deploy/ubuntu/`,
+  and CI's `deploy-image` job boots that exact image on every push so the path
+  stays continuously tested.
 
-### 4. Automated test suite — NOT STARTED
-No automated tests exist for backend or frontend today. Planned:
-- Backend: pytest + httpx (async client), targeting auth, RBAC guards, blog
-  publish workflow, rate limiting, AI proxy error paths.
-- Frontend: Vitest + React Testing Library for components/pages; consider
-  Playwright for admin login → publish flow E2E.
-- Estimated scope: 45-65 test cases across both.
-- Target coverage: see `docs/TESTING.md` for current state — no threshold is
-  enforced yet since no suite exists.
+### 5. Email campaign analytics — COMPLETE (2026-09-09)
+Built in five phases and deployed to the dev server. Design and architecture in
+`EMAIL-ANALYTICS.md`; owner setup tasks in `EMAIL-SETUP-RUNBOOK.md`.
 
-### 5. Deploy — NOT STARTED
-Railway target. Dockerfile + `railway.toml` present (single-service pattern:
-FastAPI serves the built frontend as static files from `backend/app/main.py`).
-Not yet deployed to production. Blocked on: finishing UX/SEO polish, standing up
-at minimum a smoke-test-level automated suite, and generating the first real
-Alembic migration (`alembic revision --autogenerate -m "init"`).
+1. Contacts, consent basis and suppression.
+2. Campaigns, Mailgun sending, root-mounted tracking, webhook ingestion.
+3. Honest engagement tiers and machine detection.
+4. Statistics, A/B significance testing, scorecards, sender settings.
+5. Domain trust: DMARC ingestion, blocklists, seed inboxes, pre-flight.
+
+**Not in production use yet** — sending is blocked on the owner tasks (Mailgun
+sending domain, DNS records, and the tracking-host routing decision).
+
+### 6. Automated tests — BACKEND COMPLETE, FRONTEND NOT STARTED
+**279 backend tests**, weighted toward the parts where being wrong is expensive:
+77 on the machine classifier, plus Mailgun event mapping, consent gates, link
+rewriting, significance testing, the DMARC parser, pre-flight and the SVG
+sanitizer. Plus CI's end-to-end `deploy-image` smoke test.
+
+Frontend remains at zero. See `TESTING.md`.
 
 ## Backlog (prioritized)
 
-1. **Finish UX/SEO/accessibility pass** (phase 3, in progress) — frontend token
-   refresh is the highest-risk item in this batch (silent logout is a real UX bug).
-2. **Generate first Alembic migration** — dev mode auto-creates tables via
-   lifespan; production must not rely on that.
-3. **Stand up backend test suite** (pytest + httpx) — prioritize auth/RBAC and
-   rate-limit paths since those are security-critical.
-4. **Stand up frontend test suite** (Vitest + RTL) — prioritize AuthContext,
-   token refresh, and the admin PostEditor.
-5. **GitHub Actions CI** — lint + test gate on PRs (tracked under phase 3 but
-   also unblocks safe iteration once the test suite exists).
-6. **Wire real images / OG assets** — paths are referenced in `index.html` and
-   blog covers but real assets aren't in place yet.
-7. **Commit the security-hardening changes** — currently uncommitted working
-   tree changes; commit before starting phase 3 work lands on top of them.
-8. **Railway deploy** — after the above, following `railway-deploy-playbook`.
+1. **Merge the open analytics PR.**
+2. **Owner setup tasks** — `EMAIL-SETUP-RUNBOOK.md`. Nothing sends until these
+   are done, and they are account/DNS actions no developer can perform.
+3. **The tracking-host routing decision** (runbook task C) — the only open
+   architectural question; the vhost line, certificate and webhook URL all
+   depend on it.
+4. **Fix forwarded headers at the proxy** — Paladin currently sees every visitor
+   as one IP, so per-visitor rate limits act as global caps.
+5. **Frontend test suite** (Vitest + RTL) — prioritize `AuthContext`, the
+   analytics pages, and `PostEditor`.
+6. **Production deployment** once the server exists.
+7. **Move DMARC reports to a shared mailbox** — currently a personal address.
+8. **Automatic DMARC report collection** — needs IMAP credentials for the report
+   mailbox; upload works today.
+9. **Rotate the 1024-bit DKIM key** on `mail.ashfordbriggs.com` to 2048-bit,
+   carefully — it signs customer password emails. Runbook trap 2.
+10. **Advance the root domain toward DMARC enforcement** — staged, gated by the
+    Trust panel's verdict.
 
 ## Non-goals (for now)
 
-- No heavyweight doc-management framework — this file and its siblings are
-  plain Markdown, hand-maintained.
+- No heavyweight doc-management framework — plain Markdown, hand-maintained.
 - No multi-tenant support, no i18n — single marketing site, single company.
+- **No Google Postmaster Tools integration** — needs domain-wide delegation and
+  shows nothing below a few hundred Gmail messages a day. Revisit if the list
+  grows an order of magnitude.
+- **No SpamAssassin** — not a reasonable daemon to run on a shared box serving
+  three other sites.
+- **No way to remove an address from the suppression list.** Intentional.

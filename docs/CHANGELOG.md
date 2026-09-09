@@ -3,7 +3,65 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-09 (latest) — Email campaign analytics: the trust panel
+## 2026-09-09 (latest) — Documentation reconciliation
+
+**Added:** the two documents the analytics subsystem never had, and a pass to
+stop the rest of the folder contradicting the code. These docs sync to the
+partner-facing repo, so drift here is drift the owners read.
+
+- **`EMAIL-ANALYTICS.md`** — what the system is and how it works: the trust-tier
+  model, the machine-detection rules and their thresholds, the architecture, and
+  the things deliberately not built with the reasoning for each.
+- **`EMAIL-SETUP-RUNBOOK.md`** — the ordered owner tasks, with the three traps
+  that cause real damage, how to fix each, how to verify, and how to recover.
+  Also the staged path from `p=none` to `p=reject` on the root domain.
+- **`HANDOFF.md` and `ROADMAP.md` rewritten.** Both were roughly two months
+  stale: they described the UX/SEO pass as in progress, the test suite as not
+  started, and deployment as "NOT STARTED — Railway target", when Railway had
+  been stood up *and* retired and a dev server was live. Neither mentioned the
+  analytics subsystem.
+- **`TESTING.md` rewritten** against a real `pytest --collect-only` run. It had
+  opened by saying no automated suite existed and that `python -m pytest` would
+  fail. It now carries the per-file breakdown and — more usefully — an explicit
+  statement of what the 279 tests *do not* cover: no HTTP-level tests, no
+  database integration, no frontend tests. A count without that caveat misleads.
+- **`DEPLOY-UBUNTU.md` section 5.5** — the production runbook never mentioned the
+  campaign worker, and the compose stack has no worker service. Following it
+  would produce a deployment where campaigns are written, scheduled, and
+  silently never sent. Documented with both a compose service and a systemd
+  option, plus commands to verify it is actually running, because the failure
+  mode here is silence rather than an error.
+
+**Corrected a real inconsistency in the earlier runbook.** It described
+`89.187.170.160` as the front proxy for the Paladin box and told the owners to
+point the sending subdomain at it while also adding a vhost alias on the Paladin
+machine. Live DNS shows those are two different hosts — the wildcard target is
+an nginx server hosting the public website, while Paladin is reached through
+`104.48.125.58`. Following the old instruction would have sent tracking traffic
+to the wrong server. The choice between them is now an explicit task.
+
+**Changed the recommendation on the tracking hostname.** Serving web traffic
+from the Mailgun sending domain forces that name to hold both mail records and
+an A record — and a DNS wildcard stops answering for any name that gains a
+record of any type, so publishing the SPF record would silently remove its
+address. Demonstrated on the live zone: `_dmarc.ashfordbriggs.com` holds a TXT
+record and returns nothing for an A query, while an invented name still
+resolves. Keeping the sending domain mail-only and serving tracking from a
+separate name removes the trap entirely, and needs no new DNS record at all.
+The `updates.ashfordbriggs.com` vhost alias is marked provisional pending that
+decision.
+
+**Not changed on purpose:** `deploy/ubuntu/docker-compose.yml`. CI boots it on
+every push, and editing a tested deployment artifact during a documentation pass
+is how a green pipeline turns red for unrelated reasons. The missing worker is
+documented and flagged rather than silently added.
+
+**BUG-004 and BUG-005 closed** against verified implementations. **BUG-006 held
+open** — a spot check found the approved copy sections present, but that is
+heading-level evidence, and closing a content-parity bug on partial evidence is
+how wrong copy ships.
+
+## 2026-09-09 — Email campaign analytics: the trust panel
 
 **Added:** the domain's standing on one screen, and the pre-flight check that
 stops a campaign going out broken. Completes the five-phase build.

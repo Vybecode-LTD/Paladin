@@ -6,6 +6,73 @@ current priorities and `docs/BUGS.md` for the live defect list.
 
 ---
 
+## 2026-09-09 — Documentation reconciliation
+
+Triggered by the email-analytics build completing and being deployed to the dev
+server. The code had moved a long way ahead of the documentation, and the docs
+in this folder are synced to the partner-facing repo — so drift here is drift
+the owners read.
+
+### What was wrong
+
+- **`HANDOFF.md` and `ROADMAP.md` were roughly two months stale.** Both still
+  described the UX/SEO pass as in progress (it had long landed), listed the
+  test suite as not started (279 tests exist), and listed deployment as "NOT
+  STARTED — Railway target" — when Railway had been stood up *and retired*, and
+  a dev server had gone live. Neither mentioned the analytics subsystem at all.
+- **`TESTING.md` opened by stating no automated suite existed** and that
+  `python -m pytest` would fail. It had not been true for some time.
+- **The entire analytics subsystem was undocumented.** No description of what it
+  does, and no record of the owner setup tasks it depends on.
+- **`DEPLOY-UBUNTU.md` never mentioned the campaign worker.** Following it would
+  produce a production deployment where campaigns are written, scheduled, and
+  silently never sent — the compose stack has no worker service.
+- **The earlier setup runbook was internally inconsistent about the network.**
+  It described `89.187.170.160` as the front proxy for the Paladin box and told
+  the owners to point the sending subdomain there *and* add a vhost alias on the
+  Paladin machine. Live DNS shows those are two different hosts, so following it
+  would have sent tracking traffic to the wrong server.
+- **`BUGS.md` listed BUG-004 and BUG-005 as open** when both were fixed.
+
+### What was done
+
+- Wrote `EMAIL-ANALYTICS.md` (what the system is, the trust-tier model, machine
+  detection, architecture) and `EMAIL-SETUP-RUNBOOK.md` (the ordered owner
+  tasks, the three traps with fixes and verification commands, and the staged
+  DMARC enforcement path).
+- Rewrote `HANDOFF.md`, `ROADMAP.md` and `TESTING.md` against verified state —
+  test counts taken from an actual `pytest --collect-only` run, not from memory.
+- Added section 5.5 to `DEPLOY-UBUNTU.md` covering the worker, with both a
+  compose service and a systemd option, and verification commands. The compose
+  file itself was deliberately **not** modified: CI boots it on every push, and
+  changing a tested deployment artifact during a documentation pass is how a
+  green pipeline turns red for unrelated reasons. The gap is documented and
+  flagged instead.
+- Corrected the network description everywhere it appeared, and marked the
+  `updates.ashfordbriggs.com` vhost alias as provisional pending the routing
+  decision.
+- Closed BUG-004 and BUG-005 against verified code. **Held BUG-006 open** — the
+  spot check found the approved sections present, but that is heading-level
+  evidence, and closing a content-parity bug on partial evidence is how wrong
+  copy ships.
+
+### Verified, not assumed
+
+Test counts from `pytest --collect-only` (279, with the per-file breakdown in
+`TESTING.md`); the absence of HTTP-level and database tests by grepping the
+suite for `AsyncClient` / `ASGITransport` / `AsyncSession` (none); BUG-004 and
+BUG-005 by reading the implementations; and every DNS claim against both a
+public resolver and the dev server's own, including a live demonstration on the
+zone that a name holding any record loses the wildcard's answer.
+
+### Still open
+
+Frontend test coverage is still zero. BUG-006 needs a full parity diff. The
+tracking-host routing decision is unmade, and the owner setup tasks in
+`EMAIL-SETUP-RUNBOOK.md` are untouched — nothing sends until they are done.
+
+---
+
 ## 2026-07-07 — 6-dimension project audit + security remediation pass
 
 ### Audit
@@ -77,6 +144,12 @@ status.
 The testing-dimension findings (no automated suite) remain fully open; no
 remediation has started as of this entry. See `docs/TESTING.md` and roadmap
 phase 4.
+
+> **Superseded 2026-09-09.** Both paragraphs above were accurate when written
+> and are not any more, kept because this is a log of events rather than a live
+> tracker. The UX/SEO/CI work landed, and the testing findings are substantially
+> remediated — 279 backend tests, though the frontend is still at zero. See the
+> 2026-09-09 reconciliation entry at the top of this file.
 
 ---
 

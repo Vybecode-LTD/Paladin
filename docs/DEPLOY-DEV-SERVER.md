@@ -12,9 +12,10 @@ PBX systems and other sites. **Touch only the Paladin footprint listed here.**
 | Config and secrets | `/opt/paladin/backend/.env` (mode 640, `mbarker:paladin`) |
 | Python venv | `/opt/paladin/backend/.venv` (Python 3.10, system) |
 | Service | `paladin.service` (systemd; runs as the `paladin` system user; `ExecStartPre` applies migrations) |
+| Background worker | `paladin-worker.service` + `paladin-worker.timer` (systemd; source in `deploy/ubuntu/`). Sends due campaigns and runs the daily domain-trust checks. Takes a Postgres advisory lock (`84712026`) on its own connection, so an overlapping timer firing exits rather than double-sending. Logs: `journalctl -u paladin-worker` |
 | App listener | `127.0.0.1:8000` only |
 | Database | existing Postgres 14 on the box; role `paladin`, database `paladin` |
-| Apache vhost | `/etc/apache2/sites-enabled/www.ashfordbriggs.com.conf` (`:80` only; reverse proxy to 8000; `ServerName ashfordbriggs.com`, `ServerAlias devwww.ashfordbriggs.com`). The previous static-site version is kept at `sites-available/www.ashfordbriggs.com.conf.bak-2026-09-09-static`. |
+| Apache vhost | `/etc/apache2/sites-enabled/www.ashfordbriggs.com.conf` (`:80` only; reverse proxy to 8000; `ServerName ashfordbriggs.com`, aliases `devwww.ashfordbriggs.com` and `updates.ashfordbriggs.com` — the second is **provisional**, see "How traffic reaches it" below). **`sites-enabled/` holds a real file here, not the usual `a2ensite` symlink** — `sites-available/www.ashfordbriggs.com.conf` is a stale copy of the old static site (it still has a `:443` block) and is *not* what Apache serves. Edit the `sites-enabled/` file. The previous static-site version is kept at `sites-available/www.ashfordbriggs.com.conf.bak-2026-09-09-static`. |
 | SSH access used for the deploy | the `claude-paladin-deploy` line in `~mbarker/.ssh/authorized_keys`; remove it with `sed -i '/claude-paladin-deploy/d' ~/.ssh/authorized_keys` when no longer wanted |
 | Apache logs for this site only | `/var/log/apache2/paladin-access.log`, `paladin-error.log` |
 | App logs | `journalctl -u paladin` |
@@ -38,6 +39,32 @@ Consequences:
   static-site vhost was dropped on 2026-09-09: nothing legitimate reaches it
   (the front proxy talks to `:80`), and the only certificate it could use is
   the expired `ashfordbriggs.com` one.
+- **`updates.ashfordbriggs.com` is aliased on the vhost, but the tracking
+  hostname is not settled and this alias is provisional.** The alias was added
+  2026-09-09; the campaign tracking routes are root-mounted, so they answer on
+  any hostname that reaches the app, and changing which name is used is a
+  one-line vhost edit.
+
+  **The current recommendation is to move tracking to a different name than the
+  sending domain** — see `EMAIL-SETUP-RUNBOOK.md`, trap 1. Serving web traffic
+  from `updates.` means it needs an A record, and per RFC 4592 the zone wildcard
+  stops answering for any name that gains a record of any type — so the first
+  Mailgun TXT record published on `updates.` would silently remove its address.
+  Keeping the sending domain mail-only (no A record) and serving tracking from
+  e.g. `links.ashfordbriggs.com` removes that trap entirely. **When that name is
+  chosen, change this alias to match.**
+
+  Either way, two things outside this box have to happen before any tracking
+  hostname works:
+  1. **DNS.** It must resolve to whichever machine will serve it. Note that the
+     wildcard points at `89.187.170.160` (the nginx host serving the public
+     website) while Paladin is reached through `104.48.125.58` — those are two
+     different machines, so "the wildcard already covers it" is only true if the
+     nginx host is the one doing the proxying.
+  2. **TLS.** The front proxy's certificate covers `devwww.ashfordbriggs.com`
+     only (no wildcard, no SAN), and the nginx host's covers `ashfordbriggs.com`
+     and `www.` only. Whichever hostname serves tracking needs adding to
+     whichever certificate is in front of it.
 - **Rate limiting is degraded, by the front proxy, not by this box.** The
   vhost's access log records every candidate forwarded-address header
   (`xff=`, `xrip=`, `fwd=`, `cf=`), and the front proxy sends none of them,
