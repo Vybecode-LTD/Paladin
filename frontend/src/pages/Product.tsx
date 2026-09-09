@@ -163,7 +163,8 @@ export default function Product() {
         </div>
       </section>
 
-      <section className="container" style={{ paddingBottom: 40 }}>
+      {/* Closing CTA — 80px above so the card clears the bordered section's divider (matches About) */}
+      <section className="container" style={{ padding: "80px 0 40px" }}>
         <motion.div {...fadeUp} className="card-deep" style={{ textAlign: "center" }}>
           <h2 className="section-title">The best way to understand Paladin is to watch it work.</h2>
           <Link to="/contact" className="btn btn-primary" style={{ marginTop: 24 }}>Request a Demo <ArrowRight size={18} aria-hidden="true" /></Link>
