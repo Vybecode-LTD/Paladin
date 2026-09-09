@@ -5,6 +5,16 @@ formal tags/releases — this log tracks work sessions, not package versions.
 
 ## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
 
+**Fixed (BUG-007, later that day):** the admin SMTP test on the dev server
+ended in a 504 for a port-465 mail host. The Settings "Use TLS" switch only
+ever meant STARTTLS, so port 465 got a plaintext connection that waited 30 s.
+`smtp_tls_options()` now selects implicit TLS for 465 and STARTTLS otherwise,
+the send timeout is 15 s so the real error beats the proxy timeout, and the
+checkbox says what it does. Six regression tests. Live after deploy: the mail
+host answers in ~1 s and rejects the fixed sender `info@ashfordbriggs.com`
+because the configured account does not own it. Sending needs either an SMTP
+account that owns that address or a decision to make the sender configurable.
+
 **Documentation repo** for the partners: github.com/Vybecode-LTD/ashfordbriggs-docs
 now carries a synced copy of `docs/` plus the `deploy/ubuntu` files under
 `paladin-website/`. Source of truth stays here; `scripts/sync-docs.sh` (and the

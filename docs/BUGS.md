@@ -52,6 +52,27 @@ high-value first regression test once the suite exists).
 
 ---
 
+### BUG-007 — SMTP test on port 465 hangs, surfaces as "Gateway Time-out"
+- **Location:** `backend/app/services/email_service.py`; label in
+  `frontend/src/pages/admin/Settings.tsx`
+- **Root cause:** the Settings screen's single "Use TLS" switch was passed to
+  aiosmtplib as `start_tls` (STARTTLS) and nothing ever selected implicit TLS
+  (`use_tls`). Port 465 speaks TLS before any SMTP greeting, so a 465
+  configuration opened a plaintext connection and waited the full 30 s for a
+  greeting. On the dev server the front proxy timed out first (504); the app's
+  own 502 with the real message arrived after the browser had given up.
+- **Fix:** `smtp_tls_options(port, use_tls)` maps port 465 to implicit TLS
+  (never STARTTLS) and every other port to STARTTLS when the switch is on;
+  the two modes are never both set. Send timeout is now 15 s so a real error
+  beats a proxy timeout. The checkbox label states the behaviour.
+- **Verified:** `backend/tests/test_email_service.py` (6 tests; collection
+  error before the fix, all pass after). Live on the dev server after deploy:
+  the SMTP test to mail.spacemail.com:465 completes in ~1 s and returns the
+  server's real answer, `553 5.7.1 Sender address rejected: not owned by user`,
+  because the configured account does not own the fixed sender
+  `info@ashfordbriggs.com`. That is a mail-account configuration decision, not
+  an application fault (see CHANGELOG 2026-09-09).
+
 ## OPEN
 
 ### BUG-004 — Access tokens never refresh on the frontend
