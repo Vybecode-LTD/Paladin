@@ -1,6 +1,13 @@
 # Testing — Ashford & Briggs / Paladin
 
-## Current state: no automated test suite
+## Current state: minimal automated coverage
+
+Update 2026-09-09: this is no longer strictly "zero". `backend/tests/test_svg_sanitize.py`
+holds 7 regression tests for the AI header-image SVG sanitizer, and CI runs
+them (pytest is installed from `backend/requirements-dev.txt`; the job had
+been failing since July because pytest was never installed). CI also runs the
+deploy-path smoke test described below. The original assessment follows.
+
 
 There is **no automated test suite** for either the backend or the frontend as
 of this writing. This is an honest, known gap — not a claim of coverage. Every

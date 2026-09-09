@@ -248,8 +248,10 @@ are all complete and verified (not just claimed):
 
 ## NEXT STEPS (for Claude Code)
 1. **Build the automated test suite** — this is the single biggest remaining
-   gap. Zero automated tests exist for backend or frontend; every fix above
-   was verified by hand (curl, browser checks), not by regression-safe tests.
+   gap. As of 2026-09-09 there are 7 backend unit tests
+   (`backend/tests/test_svg_sanitize.py`, run by CI via `requirements-dev.txt`)
+   plus CI's `deploy-image` end-to-end smoke test; everything else was
+   verified by hand (curl, browser checks), not by regression-safe tests.
    See `docs/TESTING.md` for the planned scope (pytest+httpx backend,
    Vitest+RTL frontend, ~45-65 cases).
 2. **Move to the real domain (later, per the owner).** The site currently

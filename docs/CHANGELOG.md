@@ -21,6 +21,10 @@ Ubuntu server (pending partner approval).
   automated end-to-end check of the deploy path.
 
 **Fixed**
+- CI `Backend` job had failed on every push since July: the `Run tests` step
+  fires because `backend/tests/` exists, but pytest was never installed.
+  Added `backend/requirements-dev.txt` (pytest) and install it in CI. The
+  7 existing SVG-sanitizer tests pass.
 - `Dockerfile`: uvicorn now runs with `--proxy-headers
   --forwarded-allow-ips='*'`. slowapi keys rate limits on
   `request.client.host`; behind Railway's edge (and behind Caddy on the VPS)
