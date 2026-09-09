@@ -13,11 +13,11 @@ cover deployment, testing, the roadmap, and change history.
 
 | Purpose | URL | Where it runs | Notes |
 |---|---|---|---|
-| Display / demo (temporary) | https://puppyinfo.us | Railway, project "Ashford & Briggs" | See `DEPLOY-RAILWAY.md`. Will be retired once the real domain is live. |
+| Display / demo on Railway | retired 2026-09-09 | Railway | Shut down; `DEPLOY-RAILWAY.md` is kept as history. |
 | Dev (company server) | https://devwww.ashfordbriggs.com | `ab-webserver`, shared company Ubuntu box | See `DEPLOY-DEV-SERVER.md`. Not indexed by search engines. |
 | Production | ashfordbriggs.com (planned) | A self-managed Ubuntu server | Runbook: `DEPLOY-UBUNTU.md` with the files in `deploy/ubuntu/`. |
 
-All three run the same code from the `main` branch of the
+Every environment runs the same code from the `main` branch of the
 `Vybecode-LTD/Paladin` repository and the same single-process design: one
 FastAPI process serves the API under `/api/*` and the built React site for
 every other path.
@@ -56,10 +56,10 @@ users are created from the admin UI.
 |---|---|
 | Frontend | React 18, Vite, TypeScript, React Router, Framer Motion, react-markdown |
 | Backend | FastAPI, async SQLAlchemy 2 with asyncpg, Alembic migrations |
-| Database | PostgreSQL (14 on the dev server, 17 in the production compose stack, Railway's plugin for the display site) |
+| Database | PostgreSQL (14 on the dev server, 17 in the production compose stack) |
 | Auth | JWT access + refresh tokens, bcrypt password hashes, per-IP rate limiting on login, demo requests and AI calls |
 | Email | The company's own SMTP server, configured in the admin Settings screen (host, port, TLS, account, sender address and name); the password is stored encrypted. The sender address must be one the account is allowed to send as; blank falls back to info@ashfordbriggs.com |
-| Build / run | One Dockerfile builds the frontend and serves it with the backend; the same image is used by Railway, the production compose stack, and CI's smoke test. The dev server runs the equivalent manual install. |
+| Build / run | One Dockerfile builds the frontend and serves it with the backend; the same image is used by the production compose stack and CI's smoke test. The dev server runs the equivalent manual install. |
 
 ## Repository layout (`Vybecode-LTD/Paladin`)
 
@@ -88,7 +88,7 @@ sites leave it as is.
 
 ## Where to look next
 
-- Deploying: `DEPLOY-UBUNTU.md` (production), `DEPLOY-DEV-SERVER.md` (dev box), `DEPLOY-RAILWAY.md` (display).
+- Deploying: `DEPLOY-UBUNTU.md` (production), `DEPLOY-DEV-SERVER.md` (dev box), `DEPLOY-RAILWAY.md` (the retired display deployment, history only).
 - What is planned and what is open: `ROADMAP.md`, `BUGS.md`.
 - What changed when: `CHANGELOG.md`.
 - Test and security posture: `TESTING.md`, `AUDIT-LOG.md`.

@@ -66,13 +66,10 @@ write time only.
    coverage.
 5. **Wire real images/OG assets** — paths are referenced in `index.html` and
    blog cover slots but real files aren't in place.
-6. ~~Deploy to Railway~~ **Done 2026-09-08.** Live on the temporary display
-   domain https://puppyinfo.us (custom domain attached 2026-09-09; the real
-   domain comes later) — full details, env vars and the gotchas that cost
-   time are in the DEPLOYMENT section of `CLAUDE.md`. Still open: move to the
-   final domain when the owner is ready (only `SITE_URL` / `CORS_ORIGINS`
-   change). The stray `frontend` / `backend` services were deleted on
-   2026-09-09; the project is now just `Paladin` + `Postgres`.
+6. ~~Deploy to Railway~~ **Done 2026-09-08, retired 2026-09-09.** The Railway
+   display deployment (puppyinfo.us) was shut down at the owner's request;
+   `docs/DEPLOY-RAILWAY.md` keeps the history. Still open: move to the final
+   domain when the owner is ready (only `SITE_URL` / `CORS_ORIGINS` change).
    **Dev/demo copy is live at https://devwww.ashfordbriggs.com** (shared
    company server; see `docs/DEPLOY-DEV-SERVER.md`, and do not touch anything
    on that box beyond the Paladin footprint it lists).

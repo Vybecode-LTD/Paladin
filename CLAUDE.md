@@ -52,14 +52,13 @@ The verbatim original copy is frozen in `docs/original-snapshot/` as a revert po
 ## Stack
 - **Frontend:** React 18 + Vite + TypeScript, React Router, Framer Motion,
   react-markdown. Design-forward dark aesthetic (see `frontend/src/styles/tokens.css`).
-- **Backend:** FastAPI + async SQLAlchemy 2 (asyncpg) + Alembic, Railway Postgres.
+- **Backend:** FastAPI + async SQLAlchemy 2 (asyncpg) + Alembic, PostgreSQL.
 - **AI:** blog generation runs **server-side** via a FastAPI proxy to Anthropic
   (`backend/app/services/anthropic_service.py`) — the API key NEVER reaches the
   browser. Model: `claude-sonnet-4-6` (configurable via `ANTHROPIC_MODEL`).
 - **Deploy target:** Any Docker host. The single `Dockerfile` builds the frontend
   then serves it + the API from one FastAPI process on `$PORT` (healthcheck at
-  `/api/health`) — nothing about the image is Railway-specific. `railway.toml` is
-  present for Railway specifically, but a plain
+  `/api/health`) — nothing about the image is host-specific. A plain
   `docker build -t paladin . && docker run -p 8000:8000 --env-file backend/.env paladin`
   works on any server. **Self-managed Ubuntu/VPS: follow `docs/DEPLOY-UBUNTU.md`**
   (Docker Compose + Postgres + Caddy; files in `deploy/ubuntu/`; CI's
@@ -84,7 +83,7 @@ ashford-briggs/
 │   │   └── main.py        app factory, CORS, routers under /api
 │   ├── alembic/          async migrations
 │   ├── seed.py           creates first admin
-│   ├── Dockerfile, railway.toml, requirements.txt, .env.example
+│   ├── requirements.txt, .env.example
 ├── frontend/         React/Vite app
 │   ├── src/
 │   │   ├── pages/         Home, Product, HowItWorks, About, Contact, Blog*, admin/*
@@ -191,36 +190,22 @@ are all complete and verified (not just claimed):
   there was just no UI control for it), and an **Insert image** button now
   supports captioned in-body images (see Blog model above).
 
-## DEPLOYMENT (live) — as of 2026-09-08
-- **Host:** Railway project **"Ashford & Briggs"**
-  (id `006280bb-57cc-4b59-bc3a-0acfcc3fa623`), environment `production`.
-  Exactly two services: **`Paladin`** (built from this repo's root
-  `Dockerfile`, GitHub-connected to `main`, auto-deploys on every push) and
-  **`Postgres`** (Railway plugin). Two stray `frontend`/`backend` services
-  that failed on every push were deleted on 2026-09-09 — do not recreate
-  them; this monorepo deploys as one service.
-- **URL (temporary display domain):** https://puppyinfo.us — attached as a
-  Railway custom domain on 2026-09-09 for demo/display purposes only. The
-  generated Railway domain is https://paladin-production-c90f.up.railway.app
-  (the earlier `-bc0b` one was regenerated and is dead). Health at
-  `/api/health`, admin at `/admin/login`.
+## DEPLOYMENT — as of 2026-09-09
+- **Where the site runs now:** only the dev/demo copy on the company server
+  (see below). The Railway display deployment (puppyinfo.us) was **retired on
+  2026-09-09**: its `Paladin` and `Postgres` services were deleted,
+  puppyinfo.us no longer serves anything, and `railway.toml` was removed from
+  the repo. History and the Railway-specific lessons are kept in
+  `docs/DEPLOY-RAILWAY.md` in case Railway is ever used again.
 - **The real domain comes later.** `ashfordbriggs.com` is still hardcoded in
   the frontend (canonical/OG in `Seo.tsx` and `index.html`, `robots.txt`,
   JSON-LD in `Home.tsx`/`About.tsx`, the copy-link in `admin/PostList.tsx`,
   Privacy/Terms text). That is deliberate — leave it. When the site moves to
-  its final domain, only `SITE_URL` and `CORS_ORIGINS` on the `Paladin`
-  service need to change, unless the final domain is not `ashfordbriggs.com`.
-- **Env vars on `Paladin`:** `DATABASE_URL=${{Postgres.DATABASE_URL}}` (a
-  Railway reference, not a pasted URL), `JWT_SECRET_KEY`, `ENCRYPTION_KEY`,
-  `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `DEBUG=false`, the JWT expiry
-  settings, and the only two domain-dependent ones:
-  `SITE_URL=https://puppyinfo.us` (feeds the dynamic `/sitemap.xml`) and
-  `CORS_ORIGINS=https://puppyinfo.us,https://www.puppyinfo.us,https://paladin-production-c90f.up.railway.app`.
-  Production secrets were generated fresh (not the dev ones); none are in git.
-- **Start path:** the Dockerfile `CMD` runs `alembic upgrade head`, then
-  `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
-  first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
-  and the seed variables were removed afterwards.
+  its final domain, only `SITE_URL` and `CORS_ORIGINS` in that deployment's
+  environment need to change, unless the final domain is not `ashfordbriggs.com`.
+- **Start path (any host):** the Dockerfile `CMD` runs `alembic upgrade head`,
+  then `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn
+  with `--proxy-headers`. The dev server's systemd unit mirrors this sequence.
 - **Partner-facing docs repo:** github.com/Vybecode-LTD/ashfordbriggs-docs is a
   synced copy of `docs/` + `deploy/ubuntu/` (folder `paladin-website/`). Never
   edit it there. After changing docs here, run `scripts/sync-docs.sh` (needs
@@ -242,21 +227,8 @@ are all complete and verified (not just claimed):
   `--proxy-headers --forwarded-allow-ips='*'` so slowapi keys on the real
   client IP. Without it every visitor shares one bucket. Safe only because
   port 8000 is never published directly.
-- **Gotchas learned the hard way — do not repeat:**
-  1. A `startCommand` in `railway.toml` *or* in the service's dashboard
-     settings overrides the Dockerfile CMD and silently skips migrations
-     (symptom: every DB route 500s with `relation "blog_posts" does not
-     exist` while `/api/health` is green). Keep both empty. Railway also
-     ignored `preDeployCommand` from `railway.toml` (manifest showed `null`).
-  2. Removing `startCommand` from `railway.toml` does **not** clear a value
-     already stored on the service — it had to be cleared through the API
-     (`serviceInstanceUpdate` with `startCommand: ""`).
-  3. `railway redeploy` reuses the previous deployment's config snapshot; a
-     settings change only takes effect on a *new* deployment (a push,
-     `railway up`, or the `serviceInstanceDeploy` mutation).
-  4. Project tokens cannot `railway ssh` / `railway run` against the
-     container — hence the env-gated seed step in the CMD instead of a
-     one-off command.
+- **Railway-specific gotchas** (start-command override, redeploy config
+  snapshots, project-token limits) are recorded in `docs/DEPLOY-RAILWAY.md`.
 
 ## NEXT STEPS (for Claude Code)
 1. **Build the automated test suite** — this is the single biggest remaining
@@ -266,12 +238,11 @@ are all complete and verified (not just claimed):
    verified by hand (curl, browser checks), not by regression-safe tests.
    See `docs/TESTING.md` for the planned scope (pytest+httpx backend,
    Vitest+RTL frontend, ~45-65 cases).
-2. **Move to the real domain (later, per the owner).** The site currently
-   runs on the temporary display domain puppyinfo.us (see DEPLOYMENT above).
-   The final host will be a self-managed Ubuntu server: `docs/DEPLOY-UBUNTU.md`.
-   When the final domain is ready: add it as a custom domain on the `Paladin`
-   service in Railway, then change `SITE_URL` and `CORS_ORIGINS` on that
-   service to the new origin. The frontend's hardcoded canonical/OG/JSON-LD
+2. **Move to the real domain (later, per the owner).** The only live copy is
+   the dev server at devwww.ashfordbriggs.com (see DEPLOYMENT above). The final
+   host will be a self-managed Ubuntu server: `docs/DEPLOY-UBUNTU.md`. When
+   the final domain is ready, set `SITE_URL` and `CORS_ORIGINS` for that
+   deployment to the new origin. The frontend's hardcoded canonical/OG/JSON-LD
    references already say `ashfordbriggs.com`, so they need editing only if
    the final domain is something else. Delete the dead static
    `frontend/public/sitemap.xml` at that point — the backend generates the

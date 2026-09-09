@@ -5,6 +5,12 @@ formal tags/releases — this log tracks work sessions, not package versions.
 
 ## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
 
+**Retired (owner request):** the Railway display deployment. The `Paladin`
+and `Postgres` services were deleted from the Railway project, puppyinfo.us
+no longer serves anything, and the unused `railway.toml` was removed from the
+repo. `docs/DEPLOY-RAILWAY.md` stays as history. The dev server
+(devwww.ashfordbriggs.com) is now the only live copy of the site.
+
 **Changed (owner decision, after BUG-007):** the demo-reply **sender address
 is now configurable** in the admin Settings screen (`from_email`, migration
 `d4a1c9e7b2f8`). It defaults to `info@ashfordbriggs.com` when blank, so

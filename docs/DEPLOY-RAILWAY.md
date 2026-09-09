@@ -1,8 +1,14 @@
-# Railway display deployment (puppyinfo.us)
+# Railway display deployment (puppyinfo.us) — RETIRED
 
-The temporary **display / demo** deployment, live since 2026-09-08. It exists
-so the site can be shown before the real domain is ready; it is not the
-production plan (that is `DEPLOY-UBUNTU.md`).
+> **Retired 2026-09-09.** The `Paladin` and `Postgres` services were deleted
+> at the owner's request and puppyinfo.us no longer serves anything. This
+> page is kept as history and for the Railway-specific lessons at the bottom,
+> in case Railway is used again. The live copy of the site is the dev server
+> (`DEPLOY-DEV-SERVER.md`); production is `DEPLOY-UBUNTU.md`.
+
+The temporary **display / demo** deployment, live 2026-09-08 to 2026-09-09. It
+existed so the site could be shown before the real domain was ready; it was
+never the production plan.
 
 ## Where it runs
 
