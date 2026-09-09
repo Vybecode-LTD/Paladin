@@ -3,7 +3,36 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-07-07 (latest) — Blog editor completeness pass + deploy handoff docs
+## 2026-09-08 (latest) — First production deploy (Railway)
+
+Redeployed the whole site into a fresh Railway project ("Ashford & Briggs")
+and got it live: https://paladin-production-bc0b.up.railway.app
+
+**Changed**
+- `railway.toml`: removed `startCommand` and `preDeployCommand`. The
+  `startCommand` overrode the Dockerfile CMD, so `alembic upgrade head` never
+  ran on Railway and every DB-backed route returned 500 with
+  `relation "blog_posts" does not exist`; `preDeployCommand` was ignored by
+  Railway entirely (service manifest showed `null`). The Dockerfile CMD is
+  now the single start path on any Docker host.
+- `Dockerfile`: CMD now runs migrations, then `python -m seed` only when
+  `SEED_ADMIN_PASSWORD` is set (idempotent — skips an existing user), then
+  uvicorn. Needed because Railway project tokens cannot `railway ssh` to run
+  the seed as a one-off.
+
+**Infra (Railway, not in git)**
+- Postgres plugin added; `DATABASE_URL` referenced as
+  `${{Postgres.DATABASE_URL}}`.
+- Fresh production `JWT_SECRET_KEY` and `ENCRYPTION_KEY`; `ANTHROPIC_API_KEY`,
+  `ANTHROPIC_MODEL`, `CORS_ORIGINS`, `SITE_URL`, `DEBUG=false` set on the
+  `Paladin` service. A stale service-level `startCommand` was cleared via
+  the API so the Dockerfile CMD applies.
+- All three Alembic migrations applied; first admin created; seed variables
+  removed afterwards.
+- Verified live: `/`, `/blog`, `/api/blog/posts` (200 `[]`), `/sitemap.xml`
+  (200, correct origin), admin login and authenticated admin routes (200).
+
+## 2026-07-07 — Blog editor completeness pass + deploy handoff docs
 
 Verified the admin blog editor against a checklist (AI assistant, editing
 published posts, image handling, formatting, unpublish/delete) rather than

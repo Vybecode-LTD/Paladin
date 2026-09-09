@@ -186,16 +186,55 @@ are all complete and verified (not just claimed):
   there was just no UI control for it), and an **Insert image** button now
   supports captioned in-body images (see Blog model above).
 
+## DEPLOYMENT (live) — as of 2026-09-08
+- **Host:** Railway project **"Ashford & Briggs"**
+  (id `006280bb-57cc-4b59-bc3a-0acfcc3fa623`), environment `production`.
+  Two services matter: **`Paladin`** (built from this repo's root
+  `Dockerfile`, GitHub-connected to `main`, auto-deploys on every push) and
+  **`Postgres`** (Railway plugin). `frontend` and `backend` are dead
+  leftovers — see NEXT STEPS.
+- **URL:** https://paladin-production-bc0b.up.railway.app
+  (health at `/api/health`, admin at `/admin/login`).
+- **Env vars on `Paladin`:** `DATABASE_URL=${{Postgres.DATABASE_URL}}` (a
+  Railway reference, not a pasted URL), `JWT_SECRET_KEY`, `ENCRYPTION_KEY`,
+  `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `CORS_ORIGINS`, `SITE_URL`,
+  `DEBUG=false`, plus the JWT expiry settings. Production secrets were
+  generated fresh (not the dev ones); none are in git.
+- **Start path:** the Dockerfile `CMD` runs `alembic upgrade head`, then
+  `python -m seed` *only if* `SEED_ADMIN_PASSWORD` is set, then uvicorn. The
+  first admin (`admin@ashfordbriggs.com`) was created this way on 2026-09-08
+  and the seed variables were removed afterwards.
+- **Gotchas learned the hard way — do not repeat:**
+  1. A `startCommand` in `railway.toml` *or* in the service's dashboard
+     settings overrides the Dockerfile CMD and silently skips migrations
+     (symptom: every DB route 500s with `relation "blog_posts" does not
+     exist` while `/api/health` is green). Keep both empty. Railway also
+     ignored `preDeployCommand` from `railway.toml` (manifest showed `null`).
+  2. Removing `startCommand` from `railway.toml` does **not** clear a value
+     already stored on the service — it had to be cleared through the API
+     (`serviceInstanceUpdate` with `startCommand: ""`).
+  3. `railway redeploy` reuses the previous deployment's config snapshot; a
+     settings change only takes effect on a *new* deployment (a push,
+     `railway up`, or the `serviceInstanceDeploy` mutation).
+  4. Project tokens cannot `railway ssh` / `railway run` against the
+     container — hence the env-gated seed step in the CMD instead of a
+     one-off command.
+
 ## NEXT STEPS (for Claude Code)
 1. **Build the automated test suite** — this is the single biggest remaining
    gap. Zero automated tests exist for backend or frontend; every fix above
    was verified by hand (curl, browser checks), not by regression-safe tests.
    See `docs/TESTING.md` for the planned scope (pytest+httpx backend,
    Vitest+RTL frontend, ~45-65 cases).
-2. **Deploy.** Being handed off to be self-hosted on someone else's own
-   server — the Dockerfile is host-agnostic (see the Deploy target note
-   above), so this is not Railway-only. Before deploying: set real env vars
-   (`DATABASE_URL`, `JWT_SECRET_KEY`, `ANTHROPIC_API_KEY`, `CORS_ORIGINS`,
-   `SITE_URL`), update the domain references listed above if not using
-   `ashfordbriggs.com`, and run `python -m seed` once against the production
-   DB to create the first admin login.
+2. **Attach the real domain.** The site is live on Railway (see DEPLOYMENT
+   above) under a generated `*.up.railway.app` URL. When `ashfordbriggs.com`
+   (or whichever domain is chosen) is pointed at it: add the custom domain to
+   the `Paladin` service in Railway, then set `SITE_URL` and `CORS_ORIGINS` on
+   that service to the new origin. The hardcoded canonical/OG references in
+   `frontend/index.html`, `frontend/src/components/Seo.tsx` and
+   `frontend/public/robots.txt` already say `ashfordbriggs.com` — change them
+   only if a different domain is chosen.
+3. **Delete the two dead Railway services** `frontend` and `backend` in the
+   "Ashford & Briggs" project. They were created alongside `Paladin`, use the
+   wrong build setup for this monorepo, fail on every push to `main`, and
+   serve nothing.

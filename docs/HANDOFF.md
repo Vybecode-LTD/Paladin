@@ -66,11 +66,12 @@ write time only.
    coverage.
 5. **Wire real images/OG assets** — paths are referenced in `index.html` and
    blog cover slots but real files aren't in place.
-6. **Deploy to Railway** — Dockerfile + `railway.toml` are ready
-   (single-service: FastAPI serves the built frontend as static). Not yet
-   deployed. Use the `railway-deploy-playbook` skill when ready; set
-   `JWT_SECRET_KEY`, `ANTHROPIC_API_KEY`, `CORS_ORIGINS` as env vars
-   (`DATABASE_URL` is auto-provided by Railway Postgres).
+6. ~~Deploy to Railway~~ **Done 2026-09-08.** Live at
+   https://paladin-production-bc0b.up.railway.app — full details, env vars
+   and the gotchas that cost time are in the DEPLOYMENT section of
+   `CLAUDE.md`. Still open: attach the custom domain (then update `SITE_URL`
+   / `CORS_ORIGINS`) and delete the dead `frontend` / `backend` Railway
+   services.
 
 ## Blockers / risks to know about
 
@@ -87,8 +88,10 @@ write time only.
   window get silently broken sessions today — this is being worked in the
   parallel pass but isn't confirmed fixed yet. Don't assume it's resolved
   without checking.
-- **Not deployed anywhere yet.** All of the above is local-dev-only. No
-  production environment exists to worry about breaking.
+- **Production now exists (2026-09-08).** The `Paladin` Railway service
+  auto-deploys every push to `main` and runs `alembic upgrade head` on boot,
+  so a broken build or a bad migration on `main` now hits the live site.
+  Build and check locally before pushing.
 
 ## Where to look for detail
 
