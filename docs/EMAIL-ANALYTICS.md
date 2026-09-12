@@ -4,8 +4,8 @@ The admin backend's **Analytics** tab: sending campaigns to a consented contact
 list, and measuring what happened to them honestly.
 
 This document explains what the system does and how it is built. For the setup
-work that only an owner can do — Mailgun, DNS, the sending domain — see
-`EMAIL-SETUP-RUNBOOK.md`.
+path — Mailgun, DNS, the sending domain, production and the first campaign, with
+who does each step — see `EMAIL-SETUP-RUNBOOK.md`.
 
 ## The problem it solves, and the one that shapes everything
 

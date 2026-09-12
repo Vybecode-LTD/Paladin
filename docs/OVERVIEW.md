@@ -40,8 +40,8 @@ every other path.
   clicks are always shown split between the two, and a reply counts for more than a hundred opens (capturing replies is still to
   be built). Includes a domain-trust panel (DMARC reports, blocklist
   checks, inbox placement) and a pre-flight check that refuses to send a broken
-  campaign. Full detail in `EMAIL-ANALYTICS.md`; the setup an owner has to do is
-  in `EMAIL-SETUP-RUNBOOK.md`.
+  campaign. Full detail in `EMAIL-ANALYTICS.md`; the full setup path, and who does
+  each step, is in `EMAIL-SETUP-RUNBOOK.md`.
 - **AI:** all generation runs server-side through a proxy to Anthropic's API.
   The API key never reaches a browser. Model: `claude-sonnet-4-6`
   (configurable).
@@ -110,7 +110,7 @@ sites leave it as is.
 
 ## Where to look next
 
-- **Setting up email campaigns (owners start here):** `EMAIL-SETUP-RUNBOOK.md` — the ordered list of account and DNS tasks that only an owner can do, with verification commands and the three mistakes that cause real damage.
+- **Setting up email campaigns (start here):** `EMAIL-SETUP-RUNBOOK.md` — the full ordered path from today's build to a first campaign, production and a locked-down domain, with who does each step, how to check it worked, and the nine mistakes nothing will warn you about.
 - How the campaign analytics work: `EMAIL-ANALYTICS.md`.
 - Deploying: `DEPLOY-UBUNTU.md` (production), `DEPLOY-DEV-SERVER.md` (dev box), `DEPLOY-RAILWAY.md` (the retired display deployment, history only).
 - What is planned and what is open: `ROADMAP.md`, `BUGS.md`.

@@ -123,7 +123,8 @@ system**, which is the current focus of work.
 ## Where to look
 
 - `EMAIL-ANALYTICS.md` — what the analytics system is and how it works.
-- `EMAIL-SETUP-RUNBOOK.md` — the owner tasks. Start here if setup is the question.
+- `EMAIL-SETUP-RUNBOOK.md` — the full setup path, in order, with who does each
+  step. Start here if setup is the question.
 - `OVERVIEW.md` — orientation for someone new to the whole project.
 - `DEPLOY-DEV-SERVER.md` / `DEPLOY-UBUNTU.md` — the two live runbooks.
   `DEPLOY-RAILWAY.md` is history only.
