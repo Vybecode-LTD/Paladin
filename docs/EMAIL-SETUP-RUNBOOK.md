@@ -3,7 +3,8 @@
 Everything that has to be done by a person with an account login, rather than by
 someone with access to the code. Written for Matt and John.
 
-Verified against live DNS and the running servers on **2026-09-09**. Where this
+Verified against live DNS and the running servers on **2026-09-09**, with the
+DMARC and DNS-hosting details re-verified on **2026-09-12**. Where this
 document contradicts an earlier copy of the runbook, this one is correct — see
 "Correction to the earlier runbook" at the end.
 
@@ -20,12 +21,15 @@ the key to every DNS decision below.
 | anything else `*.ashfordbriggs.com` | 89.187.170.160 | The same nginx, via a **wildcard** record. It answers for any name, but its certificate does not, so HTTPS fails the name check. |
 | `devwww.ashfordbriggs.com` | 104.48.125.58 | An **explicit exception** to the wildcard. The AT&T line in Jacksonville → front proxy → Apache on 10.0.0.80 → Paladin on 127.0.0.1:8000. Certificate covers `devwww` only. |
 
-Existing mail, unchanged by any of this:
+Existing mail and DNS, verified 2026-09-12. Setting up campaigns changes none of
+these:
 
 ```
-MX   ashfordbriggs.com          smtp.google.com          (Google Workspace)
-TXT  ashfordbriggs.com          v=spf1 include:_spf.google.com ~all
-TXT  _dmarc.ashfordbriggs.com   v=DMARC1; p=none; rua=mailto:jevans@ashfordbriggs.com
+MX   ashfordbriggs.com               smtp.google.com   (Google Workspace)
+TXT  ashfordbriggs.com               v=spf1 include:_spf.google.com ~all
+TXT  _dmarc.ashfordbriggs.com        v=DMARC1; p=none; rua=mailto:dmarc@ashfordbriggs.com; fo=1
+TXT  _dmarc.mail.ashfordbriggs.com   v=DMARC1; p=none; rua=mailto:dmarc@ashfordbriggs.com; fo=1
+NS   ashfordbriggs.com               dns1.registrar-servers.com, dns2.registrar-servers.com (Namecheap)
 ```
 
 There is already a Mailgun sending domain, **`mail.ashfordbriggs.com`**, used by
@@ -197,7 +201,7 @@ In order. Everything else can wait.
 2. **B** — Publish those records at Namecheap (see trap 1 for the shape).
 3. **C** — Decide which machine serves the tracking hostname, and get a
    certificate and a forwarding rule for it (trap 3).
-4. **D** — Create the DMARC report mailbox and point `rua` at it.
+4. **D** — Create the DMARC report address and point `rua` at it. **Done 2026-09-12.**
 5. **E** — Give me the sending identity: From name, From address, reply-to, and
    the postal address that must appear in the footer.
 6. **F** — I deploy, install the worker, and add the vhost line.
@@ -237,6 +241,9 @@ and running both produces double-counted, contradictory numbers.
 
 ## B. DNS at Namecheap
 
+Confirmed from public DNS: the zone's nameservers are `dns1.registrar-servers.com`
+and `dns2.registrar-servers.com`, which are Namecheap's.
+
 Domain List → Manage → Advanced DNS. Namecheap strips the base domain, so the
 Host column below is what you type, not the full name.
 
@@ -269,11 +276,35 @@ domain generally, and whether it is on the tailnet.
 
 ## D. Google Workspace admin
 
-**D1. Create the DMARC report address.** A group or shared mailbox at
-`dmarc@ashfordbriggs.com`. Reports currently go to `jevans@ashfordbriggs.com`
-personally, which means they stop being read the moment John is busy. These
-arrive daily from every major provider and are the raw material the Trust panel
-reads.
+**D1. The DMARC report address — done 2026-09-12.** `dmarc@ashfordbriggs.com`
+is a Google Group, created and tested by John, and both `_dmarc.ashfordbriggs.com`
+and `_dmarc.mail.ashfordbriggs.com` send their aggregate reports to it. Before
+this, reports went to one person's inbox. They arrive daily from every major
+provider and are the raw material the Trust panel reads.
+
+Two group settings keep it working, and a test email sent from inside the
+company proves neither:
+
+- **It must accept mail from outside the organization.** The reports come from
+  Google, Microsoft, Yahoo and others. In Google Groups, **Group settings → Who
+  can post** has to allow anyone to post. If that option is not offered, outside
+  mail to groups is switched off for the whole organization, and only a
+  Workspace admin can allow it in the Admin console.
+- **Its spam handling must not hold the reports.** They are automated emails
+  with `.zip` or `.gz` attachments, which is exactly what group spam filters
+  tend to hold for approval. A few days after the change, check the group's
+  pending messages; if reports are waiting there, change the spam setting so
+  they post.
+
+**How to know it worked:** the first reports arrive one to three days after the
+DNS change, usually one per provider per day. A few may still reach the old
+address in that window, because providers cache DMARC records.
+
+**Automatic collection needs a mailbox, not just the group.** A Google Group has
+no inbox that software can sign into. The Trust panel accepts uploaded reports
+today; collecting them automatically, once that is built, needs one member of
+the group that is a real mailbox — most likely a dedicated Workspace account —
+for the collector to read.
 
 **D2. Confirm the From address** the product uses for password and PIN emails, so
 campaign mail does not collide with it.
@@ -317,6 +348,13 @@ enforcing nothing. Moving to enforcement is what stops anyone forging
 `ashfordbriggs.com`, and it must be staged, because going straight to `p=reject`
 before every legitimate sender is passing is how a company silently stops
 receiving its own mail.
+
+**`mail.ashfordbriggs.com` is staged separately.** It has its own DMARC record,
+so it does not inherit the root domain's policy: tightening
+`_dmarc.ashfordbriggs.com` leaves `mail.` at `p=none` until its own record is
+advanced as well. That is useful — the client password emails are insulated
+from a mistake on the root — but it means finishing the table below for the root
+domain does not finish the job.
 
 | Stage | Record | Wait for |
 |---|---|---|

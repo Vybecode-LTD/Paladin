@@ -4,7 +4,7 @@ Written for whoever (human or Claude session) picks this project up next, cold.
 Read this before touching code. `CLAUDE.md` at the repo root has the stack and
 layout reference; this file is about *state*.
 
-**Last updated: 2026-09-09.**
+**Last updated: 2026-09-12.**
 
 ## What this project is
 
@@ -22,6 +22,7 @@ system**, which is the current focus of work.
 | Production | Does not exist yet. Server access being arranged by the owner. |
 | Backend tests | 279, passing |
 | Blocked on | Owner tasks in `EMAIL-SETUP-RUNBOOK.md` — Mailgun domain, DNS, and the routing decision |
+| Owner setup done | DMARC report group `dmarc@ashfordbriggs.com` is live, with both DMARC records pointing at it (2026-09-12) |
 
 ## What is done
 
@@ -91,13 +92,15 @@ system**, which is the current focus of work.
   Paladin sends no forwarding headers, so every visitor shares one bucket and
   the per-IP limits act as global caps. Fixed by adding `X-Forwarded-For` at
   whichever proxy ends up in front — see the runbook, trap 3.
-- **DMARC reports go to a personal mailbox.** `rua` points at
-  `jevans@ashfordbriggs.com` rather than a shared address.
-- **The root domain is at `p=none`.** DMARC reports but enforces nothing. The
-  staged path to enforcement is in the runbook; the Trust panel gates it.
-- **Automatic DMARC report collection is not built.** Reports can be uploaded to
-  the panel today, which is enough to use it. Polling needs IMAP credentials for
-  the report mailbox, which is a decision about who owns it rather than code.
+- **The root domain and `mail.` are both at `p=none`.** DMARC reports but
+  enforces nothing. `mail.ashfordbriggs.com` has its own record, so it is staged
+  separately from the root. The staged path is in the runbook; the Trust panel
+  gates it.
+- **Automatic DMARC report collection is not built, and needs a mailbox first.**
+  Reports can be uploaded to the panel today, which is enough to use it. The
+  report address, `dmarc@ashfordbriggs.com`, is a Google Group, which has no
+  inbox software can sign into, so automation needs one member of the group
+  that is a real mailbox. That is a decision for the Workspace admin, not code.
 
 ## Where to look
 

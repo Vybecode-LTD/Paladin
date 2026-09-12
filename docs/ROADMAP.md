@@ -1,7 +1,7 @@
 # Roadmap — Ashford & Briggs / Paladin
 
 How this project is progressing from scaffold to production. Updated as phases
-complete. **Last updated 2026-09-09.**
+complete. **Last updated 2026-09-12.**
 
 ## Phases
 
@@ -65,7 +65,8 @@ Frontend remains at zero. See `TESTING.md`.
 
 1. **Merge the open analytics PR.**
 2. **Owner setup tasks** — `EMAIL-SETUP-RUNBOOK.md`. Nothing sends until these
-   are done, and they are account/DNS actions no developer can perform.
+   are done, and they are account/DNS actions no developer can perform. The
+   DMARC report group is done (2026-09-12).
 3. **The tracking-host routing decision** (runbook task C) — the only open
    architectural question; the vhost line, certificate and webhook URL all
    depend on it.
@@ -74,13 +75,14 @@ Frontend remains at zero. See `TESTING.md`.
 5. **Frontend test suite** (Vitest + RTL) — prioritize `AuthContext`, the
    analytics pages, and `PostEditor`.
 6. **Production deployment** once the server exists.
-7. **Move DMARC reports to a shared mailbox** — currently a personal address.
-8. **Automatic DMARC report collection** — needs IMAP credentials for the report
-   mailbox; upload works today.
-9. **Rotate the 1024-bit DKIM key** on `mail.ashfordbriggs.com` to 2048-bit,
+7. **Automatic DMARC report collection** — the report address is a Google
+   Group, which has no inbox to sign into, so this needs a real mailbox added as
+   a member of `dmarc@ashfordbriggs.com` first. Upload works today.
+8. **Rotate the 1024-bit DKIM key** on `mail.ashfordbriggs.com` to 2048-bit,
    carefully — it signs customer password emails. Runbook trap 2.
-10. **Advance the root domain toward DMARC enforcement** — staged, gated by the
-    Trust panel's verdict.
+9. **Advance the domain toward DMARC enforcement** — staged, gated by the
+   Trust panel's verdict. `mail.ashfordbriggs.com` has its own DMARC record and
+   has to be advanced separately from the root.
 
 ## Non-goals (for now)
 

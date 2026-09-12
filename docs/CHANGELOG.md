@@ -3,7 +3,40 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-09 (latest) — Documentation reconciliation
+## 2026-09-12 (latest) — DMARC reports moved to a shared group
+
+**Changed, by the owners:** DMARC aggregate reports now go to
+`dmarc@ashfordbriggs.com`, a Google Group John created and tested, instead of a
+personal inbox. Both `_dmarc.ashfordbriggs.com` and
+`_dmarc.mail.ashfordbriggs.com` point at it
+(`rua=mailto:dmarc@ashfordbriggs.com; fo=1`), verified from two public
+resolvers. This completes runbook task D1.
+
+**Confirmed rather than asked:** the zone is hosted on Namecheap — its
+nameservers are `dns1` and `dns2.registrar-servers.com`. The runbook had assumed
+Namecheap; public DNS settles it, so it no longer needs to go to the owners as a
+question.
+
+**Corrected — automatic report collection.** The docs said collection needed
+"IMAP credentials for the report mailbox". The report address is a Google
+Group, and a group has no inbox that software can sign into, so there are no
+such credentials to issue. Automating collection needs one member of the group
+that is a real mailbox, most likely a dedicated Workspace account. Manual upload
+works in the meantime.
+
+**Added to the runbook:**
+- Two group settings without which reports silently never arrive. The group must
+  accept posts from outside the organization — the reports come from Google,
+  Microsoft and others, so a test sent from inside the company proves nothing
+  about them — and its spam handling must not hold them, since automated
+  messages with compressed attachments are exactly what group spam filters tend
+  to hold.
+- `mail.ashfordbriggs.com` has its own DMARC record, so it does not inherit the
+  root domain's policy. Tightening the root leaves `mail.` at `p=none` until its
+  own record is advanced, so finishing the enforcement path for the root does
+  not finish it for the subdomain that sends client password emails.
+
+## 2026-09-09 — Documentation reconciliation
 
 **Added:** the two documents the analytics subsystem never had, and a pass to
 stop the rest of the folder contradicting the code. These docs sync to the
