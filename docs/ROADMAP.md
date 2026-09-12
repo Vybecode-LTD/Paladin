@@ -51,7 +51,8 @@ Built in five phases and deployed to the dev server. Design and architecture in
 5. Domain trust: DMARC ingestion, blocklists, seed inboxes, pre-flight.
 
 **Not in production use yet** — sending is blocked on the owner tasks (Mailgun
-sending domain, DNS records, and the tracking-host routing decision).
+sending domain, DNS records, and the tracking-host routing decision). One gap found since: nothing records replies
+yet (BUG-008).
 
 ### 6. Automated tests — BACKEND COMPLETE, FRONTEND NOT STARTED
 **279 backend tests**, weighted toward the parts where being wrong is expensive:
@@ -63,26 +64,34 @@ Frontend remains at zero. See `TESTING.md`.
 
 ## Backlog (prioritized)
 
+Step codes refer to `EMAIL-SETUP-RUNBOOK.md`.
+
 1. **Merge the open analytics PR.**
-2. **Owner setup tasks** — `EMAIL-SETUP-RUNBOOK.md`. Nothing sends until these
-   are done, and they are account/DNS actions no developer can perform. The
-   DMARC report group is done (2026-09-12).
-3. **The tracking-host routing decision** (runbook task C) — the only open
-   architectural question; the vhost line, certificate and webhook URL all
-   depend on it.
-4. **Fix forwarded headers at the proxy** — Paladin currently sees every visitor
-   as one IP, so per-visitor rate limits act as global caps.
-5. **Frontend test suite** (Vitest + RTL) — prioritize `AuthContext`, the
+2. **Owner setup tasks** — nothing sends until these are done, and they are
+   account/DNS actions no developer can perform. The DMARC report group is done
+   (2026-09-12).
+3. **The tracking-host routing decision** (B1) — the only open architectural
+   question; the certificate, the vhost line and the webhook URL all depend on it.
+4. **Production deployment** (phase E) once the server exists. Real campaigns go
+   out from production only; dev is for rehearsal.
+5. **Import past opt-outs** (F1) — no endpoint or screen exists, and it is needed
+   before the first real campaign.
+6. **Fix forwarded headers at the proxy** (E3) — Paladin currently sees every
+   visitor as one IP, so per-visitor rate limits act as global caps.
+7. **Reply capture** (G5, BUG-008) — nothing records replies. Until it exists the
+   Reply domain setting must stay blank, and replies are forwarded to a person.
+8. **Frontend test suite** (Vitest + RTL) — prioritize `AuthContext`, the
    analytics pages, and `PostEditor`.
-6. **Production deployment** once the server exists.
-7. **Automatic DMARC report collection** — the report address is a Google
-   Group, which has no inbox to sign into, so this needs a real mailbox added as
-   a member of `dmarc@ashfordbriggs.com` first. Upload works today.
-8. **Rotate the 1024-bit DKIM key** on `mail.ashfordbriggs.com` to 2048-bit,
-   carefully — it signs customer password emails. Runbook trap 2.
-9. **Advance the domain toward DMARC enforcement** — staged, gated by the
-   Trust panel's verdict. `mail.ashfordbriggs.com` has its own DMARC record and
-   has to be advanced separately from the root.
+9. **Automatic DMARC report collection** (G1) — the report address is a Google
+   Group, which has no inbox to sign into, so this needs a real mailbox added as a
+   member of `dmarc@ashfordbriggs.com` first. Upload works today.
+10. **A sending-only Mailgun key** (G3) — the connection check reads the domain's
+    details, which such a key cannot; change the check, then swap the key.
+11. **Rotate the 1024-bit DKIM key** on `mail.ashfordbriggs.com` to 2048-bit (H1),
+    carefully — it signs customer password emails.
+12. **Advance the domain toward DMARC enforcement** (H3, H4) — staged, gated by the
+    Trust panel's verdict. `mail.ashfordbriggs.com` has its own DMARC record and has
+    to be advanced separately from the root.
 
 ## Non-goals (for now)
 

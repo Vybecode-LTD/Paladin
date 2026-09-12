@@ -6,6 +6,43 @@ current priorities and `docs/BUGS.md` for the live defect list.
 
 ---
 
+## 2026-09-12 — Setup runbook rebuild: claims checked against the code
+
+Rebuilding the setup runbook meant turning every instruction into something a
+person could follow and verify, which exposed claims the code does not support.
+
+### Findings
+
+- **Reply capture does not exist** (BUG-008), though the design doc, the overview,
+  the settings screen and the earlier runbook all implied it did.
+- **The settings screen's examples pointed at breaking configurations** (BUG-009):
+  the tracking URL example was the sending domain, and the Reply domain hint
+  promised matching.
+- **No path exists to import past opt-outs**, and one must exist before a first
+  real send.
+- **Earlier runbook advice that would have failed:** a sending-only Mailgun key (the
+  connection check reads domain details), and a Tailscale proxy route to the dev
+  vhost, which is bound to one LAN address.
+- **Test sends are untracked**, so a rehearsal using them could never have confirmed
+  the loop.
+
+### Verified, not assumed
+
+Each finding came from reading the code involved: Reply-To construction in
+`campaign_service.py`, the JSON-only webhook router, a repository-wide search for
+anything creating a reply event (none), the contacts router's endpoints, the seed
+checker's providers and sign-in method, the Mailgun sender's verify call, and the
+SenderSettings component. The dev site's public HTTPS was checked live. The
+Tailscale route could not be tested, because the developer machine's Tailscale
+client was not connected at the time, so it is recorded as untested.
+
+### Still open
+
+BUG-008 and the opt-out import are backlog items. The Tailscale route and
+Microsoft seed inboxes need testing when they matter.
+
+---
+
 ## 2026-09-09 — Documentation reconciliation
 
 Triggered by the email-analytics build completing and being deployed to the dev

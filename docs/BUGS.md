@@ -91,7 +91,35 @@ high-value first regression test once the suite exists).
 - **Fix:** `<Route path="*" element={<NotFound />} />` inside the public layout.
 - **Closed 2026-09-09**, verified in `App.tsx:58`.
 
+### BUG-009 — Settings screen suggested tracking and reply values that break campaigns
+- **Location:** `frontend/src/components/SenderSettings.tsx`
+- **Symptom:** the Tracking URL field's example was `https://updates.ashfordbriggs.com`,
+  the one value that breaks every tracking and unsubscribe link once Mailgun's DNS
+  records are published on that name (the zone wildcard stops answering for it).
+  The Reply domain field's help text said replies would be matched to their
+  campaign; nothing does that (BUG-008), so following it loses replies.
+- **Fix:** the tracking example is now `https://links.ashfordbriggs.com`, with a hint
+  to use a hostname that never gets mail records. The Reply domain field says to
+  leave it blank and why. The From email hint says replies come back to that
+  address, so it must receive mail.
+- **Closed 2026-09-12.** Copy-only change, checked with ESLint. There is no frontend
+  test suite to add a regression test to. Servers show it after their next deploy.
+
 ## OPEN
+
+### BUG-008 — Replies are never recorded, and the Reply domain setting loses them
+- **Location:** `backend/app/services/campaign_service.py` (Reply-To construction)
+  and `backend/app/routers/webhooks.py` (JSON events only); no inbound handler exists.
+- **Symptom:** `replied` and `auto_replied` events are counted on the scorecard, but
+  nothing ever creates one, so the replies figure is always zero. With a *Reply
+  domain* set, each message's Reply-To is `replies+<token>@<domain>`, an address
+  nothing reads, so real replies are lost.
+- **Workaround in place:** leave Reply domain blank, so replies go to the From
+  address, and forward replies on the sending domain to a person with a Mailgun
+  route (runbook C4).
+- **To fix:** an endpoint that accepts replies forwarded by a Mailgun route,
+  verifies them, and records a reply against the message whose token is in the
+  address (runbook G5). Then Reply domain can be used.
 
 ### BUG-006 — Contact and How It Works pages drift from source copy
 - **Location:** `frontend/src/pages/Contact.tsx`, `frontend/src/pages/HowItWorks.tsx`

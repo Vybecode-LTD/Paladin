@@ -271,7 +271,9 @@ export default function SenderSettings() {
           />
           <p style={hintStyle}>
             Chosen once and never varied. Consistency is itself a reputation signal, and this is
-            the address recipients add to their contacts.
+            the address recipients add to their contacts. Replies come back to it, so it must
+            receive mail: a Google Workspace mailbox, or an address on the sending domain with
+            Mailgun forwarding replies to a person.
           </p>
         </div>
 
@@ -280,12 +282,13 @@ export default function SenderSettings() {
           <input
             style={inputStyle}
             value={form.reply_domain}
-            placeholder="updates.ashfordbriggs.com"
+            placeholder="Leave blank for now"
             onChange={(e) => setForm({ ...form, reply_domain: e.target.value })}
           />
           <p style={hintStyle}>
-            Each message gets its own address under this domain, so a reply can be matched to
-            its campaign and recipient. A bare domain, not a URL.
+            <strong>Leave this blank.</strong> Nothing records replies yet, so with a domain here
+            every reply goes to a per-message address that no one reads. When it is blank,
+            replies go to the From address.
           </p>
         </div>
 
@@ -294,12 +297,14 @@ export default function SenderSettings() {
           <input
             style={inputStyle}
             value={form.tracking_base_url}
-            placeholder="https://updates.ashfordbriggs.com"
+            placeholder="https://links.ashfordbriggs.com"
             onChange={(e) => setForm({ ...form, tracking_base_url: e.target.value })}
           />
           <p style={hintStyle}>
             Where unsubscribe and tracking links point. Must be reachable over HTTPS from
-            outside, because it is printed inside mail that cannot be changed once sent.
+            outside, because it is printed inside mail that cannot be changed once sent. Use a
+            hostname that never gets mail records, not the sending domain: once Mailgun's DNS
+            records are published on a name, it stops resolving to a web server.
           </p>
         </div>
 

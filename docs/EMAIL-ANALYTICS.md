@@ -31,7 +31,9 @@ in the database, the API and the UI.
 Nothing in the UI shows a bare "open rate". Opens and clicks are split between
 what is probably a machine and what might be a person, and the split is always
 shown. **A reply is worth more than a hundred opens**, and the system is built
-to say so.
+to say so. Replies are not captured yet, though: the scoring and the
+scorecard are in place, but nothing records a reply, so that figure stays at zero
+until reply capture is built (see "Not built yet" below).
 
 ## Machine detection
 
@@ -68,7 +70,9 @@ assigned by salted hash so the same contact always lands in the same bucket.
 **Sending.** A `Sender` protocol with two implementations — Mailgun (the real
 path, which reports delivery events) and SMTP (a fallback that structurally
 cannot report them). Sending is claimed with `FOR UPDATE SKIP LOCKED` so two
-workers can never send the same message twice.
+workers can never send the same message twice. Mailgun's own open and click
+tracking is switched off on every message, because its version rewrites links onto
+a domain it shares with its other customers.
 
 **Tracking.** An open pixel, click redirects, a landing-page beacon, and a
 one-click unsubscribe honouring `List-Unsubscribe` / `List-Unsubscribe-Post`.
@@ -136,7 +140,11 @@ second timer unit.
   not as a listing, so a resolver problem never shows up as a reputation problem.
 - **Seed inboxes** check real placement, including Gmail's Promotions tab (not a
   folder — it needs Gmail's own search extension to detect). "Could not check"
-  is a distinct result from "never arrived", and only the latter is stored.
+  is a distinct result from "never arrived", and only the latter is stored. Two limits: the checker
+  signs in over IMAP with an app password, which Gmail allows and Microsoft no
+  longer does, so Outlook and Microsoft 365 seeds will fail; and it looks for every
+  recent campaign in every seed inbox, so each seed has to be in every campaign's
+  audience or it reports "never arrived".
 - **Pre-flight** enforces four blockers at send time: no sender configured, no
   From address, no tracking URL, no postal address. Everything else is a warning
   or a note — a checker that blocks on style is one people learn to work around.
@@ -147,9 +155,11 @@ second timer unit.
 **two different credentials** and they are easy to confuse: the **API key** for
 sending, and the **HTTP webhook signing key** for verifying inbound events. The
 webhook verifier fails closed — with no signing key configured it rejects
-everything rather than trusting unverified input.
+everything rather than trusting unverified input. Use the account's API key:
+the settings screen's connection check reads the domain's details, which a
+sending-only key cannot, so switching to one needs that check changed first.
 
-## Deliberately not built
+## Deliberately not built, and not built yet
 
 - **Google Postmaster Tools API** — needs a service account and domain-wide
   delegation, and shows no data below roughly a few hundred Gmail messages a
@@ -158,6 +168,19 @@ everything rather than trusting unverified input.
 - **SpamAssassin** — running its daemon on a shared box serving three other
   sites is not a reasonable trade for a checkable short list of rules.
 - **Removing addresses from the suppression list** — see above; intentional.
+
+Not built yet:
+
+- **Reply capture.** A reply is meant to be a `verified` signal, but nothing
+  records one. With the *Reply domain* setting filled in, replies are addressed to
+  `replies+<token>@<domain>` and go nowhere, so it must stay blank until an inbound
+  handler exists; when it is blank, replies go to the From address. See BUG-008 and
+  runbook step G5.
+- **Loading past opt-outs.** There is no endpoint or screen for importing an existing
+  suppression list, so it has to be done as a one-off before the first real send
+  (runbook F1).
+- **Screens for seed inboxes and contact import.** Both are API calls for now:
+  `POST /api/admin/trust/seed-inboxes` and `POST /api/admin/contacts/import`.
 
 ## Tests
 

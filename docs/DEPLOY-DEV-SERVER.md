@@ -39,6 +39,11 @@ Consequences:
   static-site vhost was dropped on 2026-09-09: nothing legitimate reaches it
   (the front proxy talks to `:80`), and the only certificate it could use is
   the expired `ashfordbriggs.com` one.
+- **It is bound to one address, `10.0.0.80:80`.** A request that reaches the
+  box on any other address, such as its Tailscale address, is matched to a
+  different site's vhost. A proxy that forwards to the box by another address
+  needs that address added to the `<VirtualHost>` line, and allowed through the
+  firewall. Not tested as of 2026-09-12.
 - **`updates.ashfordbriggs.com` is aliased on the vhost, but the tracking
   hostname is not settled and this alias is provisional.** The alias was added
   2026-09-09; the campaign tracking routes are root-mounted, so they answer on
@@ -46,7 +51,7 @@ Consequences:
   one-line vhost edit.
 
   **The current recommendation is to move tracking to a different name than the
-  sending domain** — see `EMAIL-SETUP-RUNBOOK.md`, trap 1. Serving web traffic
+  sending domain** — see `EMAIL-SETUP-RUNBOOK.md`, step C2. Serving web traffic
   from `updates.` means it needs an A record, and per RFC 4592 the zone wildcard
   stops answering for any name that gains a record of any type — so the first
   Mailgun TXT record published on `updates.` would silently remove its address.

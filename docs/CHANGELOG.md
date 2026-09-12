@@ -3,14 +3,55 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-12 (latest) — DMARC reports moved to a shared group
+## 2026-09-12 (latest) — Setup runbook rebuilt; reply capture gap found
+
+**Rebuilt `EMAIL-SETUP-RUNBOOK.md`** as one ordered path in eight phases, from
+today's state through a rehearsal on dev, production, the first real campaign and
+locking the domain. Every step names who does it, what it waits on and how to check
+it worked, and the step codes match the interactive runbook the developer works
+from. Every claim was checked against the code, and several earlier ones did not
+hold.
+
+**Found: nothing records replies** (BUG-008). The scorecard counts `replied` events,
+but no code creates one, and the webhook endpoint accepts only JSON events. Worse,
+the *Reply domain* setting addresses every reply to `replies+<token>@<domain>`,
+which nothing reads, and its help text said replies would be matched. The earlier
+runbook even counted "a reply matched" as part of proving the loop. Replies are now
+forwarded to a person through a Mailgun route, the setting stays blank, and capture
+is a backlog item.
+
+**Fixed: the settings screen's examples** (BUG-009). The tracking URL example
+pointed at the sending domain, the one value that breaks every link once Mailgun's
+records publish, and now shows `https://links.ashfordbriggs.com`. The Reply domain
+and From email hints now say what actually happens to replies.
+
+**Other corrections to the earlier runbook:**
+- Real campaigns go out from production only. Links in sent mail cannot change and
+  the unsubscribe must work for 30 days, so dev rehearses with internal addresses
+  on `devwww`, which needs no new DNS or certificate.
+- Mailgun's own tracking needs no setting: the app switches it off per message.
+- A sending-only Mailgun key would fail the connection check, which reads the
+  domain's details. Start with the account key.
+- `Send a test` uses a preview token, so the rehearsal has to be a real send.
+- There is no way to load past opt-outs yet; that becomes a task before the first
+  real campaign.
+- Seed inboxes: Gmail works, Microsoft's IMAP sign-in rules block the Outlook
+  setting, and each seed must be in every audience or it reports "never arrived".
+- Paladin's dev vhost is bound to `10.0.0.80:80`, so a proxy reaching the box on
+  another address (such as Tailscale) is not served by it. The earlier proxy
+  examples did not say so, and that route is untested.
+
+**Also updated** `EMAIL-ANALYTICS.md`, `OVERVIEW.md`, `HANDOFF.md`, `ROADMAP.md`,
+`BUGS.md`, `AUDIT-LOG.md` and `DEPLOY-DEV-SERVER.md` to match.
+
+## 2026-09-12 — DMARC reports moved to a shared group
 
 **Changed, by the owners:** DMARC aggregate reports now go to
 `dmarc@ashfordbriggs.com`, a Google Group John created and tested, instead of a
 personal inbox. Both `_dmarc.ashfordbriggs.com` and
 `_dmarc.mail.ashfordbriggs.com` point at it
 (`rua=mailto:dmarc@ashfordbriggs.com; fo=1`), verified from two public
-resolvers. This completes runbook task D1.
+resolvers. This completes the runbook's DMARC report group task.
 
 **Confirmed rather than asked:** the zone is hosted on Namecheap — its
 nameservers are `dns1` and `dns2.registrar-servers.com`. The runbook had assumed

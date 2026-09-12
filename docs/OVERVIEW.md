@@ -37,8 +37,8 @@ every other path.
   list, and honest measurement of what happened to them. Every figure is
   labelled with how far it can be trusted, because roughly half of all tracked
   email opens industry-wide are machines rather than people — so opens and
-  clicks are always shown split between the two, and a reply counts for more
-  than a hundred opens. Includes a domain-trust panel (DMARC reports, blocklist
+  clicks are always shown split between the two, and a reply counts for more than a hundred opens (capturing replies is still to
+  be built). Includes a domain-trust panel (DMARC reports, blocklist
   checks, inbox placement) and a pre-flight check that refuses to send a broken
   campaign. Full detail in `EMAIL-ANALYTICS.md`; the setup an owner has to do is
   in `EMAIL-SETUP-RUNBOOK.md`.
