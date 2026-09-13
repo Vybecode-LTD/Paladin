@@ -31,7 +31,13 @@ SRC_COMMIT="$(git -C "$HERE" rev-parse --short HEAD)"
 rm -rf "$TARGET"
 mkdir -p "$TARGET/deploy/ubuntu"
 cp -r "$HERE/docs/." "$TARGET/"
-cp "$HERE/deploy/ubuntu/docker-compose.yml" "$HERE/deploy/ubuntu/Caddyfile" "$HERE/deploy/ubuntu/.env.example" "$TARGET/deploy/ubuntu/"
+# The worker units are included because DEPLOY-UBUNTU.md section 5.5 tells the
+# reader to install them; a runbook that points at files the docs repo does not
+# carry is a dead end for whoever is following it.
+cp "$HERE/deploy/ubuntu/docker-compose.yml" "$HERE/deploy/ubuntu/Caddyfile" \
+   "$HERE/deploy/ubuntu/.env.example" \
+   "$HERE/deploy/ubuntu/paladin-worker.service" "$HERE/deploy/ubuntu/paladin-worker.timer" \
+   "$TARGET/deploy/ubuntu/"
 find "$TARGET" -name "__pycache__" -type d -prune -exec rm -rf {} + 2>/dev/null || true
 
 cd "$DOCS_REPO"

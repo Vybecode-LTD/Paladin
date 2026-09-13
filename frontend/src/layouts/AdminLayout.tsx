@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, FileText, Inbox, LogOut, Users as UsersIcon, Menu, X,
-  Settings as SettingsIcon, UserCircle,
+  Settings as SettingsIcon, UserCircle, BarChart3,
 } from "lucide-react";
 import Brandmark from "@/components/Brandmark";
 
@@ -12,12 +12,17 @@ export default function AdminLayout() {
   const nav = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // `end` controls whether the link highlights only on an exact match.
+  // Analytics has child routes, so it must NOT be `end` — otherwise the
+  // sidebar entry unhighlights the moment you open a campaign inside it, and
+  // the section reads as unselected while you are standing in it.
   const items = [
-    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, min: "author" },
-    { to: "/admin/posts", label: "Posts", icon: FileText, min: "author" },
-    { to: "/admin/demo-requests", label: "Demo Inbox", icon: Inbox, min: "editor" },
-    { to: "/admin/users", label: "Users", icon: UsersIcon, min: "admin" },
-    { to: "/admin/settings", label: "Settings", icon: SettingsIcon, min: "admin" },
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, min: "author", end: true },
+    { to: "/admin/posts", label: "Posts", icon: FileText, min: "author", end: true },
+    { to: "/admin/demo-requests", label: "Demo Inbox", icon: Inbox, min: "editor", end: true },
+    { to: "/admin/analytics", label: "Analytics", icon: BarChart3, min: "editor", end: false },
+    { to: "/admin/users", label: "Users", icon: UsersIcon, min: "admin", end: true },
+    { to: "/admin/settings", label: "Settings", icon: SettingsIcon, min: "admin", end: true },
   ];
   const rank: Record<string, number> = { author: 1, editor: 2, admin: 3 };
   const visible = items.filter((i) => rank[user!.role] >= rank[i.min]);
@@ -39,8 +44,8 @@ export default function AdminLayout() {
           <Brandmark size={22} /> Admin
         </div>
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
-          {visible.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end onClick={() => setMenuOpen(false)} style={({ isActive }) => ({
+          {visible.map(({ to, label, icon: Icon, end }) => (
+            <NavLink key={to} to={to} end={end} onClick={() => setMenuOpen(false)} style={({ isActive }) => ({
               display: "flex", alignItems: "center", gap: 12, padding: "10px 12px",
               borderRadius: 10, fontSize: 14, fontWeight: 500,
               background: isActive ? "var(--bg-card)" : "transparent",

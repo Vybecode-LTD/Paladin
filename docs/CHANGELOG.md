@@ -3,7 +3,479 @@
 All notable changes to this project, in date order. Not committed to git yet as
 formal tags/releases — this log tracks work sessions, not package versions.
 
-## 2026-09-09 (latest) — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
+## 2026-09-12 (latest) — Setup runbook rebuilt; reply capture gap found
+
+**Rebuilt `EMAIL-SETUP-RUNBOOK.md`** as one ordered path in eight phases, from
+today's state through a rehearsal on dev, production, the first real campaign and
+locking the domain. Every step names who does it, what it waits on and how to check
+it worked, and the step codes match the interactive runbook the developer works
+from. Every claim was checked against the code, and several earlier ones did not
+hold.
+
+**Found: nothing records replies** (BUG-008). The scorecard counts `replied` events,
+but no code creates one, and the webhook endpoint accepts only JSON events. Worse,
+the *Reply domain* setting addresses every reply to `replies+<token>@<domain>`,
+which nothing reads, and its help text said replies would be matched. The earlier
+runbook even counted "a reply matched" as part of proving the loop. Replies are now
+forwarded to a person through a Mailgun route, the setting stays blank, and capture
+is a backlog item.
+
+**Fixed: the settings screen's examples** (BUG-009). The tracking URL example
+pointed at the sending domain, the one value that breaks every link once Mailgun's
+records publish, and now shows `https://links.ashfordbriggs.com`. The Reply domain
+and From email hints now say what actually happens to replies.
+
+**Other corrections to the earlier runbook:**
+- Real campaigns go out from production only. Links in sent mail cannot change and
+  the unsubscribe must work for 30 days, so dev rehearses with internal addresses
+  on `devwww`, which needs no new DNS or certificate.
+- Mailgun's own tracking needs no setting: the app switches it off per message.
+- A sending-only Mailgun key would fail the connection check, which reads the
+  domain's details. Start with the account key.
+- `Send a test` uses a preview token, so the rehearsal has to be a real send.
+- There is no way to load past opt-outs yet; that becomes a task before the first
+  real campaign.
+- Seed inboxes: Gmail works, Microsoft's IMAP sign-in rules block the Outlook
+  setting, and each seed must be in every audience or it reports "never arrived".
+- Paladin's dev vhost is bound to `10.0.0.80:80`, so a proxy reaching the box on
+  another address (such as Tailscale) is not served by it. The earlier proxy
+  examples did not say so, and that route is untested.
+
+**Also updated** `EMAIL-ANALYTICS.md`, `OVERVIEW.md`, `HANDOFF.md`, `ROADMAP.md`,
+`BUGS.md`, `AUDIT-LOG.md` and `DEPLOY-DEV-SERVER.md` to match.
+
+## 2026-09-12 — DMARC reports moved to a shared group
+
+**Changed, by the owners:** DMARC aggregate reports now go to
+`dmarc@ashfordbriggs.com`, a Google Group John created and tested, instead of a
+personal inbox. Both `_dmarc.ashfordbriggs.com` and
+`_dmarc.mail.ashfordbriggs.com` point at it
+(`rua=mailto:dmarc@ashfordbriggs.com; fo=1`), verified from two public
+resolvers. This completes the runbook's DMARC report group task.
+
+**Confirmed rather than asked:** the zone is hosted on Namecheap — its
+nameservers are `dns1` and `dns2.registrar-servers.com`. The runbook had assumed
+Namecheap; public DNS settles it, so it no longer needs to go to the owners as a
+question.
+
+**Corrected — automatic report collection.** The docs said collection needed
+"IMAP credentials for the report mailbox". The report address is a Google
+Group, and a group has no inbox that software can sign into, so there are no
+such credentials to issue. Automating collection needs one member of the group
+that is a real mailbox, most likely a dedicated Workspace account. Manual upload
+works in the meantime.
+
+**Added to the runbook:**
+- Two group settings without which reports silently never arrive. The group must
+  accept posts from outside the organization — the reports come from Google,
+  Microsoft and others, so a test sent from inside the company proves nothing
+  about them — and its spam handling must not hold them, since automated
+  messages with compressed attachments are exactly what group spam filters tend
+  to hold.
+- `mail.ashfordbriggs.com` has its own DMARC record, so it does not inherit the
+  root domain's policy. Tightening the root leaves `mail.` at `p=none` until its
+  own record is advanced, so finishing the enforcement path for the root does
+  not finish it for the subdomain that sends client password emails.
+
+## 2026-09-09 — Documentation reconciliation
+
+**Added:** the two documents the analytics subsystem never had, and a pass to
+stop the rest of the folder contradicting the code. These docs sync to the
+partner-facing repo, so drift here is drift the owners read.
+
+- **`EMAIL-ANALYTICS.md`** — what the system is and how it works: the trust-tier
+  model, the machine-detection rules and their thresholds, the architecture, and
+  the things deliberately not built with the reasoning for each.
+- **`EMAIL-SETUP-RUNBOOK.md`** — the ordered owner tasks, with the three traps
+  that cause real damage, how to fix each, how to verify, and how to recover.
+  Also the staged path from `p=none` to `p=reject` on the root domain.
+- **`HANDOFF.md` and `ROADMAP.md` rewritten.** Both were roughly two months
+  stale: they described the UX/SEO pass as in progress, the test suite as not
+  started, and deployment as "NOT STARTED — Railway target", when Railway had
+  been stood up *and* retired and a dev server was live. Neither mentioned the
+  analytics subsystem.
+- **`TESTING.md` rewritten** against a real `pytest --collect-only` run. It had
+  opened by saying no automated suite existed and that `python -m pytest` would
+  fail. It now carries the per-file breakdown and — more usefully — an explicit
+  statement of what the 279 tests *do not* cover: no HTTP-level tests, no
+  database integration, no frontend tests. A count without that caveat misleads.
+- **`DEPLOY-UBUNTU.md` section 5.5** — the production runbook never mentioned the
+  campaign worker, and the compose stack has no worker service. Following it
+  would produce a deployment where campaigns are written, scheduled, and
+  silently never sent. Documented with both a compose service and a systemd
+  option, plus commands to verify it is actually running, because the failure
+  mode here is silence rather than an error.
+
+**Corrected a real inconsistency in the earlier runbook.** It described
+`89.187.170.160` as the front proxy for the Paladin box and told the owners to
+point the sending subdomain at it while also adding a vhost alias on the Paladin
+machine. Live DNS shows those are two different hosts — the wildcard target is
+an nginx server hosting the public website, while Paladin is reached through
+`104.48.125.58`. Following the old instruction would have sent tracking traffic
+to the wrong server. The choice between them is now an explicit task.
+
+**Changed the recommendation on the tracking hostname.** Serving web traffic
+from the Mailgun sending domain forces that name to hold both mail records and
+an A record — and a DNS wildcard stops answering for any name that gains a
+record of any type, so publishing the SPF record would silently remove its
+address. Demonstrated on the live zone: `_dmarc.ashfordbriggs.com` holds a TXT
+record and returns nothing for an A query, while an invented name still
+resolves. Keeping the sending domain mail-only and serving tracking from a
+separate name removes the trap entirely, and needs no new DNS record at all.
+The `updates.ashfordbriggs.com` vhost alias is marked provisional pending that
+decision.
+
+**Not changed on purpose:** `deploy/ubuntu/docker-compose.yml`. CI boots it on
+every push, and editing a tested deployment artifact during a documentation pass
+is how a green pipeline turns red for unrelated reasons. The missing worker is
+documented and flagged rather than silently added.
+
+**BUG-004 and BUG-005 closed** against verified implementations. **BUG-006 held
+open** — a spot check found the approved copy sections present, but that is
+heading-level evidence, and closing a content-parity bug on partial evidence is
+how wrong copy ships.
+
+## 2026-09-09 — Email campaign analytics: the trust panel
+
+**Added:** the domain's standing on one screen, and the pre-flight check that
+stops a campaign going out broken. Completes the five-phase build.
+
+- **DMARC report ingestion** (migration `a132dbcacc3b`). The parser reads the
+  gzipped, zipped or bare XML every mailbox provider sends daily, and the panel
+  groups it by sending source. Alignment is read from `policy_evaluated`, not
+  from the raw auth results — the difference matters: a forged message can show
+  DKIM "pass" for the forger's own domain, and reading the raw result would
+  report it as a healthy sender.
+- **The panel carries the verdict that gates real work:** whether it is safe to
+  tighten the domain policy. It refuses while any source is still failing,
+  because enforcing before the failing sources are told apart is how a company
+  silently stops receiving its own mail. Worst source is listed first.
+- **Blocklist checks** over plain DNS, no account or key. A Spamhaus refusal —
+  which is what a public resolver gets — is reported as an error rather than a
+  listing, so a resolver problem never appears on the panel as a reputation
+  problem.
+- **Seed inbox placement** over IMAP, including Gmail's Promotions tab, which
+  is not a folder and needs Gmail's own search extension to detect. "Could not
+  check" is deliberately a distinct result from "never arrived", and only the
+  latter is stored, so an expired password does not freeze a false delivery
+  alarm into the record.
+- **Pre-flight**, our own rules rather than SpamAssassin: running its daemon on
+  a shared machine that serves three other sites is not a reasonable trade, and
+  the things that actually hurt this sender are a short list that can be checked
+  exactly and explained in words an author can act on. Four blockers — no
+  sender, no From address, no tracking URL, no postal address — are enforced at
+  send time, not merely offered as advice. Everything else is a warning or a
+  note, because a checker that blocks on style is one people work around.
+- **The worker now runs the daily checks** as well as campaigns, rate-limited
+  by when the last check actually ran rather than by a second timer unit.
+- **38 new tests** (279 total) on the DMARC parser and the pre-flight rules.
+
+**Deliberately not built: the Google Postmaster Tools API.** It needs a service
+account and domain-wide delegation to set up, and Google shows no data below
+roughly a few hundred messages a day to Gmail — far above what this company
+sends. It would be an OAuth integration displaying an empty panel. The DMARC
+reports and seed inboxes answer the same questions and do work at this volume.
+Worth revisiting if the list grows an order of magnitude.
+
+**Not yet automated: polling the dmarc mailbox.** Reports can be uploaded to
+the panel today, which is enough to use it. Automatic collection needs IMAP
+credentials for that mailbox, which is a decision about who owns it rather than
+a piece of code — the same shape as the seed inboxes, and it reuses their
+mechanism when the answer exists.
+
+**Fixed before shipping:** the generated migration's downgrade omitted the
+`seed_placement` enum type, the same defect found in the analytics migration.
+Caught by round-tripping again.
+
+**Verified against real data:** a gzipped report with three sources — Google
+passing, a Mailgun subdomain passing, and an address forging the domain —
+parsed, deduplicated on resend, sorted worst-first, and correctly refused to
+call enforcement safe until the forging source was removed. Blocklist checks
+ran against the real domain over real DNS and came back clear on both lists.
+
+## 2026-09-09 — Email campaign analytics: the Analytics tab
+
+**Added:** the dashboard, and the endpoint the product reports conversions to.
+One sidebar entry at `/admin/analytics` with its own tab bar — Overview,
+Campaigns, Contacts — rather than five more entries in a sidebar that already
+had five.
+
+- **Every figure carries its tier, and the inferred ones are drawn as a
+  split.** Opens and clicks are never shown as a single total, because a
+  single total is about half automatic prefetch and a number with a percent
+  sign next to it gets believed. The bar and the named breakdown underneath
+  ("Gmail image proxy 9", "Apple privacy prefetch 7") are the product.
+- **The open rate is deliberately not shown as a rate.** Recipients who never
+  consented to open tracking carried no pixel, so they were never measurable
+  and cannot be counted as people who did not open. The scorecard says so in
+  words rather than quietly dividing by the wrong denominator.
+- **A/B tests refuse to name a winner they cannot support.** Below about
+  thirty per variant the answer is "not enough recipients to tell", with the
+  number needed. Measured on verified clicks, not opens: a subject line is
+  meant to influence opens, but testing on them would measure which subject
+  the prefetchers preferred. Two-proportion z-test via `math.erf`, so no new
+  dependency.
+- **The audience preview reconciles.** In the editor, contacts in the segment
+  minus each exclusion equals the number that will actually be sent to, so
+  nobody disappears without a reason visible on screen.
+- **Attribution** at `POST /api/attribution` (migration `f63fe229a69a` adds the
+  `converted` event type). The product reports a demo booked or a first login
+  against a message token; the token is the credential, because holding one
+  requires having received that message, and the worst a recipient can do is
+  over-report their own engagement. Deduped per action per message so a
+  product that reports every login does not turn one person into a hundred
+  conversions.
+- **Send-time recommendation** built from verified engagement only, and it
+  refuses below twenty observations. Built from inferred opens it would
+  recommend whenever Apple's servers happen to prefetch.
+- **17 new tests** (241 total) covering the significance arithmetic — the one
+  piece here that can be silently wrong and still look right, producing a
+  confident sentence about a coin toss.
+
+**Verified in the running app** against seeded data on a real database: the
+scorecard's figures reconcile (34 sent, 25 opens split 16 machine and 9
+possibly human, 19 clicks split 12 and 7, per-link totals summing to the
+click total), the A/B block correctly refused on 19 against 15 recipients, the
+send-time panel correctly refused on 7 observations, and the audience preview
+reconciled 46 minus 4 minus 1 to 41. TypeScript, ESLint at zero warnings, and
+the production build are clean.
+
+**Note on the local dev database:** it now holds a seeded example campaign and
+46 synthetic contacts on `@example.com` addresses, left in place so the
+dashboard has something to show. Nothing was sent; the send path used a stub.
+
+## 2026-09-09 — Email campaign analytics: track and classify
+
+**Added:** open and click tracking on our own domain, and the classifier that
+decides whether either was a person or a machine. This is the phase the whole
+tier system was designed around.
+
+- **Two invariants hold everywhere, and both are pinned by tests.** Nothing in
+  the tracking path ever records `verified` except the landing-page beacon and
+  an unsubscribe — a pixel fetch and a redirect hit are both things a machine
+  does perfectly, so neither can prove a person. And every classification
+  carries a reason string, stored on the event, so a wrong rule can be found
+  against real data later instead of leaving a number nobody can account for.
+- **The classifier** (`services/classifier.py`) names Gmail's image proxy and
+  Yahoo's separately from generic scanners because they appear on every open
+  through those providers; spots Apple's Mail Privacy Protection relay by the
+  browser identity it strips from an otherwise ordinary WebKit agent; matches
+  around thirty machine agent fragments; reads the rewriting hosts of
+  Defender Safe Links, Proofpoint, Mimecast and Barracuda out of the referer;
+  and treats an open inside ten seconds of the send as the mail system
+  fetching images rather than a person reading.
+- **Sweep detection catches the case user-agent checks cannot.** A security
+  product forwarding the recipient's own browser string is invisible at the
+  redirect — but it walks every link in the message within seconds, which no
+  person does. Three distinct links inside thirty seconds is a sweep.
+- **The landing-page beacon is the only thing that promotes a click.**
+  Scanners fetch pages; they do not run scripts. `frontend/public/ab-beacon.js`
+  is a few lines that fire an image request when a real browser renders the
+  page, and it derives the tracking host from the referrer so the domain is
+  configured in exactly one place — the app's settings — rather than
+  duplicated into a file where it would silently go stale. It also strips the
+  token back out of the address bar, so a message identifier does not travel
+  into whatever the visitor copies, shares or bookmarks.
+- **Links are numbered per campaign** and frozen on first expansion (migration
+  `fdd908ed97a5`). A click URL carries only an index, which keeps it short —
+  it is printed in mail that can never be edited — and re-numbering after a
+  send would point old links at the wrong destinations.
+- **The unsubscribe link is structurally safe from rewriting.** It lives in the
+  footer template, and link extraction only ever looks at the Markdown body,
+  so it cannot be picked up. That is a property of the arrangement rather than
+  a rule someone has to remember.
+- **The pixel is embedded per recipient**, from the contact's tracking consent,
+  and `pixel_embedded` is recorded on the message as a historical fact — so an
+  open rate can state honestly how much of the audience was measurable at the
+  time, even after someone's consent changes. Removing the pixel from a
+  message changes nothing else about it, which a test asserts by byte
+  comparison.
+- **93 new tests** (224 total), plus an end-to-end pass against real Postgres
+  covering the sweep rule's wiring, which the unit tests cannot reach: the
+  query that reads link indices back out of JSONB payloads. Three clicks read
+  as human, the fourth is caught at exactly the threshold, and nothing is ever
+  discarded — machine clicks stay recorded and separable rather than deleted.
+
+**Fixed during verification:** the first version of the sweep test used a
+campaign with two links against a threshold of three, so the rule could never
+fire and the test passed while proving nothing. Rewritten with five links, and
+it now asserts the sweep is caught *at* the threshold rather than merely at
+some point.
+
+**Not yet done:** IP-based classification. The front proxy on the dev server
+forwards no client address, so every request appears to come from one IP.
+Until it sends `X-Forwarded-For`, the datacentre-range check that would catch
+scanners with unremarkable agent strings cannot be written honestly, and the
+classifier degrades to user agent, referer and timing. Task C2 in the setup
+runbook.
+
+## 2026-09-09 — Campaign sender settings screen
+
+**Added:** a settings screen for the campaign sender, brought forward from the
+Analytics phase. The API for it shipped with the foundation work below; without
+a screen, configuring it meant an admin making an authenticated API call by
+hand, which is not a reasonable thing to ask.
+
+- **Lives on the existing Settings page**, which is where an admin already goes
+  for mail configuration, so it needs no new route or sidebar entry. It moves
+  into the Analytics tab later if that reads better there.
+- **The page now has two labelled sections**, "Demo replies" and "Campaign
+  sending", each saying what it is for. Two mail configurations on one screen
+  is a reasonable thing to be confused by, and the answer — one is a person
+  answering a single request, the other is a campaign to a list, and they
+  should send from different domains — is worth stating rather than leaving to
+  be inferred.
+- **Provider-conditional fields.** Choosing SMTP hides the Mailgun fields and
+  explains that the path reports no delivery, bounce or complaint data and
+  suits internal test sends only.
+- **The webhook signing key field says, at the point of entry, that it is a
+  different credential from the API key.** Getting those two the wrong way
+  round rejects every incoming event and shows an empty dashboard with no
+  error anywhere, which is the worst kind of failure to debug.
+- **The screen computes the webhook URL** from the tracking URL and offers it
+  to copy, removing a step from the Mailgun setup where a hand-typed path is
+  easy to get wrong.
+- **Two test actions.** "Check connection" verifies the credentials and that
+  the sending domain exists on the account without emailing anyone, so it is
+  safe to click repeatedly while getting the settings right. Sending a real
+  test message is a separate, deliberate action.
+- Secrets stay write-only: never returned by the API, never populated into the
+  form, and the fields show "leave blank to keep existing" once one is stored.
+
+**Verified in the running app** against a real database: the form saved, the
+values persisted, the trailing slash typed into the tracking URL was stripped
+by the schema validator, both secrets were stored encrypted as distinct
+ciphertexts and decrypted back correctly, and the fields came back marked as
+already set without exposing the values. TypeScript, ESLint and the production
+build are all clean, and the backend suite still passes at 131.
+
+## 2026-09-09 — Email campaign analytics: send and record
+
+**Added:** everything needed to send a real campaign and record what happened
+to it. Still backend-only; the Analytics tab UI is the next phase.
+
+- **Contacts carry tags** (migration `702f63144e46`), and a campaign names one
+  as its segment. Resolved at *send* time, not draft time, so someone who
+  unsubscribed yesterday is not mailed by a campaign written last week.
+- **Expansion and sending are separate, and both are idempotent.** Expansion
+  skips contacts that already have a message row; the send loop skips messages
+  that already have a `sent_at`, and commits per message. That is what makes a
+  crashed worker safe to re-run — without it, a restart at the wrong moment
+  mails the list twice.
+- **Holdout and A/B assignment are deterministic**, derived from a hash of the
+  campaign and contact ids with *different salts* for the two decisions.
+  Random assignment would reshuffle the holdout on every resume and destroy
+  the comparison it exists to provide; a shared hash would bias variant B
+  toward one side of the holdout boundary.
+- **The send worker is a systemd timer**, not an in-app scheduler
+  (`backend/app/worker.py`, units in `deploy/ubuntu/`). It matches how this app
+  is already deployed and logged. Overlapping runs are prevented by a Postgres
+  advisory lock taken on its own connection — taken on the working session it
+  would be released by the first per-message commit.
+- **Queueing a send never sends inline.** A request that mails several hundred
+  people would outlive the front proxy's 30 s timeout and leave nobody knowing
+  how far it got.
+- **The audience preview reconciles.** `eligible + suppressed +
+  excluded_inactive + excluded_no_consent` always equals `total_contacts`, so
+  an admin who queues to 300 and sees 240 sent can account for the other 60.
+- **The footer is added by the renderer, not the author** — postal address and
+  a working unsubscribe are legal requirements, so they cannot depend on
+  someone remembering them. RFC 8058 one-click headers on every message.
+- **Mailgun webhooks** at `POST /api/webhooks/mailgun`, signature-verified in
+  constant time and **failing closed**: with no signing key configured, every
+  event is rejected. Deduped on Mailgun's event id, because they retry until
+  they get a 200. `failed` splits on severity — permanent suppresses, temporary
+  does not.
+- **Unsubscribe is live** at `/t/u/{token}`, both the one-click POST that Gmail
+  and Yahoo call and the visible GET link. Root-mounted before the SPA
+  catch-all, and with no rate limit: the front proxy forwards no client
+  address, so a shared bucket would start refusing real unsubscribes.
+- **Re-importing a list cannot resurrect anyone.** Unsubscribed and bounced
+  contacts are left alone by an import, and a suppressed address cannot be
+  reactivated through the contact edit endpoint either.
+- **58 new tests** (131 total), plus an end-to-end pass against a real
+  Postgres with a stub sender covering expansion, idempotency, holdouts,
+  rendering, unsubscribe, webhook signature rejection, deduplication, bounce
+  suppression and re-import safety.
+
+**Fixed during verification:** the audience preview's exclusion counts
+overlapped. Suppressing an address also flips the contact's status, so a
+suppressed contact was filtered by the status gate before the suppression
+check and appeared in neither bucket — the preview reported 12 contacts, 10
+eligible and 1 excluded, which does not add up. The categories are now
+mutually exclusive and exhaustive.
+
+**New dependency:** `markdown` — campaign bodies are Markdown, rendered to
+email-safe HTML at send time. Needs `pip install -r requirements.txt` on the
+next dev-server update.
+
+**Still open:** the open pixel, click redirect and tier classifier (phase 3),
+the Analytics tab UI (phase 4), and a DB-backed pytest fixture — the
+end-to-end verification above was run by hand, which remains the biggest
+testing gap, as `docs/TESTING.md` already notes.
+
+## 2026-09-09 — Email campaign analytics: foundation
+
+**Added:** the data model and sending layer for the campaign analytics system
+that will live under an Analytics tab in the admin backend. This phase is
+backend-only and ships no UI; nothing in it changes existing behaviour.
+
+- **Six tables** (migration `7f73b1434cf1`): `contacts`, `campaigns`,
+  `campaign_messages`, `email_events`, `suppressions`, `sender_settings`.
+- **Consent is per contact, not per list.** `Contact` carries country,
+  consent basis and a *separate* tracking consent, because the rules differ by
+  jurisdiction: the US allows opt-out, Canada requires consent before the
+  first send, and April 2026 guidance from the French and Italian regulators
+  treats per-recipient open tracking as needing its own consent. Two
+  properties, `is_mailable` and `may_track_opens`, encode the rules so nobody
+  has to remember them at send time. An unknown country is treated as the
+  stricter rule.
+- **Every event carries a reliability tier** (`exact` / `verified` /
+  `inferred` / `derived`) as a column, not a caveat. Around half of all
+  tracked opens industry-wide are Apple's automatic prefetch, and corporate
+  scanners fetch every link within seconds of delivery; a dashboard that
+  reports those as people is not measuring engagement.
+- **A sender interface** (`services/senders/`) with two implementations.
+  `MailgunSender` carries campaigns — Mailgun is already operated for the
+  product's password and PIN email, so no new vendor, and its webhooks supply
+  the delivery, bounce and complaint events raw SMTP cannot produce at all.
+  `SmtpSender` reuses the existing SMTP credentials and is for internal test
+  sends only (see its module docstring for why). The demo-reply path in
+  `services/email_service.py` is untouched.
+- **Campaigns must send from a different domain** from the product's
+  transactional mail. `sender_settings` is a separate table from
+  `smtp_settings` for the same reason: a campaign complaint spike must never
+  land on the reputation that delivers a client's password reset.
+- **Mailgun's own open and click tracking is explicitly disabled** on every
+  send. It rewrites links onto a domain shared with its other customers, whose
+  reputation we would inherit inside our own mail; tracking will be served
+  from our own domain instead.
+- **Suppression has no removal path.** Addresses are normalised on both write
+  and read — the failure that prevents is a suppression stored for
+  `bob@example.com` missing an import of `Bob@Example.com`, and mailing
+  someone who pressed the spam button a second time.
+- **Admin API:** `GET`/`PUT /api/admin/settings/sender` and
+  `POST /api/admin/settings/sender/test`. The test endpoint verifies
+  credentials *and* that the sending domain exists on the account without
+  sending anything, and only mails a real address if one is supplied.
+- **60 new tests** (73 total, up from 13), covering the consent rules, address
+  normalisation, Mailgun webhook signature verification and the outbound form.
+
+**Fixed before shipping:** the generated migration's `downgrade()` dropped the
+tables but not the Postgres ENUM types — `sa.Enum` creates a type as a side
+effect of `create_table`, and `drop_table` does not remove it. A downgrade
+left eight orphaned types behind and the next upgrade died on
+`type "consent_basis" already exists`. Caught by round-tripping the migration
+down and back up before it shipped; `downgrade()` now drops the types
+explicitly.
+
+**Still open before this can send anything real:** the Mailgun sending domain
+for campaigns does not exist yet (it must not be `mail.ashfordbriggs.com`,
+which carries the product's password and PIN mail), and there is no UI, no
+campaign expansion, no tracking endpoints and no webhook receiver. Those are
+the next phases.
+
+## 2026-09-09 — Dev server deployment + Ubuntu runbook + proxy-aware rate limits
 
 **Retired (owner request):** the Railway display deployment. The `Paladin`
 and `Postgres` services were deleted from the Railway project, puppyinfo.us

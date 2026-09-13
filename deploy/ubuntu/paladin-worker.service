@@ -1,0 +1,33 @@
+[Unit]
+# Campaign send worker. One pass, then exit — driven by paladin-worker.timer.
+# See docs/DEPLOY-DEV-SERVER.md for installation, and backend/app/worker.py for
+# why this is a timer rather than a long-lived process or an in-app scheduler.
+Description=Paladin campaign send worker (one pass)
+After=network.target postgresql.service paladin.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+# Same user, group, working directory, venv and environment file as
+# paladin.service. The worker reads the identical DATABASE_URL and
+# ENCRYPTION_KEY — it must decrypt the same provider credentials the app
+# encrypted, so a second env file would silently break every send.
+User=paladin
+Group=paladin
+WorkingDirectory=/opt/paladin/backend
+EnvironmentFile=/opt/paladin/backend/.env
+ExecStart=/opt/paladin/backend/.venv/bin/python -m app.worker
+
+# A pass that hangs must not block the next one forever. The worker's own
+# advisory lock already prevents overlap, so the only thing this guards
+# against is a stuck run holding that lock indefinitely.
+TimeoutStartSec=900
+
+# Mirrors the hardening on paladin.service.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

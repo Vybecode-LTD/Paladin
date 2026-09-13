@@ -1,103 +1,115 @@
 # Testing — Ashford & Briggs / Paladin
 
-## Current state: minimal automated coverage
+**Last updated 2026-09-09.**
 
-Update 2026-09-09: this is no longer strictly "zero". `backend/tests/test_svg_sanitize.py`
-holds 7 regression tests for the AI header-image SVG sanitizer, and CI runs
-them (pytest is installed from `backend/requirements-dev.txt`; the job had
-been failing since July because pytest was never installed). CI also runs the
-deploy-path smoke test described below. The original assessment follows.
+## Current state
 
+| | |
+|---|---|
+| Backend tests | **279**, passing |
+| Frontend tests | **0** |
+| Level | Service/unit only — no HTTP-route or database integration tests |
+| End-to-end | One: CI's `deploy-image` job |
 
-There is **no automated test suite** for either the backend or the frontend as
-of this writing. This is an honest, known gap — not a claim of coverage. Every
-verification described below was done manually against a running dev server,
-not via a repeatable test harness.
+Run them:
 
-Frameworks per `CLAUDE.md` conventions (Python/FastAPI and React/TypeScript)
-are not yet installed or configured in this repo.
+```bash
+cd backend && python -m pytest
+```
 
-## What has actually been verified (manual/live, 2026-07-07)
+*(Earlier versions of this document said no automated suite existed and that
+`python -m pytest` would fail. That has not been true since 2026-09-09.)*
 
-As part of today's security-hardening pass, the following was checked by hand
-against the local dev server (`uvicorn app.main:app --reload`), using curl:
+## Backend suite — what is covered
 
-- **Rate limiting works and returns 429.** Hammered `POST /api/demo-requests`
-  seven times in under an hour from the same client; the 6th request onward
-  returned `429 Too Many Requests` (limit: 5/hour). Same pattern confirmed for
-  login at 10/min.
-- **Malformed UUIDs return clean errors, not 500s.** Crafted requests with
-  non-UUID identifiers against the three previously-crashing call sites
-  (`get_current_user` via a bad JWT `sub`, `POST /api/auth/refresh` with a bad
-  refresh-token subject, and `/api/admin/blog/{post_id}` GET/DELETE with a
-  non-UUID path segment) each returned the intended 401 or 404 instead of an
-  unhandled 500/stack trace.
-- **Short passwords are rejected.** Submitted a password under 8 characters to
-  the registration/password-change path; got a clean `422` validation error
-  instead of being silently accepted.
+| File | Tests | Covers |
+|---|---:|---|
+| `test_classifier.py` | 77 | Machine vs human detection: scanner user agents, Apple MPP shape detection, gateway referers, the 10-second prefetch window, link-sweep detection at threshold |
+| `test_mailgun_sender.py` | 24 | Request construction, webhook HMAC verification, event parsing, dedupe keys |
+| `test_event_mapping.py` | 24 | Mailgun event → event type and trust tier |
+| `test_contact_consent.py` | 24 | Consent basis, mailability, tracking-consent gating, protected statuses on import |
+| `test_render_service.py` | 21 | Personalisation, link extraction, unsubscribe URLs, `List-Unsubscribe` headers |
+| `test_preflight.py` | 21 | The four send-time blockers, plus warnings and notes |
+| `test_significance.py` | 17 | Two-proportion z-test, and refusing a verdict below the sample threshold |
+| `test_dmarc_parser.py` | 17 | gzip / zip / bare XML by magic bytes, alignment read from `policy_evaluated` |
+| `test_link_rewriting.py` | 16 | HTML and text link rewriting, pixel tag construction |
+| `test_campaign_variants.py` | 13 | Salted-hash variant and holdout assignment, stability |
+| `test_email_service.py` | 11 | SMTP TLS mode selection, including implicit TLS on port 465 (BUG-007) |
+| `test_suppression.py` | 7 | Normalisation, lookup, filtering |
+| `test_svg_sanitize.py` | 7 | AI header-image SVG sanitizer |
 
-These checks confirm the specific fixes in `docs/BUGS.md` (BUG-001 through
-BUG-003) and the security batch in `docs/CHANGELOG.md`. They are not
-repeatable/regression-safe — nothing prevents these same bugs from being
-reintroduced by a future change, because there's no test asserting the
-behavior. That's the primary argument for phase 4 below.
+The weighting is deliberate. The classifier carries a third of the suite because
+it is the component where being quietly wrong is most expensive — a
+misclassification does not throw an error, it silently reports a machine as a
+person and corrupts every number built on top of it.
 
-## Deploy-path smoke test (automated in CI since 2026-09-09)
+## What these tests do *not* cover
 
-The `deploy-image` job in `.github/workflows/ci.yml` is the first automated
-end-to-end check in the project. On every push it validates
+Being explicit, because the count alone would mislead:
+
+- **No HTTP-level tests.** Nothing exercises the FastAPI routes through an ASGI
+  client. Auth, RBAC boundaries, and the tracking and webhook endpoints are
+  verified only through their underlying services, plus manual curl checks.
+- **No database integration tests.** No test opens a session against real
+  Postgres, so migrations, constraints, the `dedupe_key` unique index and the
+  `FOR UPDATE SKIP LOCKED` claim path are not covered by automation. Migrations
+  are verified by hand-running a down-then-up round trip before commit — which
+  is how both enum-drop defects were caught.
+- **No frontend tests at all.**
+
+## Deploy-path smoke test (CI, since 2026-09-09)
+
+The `deploy-image` job in `.github/workflows/ci.yml` is the only automated
+end-to-end check. On every push it validates
 `deploy/ubuntu/docker-compose.yml`, builds the production image from the root
-`Dockerfile`, boots it against a throwaway Postgres 17, and asserts that:
-the Alembic migrations ran, the seeded admin was created and can log in
-(`POST /api/auth/login` returns an access token), `/api/health` and
-`/api/blog/posts` return 200, and `/` serves the built React app. It does not
-replace the unit/integration suite below; it proves the deploy path itself.
+`Dockerfile`, boots it against a throwaway Postgres 17, and asserts that the
+Alembic migrations ran, the seeded admin was created and can log in, `/api/health`
+and `/api/blog/posts` return 200, and `/` serves the built React app.
 
-## Planned automated suite (not started)
+It does not replace a unit suite; it proves the deploy path itself.
 
-### Backend — pytest + httpx
-- Async test client against the FastAPI app (httpx `AsyncClient` +
-  `ASGITransport`), isolated test database (or transactional rollback per test).
-- Priority areas, roughly in order:
-  1. Auth: login, refresh, malformed-token/UUID paths (direct regression tests
-     for BUG-001/002/003), password length validation, password-change endpoint.
-  2. RBAC guard (`require_role`): author/editor/admin boundary checks on every
-     protected route.
-  3. Blog workflow: draft creation, publish transition (`published_at`
-     stamping), slug uniqueness/de-duplication, ownership checks on edit/delete.
-  4. Rate limiting: confirm 429 behavior on login and demo-request endpoints
-     (can toggle `rate_limit_enabled=False` in config for tests that don't care
-     about limits, per slowapi's `enabled` flag pattern).
-  5. AI proxy error handling: mock the Anthropic call to raise, confirm clean
-     502 (`AIServiceError` path) rather than 500.
-  6. Demo request submission: validation, persistence, inbox listing.
-- Estimated: roughly 30-40 test cases for the backend alone.
+## Verified by hand, not by tests
 
-### Frontend — Vitest + React Testing Library
-- Component/page-level tests, priority order:
-  1. `AuthContext` — login, logout, token storage, and (once built) the
-     refresh-on-401 flow.
-  2. Admin `PostEditor` — draft/publish state transitions, AI-assist calls
-     mocked at the API-client boundary.
-  3. Public pages — smoke render tests for Home/Product/HowItWorks/About/Contact
-     (catches content-parity regressions like BUG-006).
-  4. Contact form — submission, validation, error states.
-- Consider Playwright for one true end-to-end path (admin login -> create post
-  -> publish -> confirm visible on `/blog`) once the component-level suite
-  exists; not started, not committed to yet.
-- Estimated: roughly 15-25 test cases for the frontend, plus the optional E2E flow.
+Recorded here so the distinction stays honest:
 
-### Target coverage
+- **The 2026-07-07 security pass** — rate limiting returning 429, malformed
+  UUIDs returning clean 401/404, short passwords rejected with 422. Confirms
+  BUG-001…003 by curl against a running dev server, with no regression test
+  behind them.
+- **The 2026-09-09 dev deployment** — admin routes 401 without a token, tracking
+  routes return 200/302, the Mailgun webhook returns 403 when unsigned (failing
+  closed), and the other three sites on the shared box were unaffected.
+- **DMARC ingestion against a real report** — a gzipped report with three
+  sources parsed, deduplicated on resend, sorted worst-first, and correctly
+  refused to clear the domain for enforcement while one source was failing.
 
-No coverage threshold is enforced today because no suite exists to measure
-against. Once the initial suite lands, treat coverage numbers as informational
-until they stabilize — don't gate merges on a threshold before there's a
-baseline. `CLAUDE.md`'s general quality-gate numbers (85% PR / 95% deploy) are
-aspirational for this project, not yet wired into CI (CI itself is also part of
-the in-progress UX/SEO/polish phase — see `docs/ROADMAP.md`).
+## Planned — frontend (Vitest + React Testing Library)
 
-## How to run tests today
+Not started. Priority order:
 
-There is nothing to run yet. `python -m pytest` and `npm run test` will both
-fail (no test files, no test runner configured) until phase 4 of the roadmap
-is executed.
+1. `AuthContext` — login, logout, token storage, refresh-on-401.
+2. The analytics pages — the tier labelling in particular, since presenting an
+   `inferred` figure as though it were `exact` is the exact failure the whole
+   subsystem exists to prevent.
+3. Admin `PostEditor` — draft/publish transitions, AI calls mocked at the API
+   client boundary.
+4. Public pages — smoke renders, catching content-parity regressions (BUG-006).
+5. Contact form — submission, validation, error states.
+
+Roughly 15–25 cases, plus an optional Playwright path (admin login → create post
+→ publish → visible on `/blog`).
+
+## Filling the backend gaps
+
+In rough priority, if someone picks this up:
+
+1. **HTTP-level tests** with httpx `AsyncClient` + `ASGITransport` — auth, RBAC
+   boundaries on every protected route, and the tracking/webhook endpoints.
+2. **A database fixture** — transactional rollback per test — so the claim path,
+   dedupe constraint and migrations get real coverage.
+
+## Coverage thresholds
+
+None enforced. `CLAUDE.md`'s general gates (85% PR / 95% deploy) are aspirational
+here and not wired into CI. Treat coverage as informational until an HTTP-level
+suite exists, since the current number would measure only the service layer.

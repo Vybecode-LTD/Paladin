@@ -29,6 +29,10 @@ allowed.
   renews on its own, and proxies to `app`. It is the only container with
   published ports.
 
+**Not shown, and not in the compose file: the campaign worker.** Without it the
+whole site works but no campaign is ever sent, silently. If this environment
+sends email, see section 5.5.
+
 All configuration lives in one file: `deploy/ubuntu/.env`.
 
 ---
@@ -243,6 +247,73 @@ Caddy obtains the certificate during the first request or two; if the
 
 ---
 
+## 5.5 The campaign worker — required for email campaigns
+
+**The compose stack in `deploy/ubuntu/docker-compose.yml` runs `db`, `app` and
+`caddy` only. It does not include the campaign worker.** Deploy it as-is and the
+site works perfectly, the Analytics screens load, campaigns can be written and
+scheduled — and nothing is ever sent. Nothing errors; the queue simply sits
+there. If this environment is meant to send email, one of the two options below
+has to be set up deliberately.
+
+The worker sends due campaigns and runs the daily domain-trust checks. It is a
+**one pass, then exit** program (`python -m app.worker`), not a daemon: it takes
+a Postgres advisory lock (`84712026`) on its own connection, so if a previous
+pass is still running the next one exits immediately rather than double-sending.
+That design is what makes it safe to run on a tight schedule.
+
+It must use **the same `ENCRYPTION_KEY` and `DATABASE_URL` as the app** — it
+decrypts the very provider credentials the app encrypted, so a second env file
+would silently break every send.
+
+**Option A — a worker service in the compose stack.** Add alongside `app`:
+
+```yaml
+  worker:
+    build:
+      context: ../..
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    # One pass a minute. The advisory lock makes an overlapping tick a no-op.
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["while true; do python -m app.worker || true; sleep 60; done"]
+```
+
+`|| true` matters: a single failed pass — a transient database blip, a provider
+timeout — must not kill the loop and stop every future send.
+
+**Option B — systemd on the host.** Use `deploy/ubuntu/paladin-worker.service`
+and `paladin-worker.timer` as written. They assume the manual install layout of
+Appendix A (`/opt/paladin/backend/.venv`, `EnvironmentFile=/opt/paladin/backend/.env`),
+which is what the dev server runs — see `DEPLOY-DEV-SERVER.md`. Adjust the paths
+if the layout differs.
+
+```bash
+sudo systemctl enable --now paladin-worker.timer
+```
+
+**Verify it is actually running** — the failure mode here is silence, so check
+rather than assume:
+
+```bash
+systemctl list-timers paladin-worker.timer
+```
+```bash
+journalctl -u paladin-worker --since '10 min ago'
+```
+
+For Option A, `docker compose logs worker` instead. Either way you want to see a
+pass logged within the last couple of minutes.
+
+Sending also depends on account and DNS work that no server command can do —
+the Mailgun sending domain, its DNS records, and a tracking hostname with a
+certificate. That is all in `EMAIL-SETUP-RUNBOOK.md`.
+
+---
+
 ## 6. First login and lock-down
 
 1. Open `https://<SITE_DOMAIN>/admin/login` and sign in with
@@ -279,6 +350,7 @@ Caddy obtains the certificate during the first request or two; if the
 | TLS certificates | Docker volume `paladin_caddy_data` |
 | App logs | `docker compose logs app` (stdout; Docker keeps them) |
 | Caddy logs | `docker compose logs caddy` |
+| Campaign worker | Not in the compose stack by default — see section 5.5. Logs are `docker compose logs worker` (option A) or `journalctl -u paladin-worker` (option B) |
 
 ---
 

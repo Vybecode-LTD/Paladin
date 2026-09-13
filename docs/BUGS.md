@@ -73,29 +73,66 @@ high-value first regression test once the suite exists).
   `info@ashfordbriggs.com`. That is a mail-account configuration decision, not
   an application fault (see CHANGELOG 2026-09-09).
 
-## OPEN
-
 ### BUG-004 — Access tokens never refresh on the frontend
 - **Location:** frontend `AuthContext` / API client (`frontend/src/lib/api.ts`)
 - **Symptom:** access tokens are issued with a 60-minute lifetime and stored on
-  login, but nothing refreshes them on expiry or on a 401 response. A user mid-
-  session past the hour mark gets silently logged out / requests start failing.
-- **Status:** being addressed as part of the in-progress UX/SEO polish pass (see
-  `docs/ROADMAP.md` phase 3). Tracked here because it's a functional defect
-  (broken session continuity), not just missing polish.
+  login, but nothing refreshed them on expiry or on a 401 response. A user
+  mid-session past the hour mark was silently logged out.
+- **Fix:** `frontend/src/lib/api.ts` now refreshes on 401 against
+  `/auth/refresh`, and de-duplicates concurrent refreshes behind a single
+  shared promise so a burst of simultaneous 401s produces one refresh call
+  rather than a stampede.
+- **Closed 2026-09-09**, verified by reading the implementation. No regression
+  test — the frontend has no test suite (`TESTING.md`).
 
 ### BUG-005 — No 404 route on the frontend
-- **Location:** frontend router (`React Router` config)
-- **Symptom:** unmatched paths have no defined catch-all; behavior falls through
-  to whatever the router's default is rather than a real 404 page.
-- **Status:** in progress, same UX/SEO pass.
+- **Location:** frontend router (`frontend/src/App.tsx`)
+- **Symptom:** unmatched paths had no catch-all.
+- **Fix:** `<Route path="*" element={<NotFound />} />` inside the public layout.
+- **Closed 2026-09-09**, verified in `App.tsx:58`.
+
+### BUG-009 — Settings screen suggested tracking and reply values that break campaigns
+- **Location:** `frontend/src/components/SenderSettings.tsx`
+- **Symptom:** the Tracking URL field's example was `https://updates.ashfordbriggs.com`,
+  the one value that breaks every tracking and unsubscribe link once Mailgun's DNS
+  records are published on that name (the zone wildcard stops answering for it).
+  The Reply domain field's help text said replies would be matched to their
+  campaign; nothing does that (BUG-008), so following it loses replies.
+- **Fix:** the tracking example is now `https://links.ashfordbriggs.com`, with a hint
+  to use a hostname that never gets mail records. The Reply domain field says to
+  leave it blank and why. The From email hint says replies come back to that
+  address, so it must receive mail.
+- **Closed 2026-09-12.** Copy-only change, checked with ESLint. There is no frontend
+  test suite to add a regression test to. Servers show it after their next deploy.
+
+## OPEN
+
+### BUG-008 — Replies are never recorded, and the Reply domain setting loses them
+- **Location:** `backend/app/services/campaign_service.py` (Reply-To construction)
+  and `backend/app/routers/webhooks.py` (JSON events only); no inbound handler exists.
+- **Symptom:** `replied` and `auto_replied` events are counted on the scorecard, but
+  nothing ever creates one, so the replies figure is always zero. With a *Reply
+  domain* set, each message's Reply-To is `replies+<token>@<domain>`, an address
+  nothing reads, so real replies are lost.
+- **Workaround in place:** leave Reply domain blank, so replies go to the From
+  address, and forward replies on the sending domain to a person with a Mailgun
+  route (runbook C4).
+- **To fix:** an endpoint that accepts replies forwarded by a Mailgun route,
+  verifies them, and records a reply against the message whose token is in the
+  address (runbook G5). Then Reply domain can be used.
 
 ### BUG-006 — Contact and How It Works pages drift from source copy
 - **Location:** `frontend/src/pages/Contact.tsx`, `frontend/src/pages/HowItWorks.tsx`
   vs. `docs/content/contact.md`, `docs/content/how-it-works.md`
 - **Symptom:** rendered page copy doesn't match the approved copy documents —
   content-parity gap, not a crash, but user-facing incorrect content.
-- **Status:** in progress, same UX/SEO pass.
+- **Status:** **believed fixed but not confirmed.** The UX/SEO pass recorded
+  content-parity work on both pages, and a 2026-09-09 spot check found the
+  approved sections present (HowItWorks carries the security / human-first
+  section; Contact carries HQ). That is a heading-level check, not line-by-line
+  parity, so this stays open rather than being closed on partial evidence.
+- **To close it:** diff each page's rendered copy against its source document in
+  `docs/content/` in full, then close with the date and what was compared.
 
 ---
 
@@ -104,13 +141,22 @@ high-value first regression test once the suite exists).
 - The three UUID crashes are logged as closed bugs (they were genuine defects
   with clear root cause, fix, and verification) rather than as changelog-only
   items, because they represent real broken behavior a user/attacker could hit.
-- Items still in the parallel UX/SEO pass (missing SEO tags, admin responsive
-  CSS, click-to-copy, CI pipeline) are treated as roadmap/backlog work, not
-  bugs — they're absent features, not broken ones. The two exceptions are
+- Items from the UX/SEO pass (SEO tags, admin responsive CSS, click-to-copy, CI
+  pipeline) were treated as roadmap/backlog work, not bugs — they were absent
+  features, not broken ones. The two exceptions logged here as real defects were
   BUG-004 (session silently breaks — a functional regression from the user's
-  point of view) and BUG-006 (shipped content is factually wrong relative to
-  the source of truth), which are logged here as open bugs even though their
-  fix is bundled into the same in-progress pass.
+  point of view) and BUG-006 (shipped content factually wrong relative to the
+  source of truth). That pass has since completed; BUG-004 and BUG-005 are
+  closed, and BUG-006 is held open pending a full parity check rather than
+  closed on a spot check.
+- **Bugs found and fixed inside a single work session are not logged here.** The
+  analytics build (2026-09-09) hit several — two Alembic downgrades leaving
+  orphaned Postgres enum types, an audience breakdown whose exclusion counts
+  overlapped so the numbers did not reconcile, and a sweep-detection test too
+  weak to ever fail — but each was caught and fixed before the code was
+  committed, so they were never defects in the tree. They are described in
+  `CHANGELOG.md` where the reasoning is useful, rather than inflating this log
+  with entries that opened and closed on the same day.
 - No severity/priority scheme is imposed beyond OPEN/CLOSED — this project
   doesn't run a formal triage process, so keep it to what's broken and what
   isn't.

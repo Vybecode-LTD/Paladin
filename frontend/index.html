@@ -22,5 +22,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!--
+      Campaign landing-page beacon. Inert for ordinary traffic: it does nothing
+      unless the visitor arrived through a campaign link, which is the only way
+      the token it looks for appears in the URL. It is what separates a real
+      click from a security scanner's, since scanners fetch pages but do not
+      run scripts. Deferred so it never delays rendering. See the file itself
+      for why it needs no configuration.
+    -->
+    <script src="/ab-beacon.js" defer></script>
   </body>
 </html>
